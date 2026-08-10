@@ -1,6 +1,7 @@
 import { LayoutGrid } from "lucide-react";
 import { PageTemplate } from "@/shared/components/templates/page-template";
 import { listConceitos } from "@/shared/lib/content";
+import { slugsNovos } from "@/shared/lib/novidades";
 import { CatalogoConceitos } from "./_components/catalogo-conceitos";
 
 export const metadata = { title: "Conceitos" };
@@ -15,7 +16,8 @@ export default function ConceitosPage() {
       subtitle="Padrões de projeto, princípios e arquitetura — filtre e explore."
       breadcrumb={[{ label: "Conceitos" }]}
     >
-      <CatalogoConceitos conceitos={conceitos} />
+      {/* o "novo" é resolvido no servidor: evita divergência de hidratação */}
+      <CatalogoConceitos conceitos={conceitos} novos={slugsNovos("conceito")} />
     </PageTemplate>
   );
 }

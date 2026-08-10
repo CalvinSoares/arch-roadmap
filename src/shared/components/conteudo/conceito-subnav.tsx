@@ -8,11 +8,8 @@ export interface SecaoNav {
   titulo: string;
 }
 
-/**
- * Sub-navegação com scroll-spy: sticky lateral no desktop, chips horizontais
- * no mobile. Destaca a seção visível e rola suavemente ao clicar.
- */
-export function ConceitoSubnav({ secoes }: { secoes: SecaoNav[] }) {
+/** Scroll-spy compartilhado pelas duas apresentações do índice. */
+function useSecaoAtiva(secoes: SecaoNav[]) {
   const [ativa, setAtiva] = useState(secoes[0]?.id);
 
   useEffect(() => {
@@ -24,7 +21,7 @@ export function ConceitoSubnav({ secoes }: { secoes: SecaoNav[] }) {
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (visiveis[0]) setAtiva(visiveis[0].target.id);
       },
-      { rootMargin: "-96px 0px -60% 0px", threshold: 0 }
+      { rootMargin: "-88px 0px -62% 0px", threshold: 0 }
     );
     secoes.forEach((s) => {
       const el = document.getElementById(s.id);
@@ -34,34 +31,118 @@ export function ConceitoSubnav({ secoes }: { secoes: SecaoNav[] }) {
   }, [secoes]);
 
   const irPara = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     setAtiva(id);
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  return { ativa, irPara };
+}
+
+/**
+ * Fita de chips presa ao topo — apresentação do índice até `xl`.
+ * Some acima disso, onde a trilha vertical assume.
+ */
+export function SubnavFita({ secoes }: { secoes: SecaoNav[] }) {
+  const { ativa, irPara } = useSecaoAtiva(secoes);
 
   return (
     <nav
       aria-label="Seções do conceito"
-      className={cn(
-        // mobile: chips horizontais roláveis; desktop: coluna sticky
-        "sticky top-14 z-20 -mx-1 flex gap-1 overflow-x-auto bg-canvas/90 px-1 py-2 backdrop-blur",
-        "lg:top-20 lg:mx-0 lg:flex-col lg:self-start lg:overflow-visible lg:bg-transparent lg:p-0 lg:backdrop-blur-none"
-      )}
+      className="sticky top-14 z-20 -mx-4 border-y border-card-border bg-canvas/85 px-4 py-2 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 xl:hidden"
     >
-      {secoes.map((s) => (
-        <button
-          key={s.id}
-          type="button"
-          onClick={() => irPara(s.id)}
-          className={cn(
-            "whitespace-nowrap rounded-lg px-3 py-1.5 text-left text-sm transition-colors",
-            ativa === s.id
-              ? "bg-primary/12 font-medium text-primary"
-              : "text-muted hover:bg-muted/10 hover:text-foreground"
-          )}
-        >
-          {s.titulo}
-        </button>
-      ))}
+      <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+        {secoes.map((s, i) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => irPara(s.id)}
+            aria-current={ativa === s.id ? "true" : undefined}
+            className={cn(
+              "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] transition-colors",
+              ativa === s.id
+                ? "bg-[color-mix(in_srgb,var(--acento)_16%,transparent)] font-semibold text-[var(--acento)]"
+                : "text-muted hover:bg-foreground/5 hover:text-foreground"
+            )}
+          >
+            <span className="font-mono text-[10px] opacity-70">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            {s.titulo}
+          </button>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+/**
+ * Trilha vertical do índice (xl+): um trilho que se preenche conforme a
+ * leitura avança, dando ao leitor a noção de "quanto falta".
+ */
+export function SubnavTrilha({ secoes }: { secoes: SecaoNav[] }) {
+  const { ativa, irPara } = useSecaoAtiva(secoes);
+  const indiceAtivo = Math.max(
+    0,
+    secoes.findIndex((s) => s.id === ativa)
+  );
+  const progresso =
+    secoes.length > 1 ? indiceAtivo / (secoes.length - 1) : 1;
+
+  return (
+    <nav
+      aria-label="Seções do conceito"
+      className="hidden xl:sticky xl:top-20 xl:block xl:self-start"
+    >
+      <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+        Nesta página
+      </p>
+      <div className="relative">
+        {/* trilho + preenchimento de progresso */}
+        <span
+          aria-hidden
+          className="absolute bottom-2 left-[7px] top-2 w-px bg-card-border"
+        />
+        <span
+          aria-hidden
+          className="absolute left-[7px] top-2 w-px bg-[var(--acento)] transition-[height] duration-500 ease-out"
+          style={{ height: `calc((100% - 1rem) * ${progresso})` }}
+        />
+
+        <ul className="flex flex-col gap-0.5">
+          {secoes.map((s, i) => {
+            const ativo = ativa === s.id;
+            const passado = i < indiceAtivo;
+            return (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  onClick={() => irPara(s.id)}
+                  aria-current={ativo ? "true" : undefined}
+                  className={cn(
+                    "group/toc flex w-full items-start gap-3 rounded-lg py-1.5 pr-2 text-left text-[13px] leading-snug transition-colors",
+                    ativo
+                      ? "font-semibold text-[var(--acento)]"
+                      : "text-muted hover:text-foreground"
+                  )}
+                >
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "relative z-10 mt-[5px] size-[7px] shrink-0 rounded-full ring-4 ring-canvas transition-all duration-300",
+                      ativo
+                        ? "scale-125 bg-[var(--acento)]"
+                        : passado
+                          ? "bg-[var(--acento)] opacity-60"
+                          : "bg-card-border group-hover/toc:bg-muted"
+                    )}
+                  />
+                  <span className="min-w-0">{s.titulo}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </nav>
   );
 }

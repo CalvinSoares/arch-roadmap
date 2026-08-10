@@ -86,7 +86,6 @@ export const factoryMethod: Conceito = {
   dificuldade: "intermediario",
   tempoLeitura: 6,
   relacionados: ["adapter", "strategy"],
-  roadmapNodes: ["criacionais"],
   problema: [
     "O código cliente precisa criar objetos, mas não deveria depender das classes concretas — senão cada novo tipo obriga a alterar o cliente (viola Aberto/Fechado).",
     "Um `new ClasseConcreta()` espalhado pelo código acopla o cliente a implementações específicas e dificulta testes e extensões.",

@@ -95,7 +95,6 @@ export const saga: Conceito = {
   dificuldade: "avancado",
   tempoLeitura: 10,
   relacionados: ["cqrs"],
-  roadmapNodes: ["arq-saga"],
   problema: [
     "Em microsserviços, uma operação de negócio costuma atravessar vários serviços com bancos próprios — reservar estoque, cobrar pagamento, agendar entrega. Não existe uma transação ACID única que abranja todos eles, então não dá para simplesmente dar commit ou rollback no conjunto.",
     "Protocolos como two-phase commit tentam garantir atomicidade distribuída, mas travam recursos por muito tempo, não escalam bem e criam pontos de bloqueio. Para fluxos longos, que podem levar segundos, minutos ou depender de sistemas externos, essa abordagem é impraticável.",

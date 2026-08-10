@@ -125,7 +125,6 @@ export const eventSourcing: Conceito = {
   dificuldade: "avancado",
   tempoLeitura: 9,
   relacionados: ["cqrs", "saga", "observer"],
-  roadmapNodes: ["arq-cqrs"],
   problema: [
     "Bancos tradicionais guardam só o estado atual: cada UPDATE sobrescreve o anterior e joga fora o COMO se chegou ali. Quando a auditoria pergunta 'por que este saldo é 200?', a resposta já foi destruída.",
     "Tabelas de auditoria, logs e triggers tentam remendar isso, mas são derivados de segunda classe: incompletos, dessincronizados do estado real e inúteis para reconstruir o passado com precisão.",

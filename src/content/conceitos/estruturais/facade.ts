@@ -115,7 +115,6 @@ export const facade: Conceito = {
   dificuldade: "iniciante",
   tempoLeitura: 5,
   relacionados: ["adapter", "decorator"],
-  roadmapNodes: ["estruturais"],
   problema: [
     "Para completar uma operação de negócio o cliente precisa conhecer meia dúzia de classes do subsistema, a ordem certa de chamada e os detalhes de cada uma — e esse conhecimento se repete em todo lugar que dispara a operação.",
     "O acoplamento se espalha: qualquer mudança interna no subsistema (uma classe renomeada, um passo novo) quebra todos os clientes que orquestravam as peças na mão.",
@@ -165,22 +164,23 @@ export const facade: Conceito = {
     },
     {
       tipo: "ilustracao",
-      arquetipo: "fluxo",
-      atores: [
-        { id: "cliente", label: "Cliente" },
-        { id: "facade", label: "CheckoutFacade", destaque: true },
-        { id: "estoque", label: "Estoque" },
-        { id: "pagamento", label: "Pagamento" },
-        { id: "frete", label: "Frete" },
-      ],
-      setas: [
-        { label: "finalizarPedido()" },
-        { label: "1. reserva" },
-        { label: "2. cobra", tracejada: true },
-        { label: "3. agenda", tracejada: true },
+      arquetipo: "estrutura",
+      blocos: [
+        { id: "cliente", label: "Cliente", nota: "conhece só finalizarPedido()" },
+        {
+          id: "facade",
+          label: "CheckoutFacade",
+          nota: "a única porta de entrada",
+          destaque: true,
+          filhos: [
+            { id: "estoque", label: "Estoque", nota: "1. reserva os itens" },
+            { id: "pagamento", label: "Pagamento", nota: "2. cobra" },
+            { id: "frete", label: "Frete", nota: "3. agenda a entrega" },
+          ],
+        },
       ],
       legenda:
-        "O cliente faz uma chamada; a facade executa a coreografia interna na ordem certa — o conhecimento do subsistema mora num lugar só.",
+        "Os três subsistemas ficam atrás da facade, não em fila: ela chama cada um na ordem certa, e nenhum deles conhece os outros. O cliente enxerga uma chamada só.",
     },
     {
       tipo: "camadas-nav",

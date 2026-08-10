@@ -34,6 +34,10 @@ import {
   Archive,
   Activity,
   Cpu,
+  Copy,
+  Cog,
+  Cable,
+  KeyRound,
   type LucideIcon,
 } from "lucide-react";
 import type { CategoriaTech } from "@/shared/types/construtor";
@@ -125,6 +129,11 @@ export function iconeDoPadrao(id: string): LucideIcon {
 export const TECH_ICON: Record<string, LucideIcon> = {
   redis: Zap,
   memcached: MemoryStick,
+  "replica-leitura": Copy,
+  worker: Cog,
+  "api-gateway": DoorOpen,
+  grpc: Cable,
+  vault: KeyRound,
   postgres: Database,
   mongodb: Leaf,
   kafka: AudioLines,
@@ -155,4 +164,6 @@ export const CATEGORIA_TECH_VISUAL: Record<CategoriaTech, VisualCategoriaTech> =
   borda: { text: "text-primary", bg: "bg-primary/12", label: "Borda / Rede" },
   storage: { text: "text-cat-arquitetura", bg: "bg-cat-arquitetura/12", label: "Storage" },
   observabilidade: { text: "text-muted", bg: "bg-muted/12", label: "Observabilidade" },
+  compute: { text: "text-cat-criacional", bg: "bg-cat-criacional/12", label: "Processamento" },
+  seguranca: { text: "text-cat-arquitetura", bg: "bg-cat-arquitetura/12", label: "Segurança" },
 };

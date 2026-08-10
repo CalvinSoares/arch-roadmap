@@ -21,18 +21,26 @@ export interface ModalOptions {
   onClose?: () => void;
 }
 
+/**
+ * A pilha de modais é heterogênea: cada entrada tem um componente com props
+ * próprias. Guardamos tudo com props abertas e cobramos a correspondência
+ * componente ↔ props na assinatura genérica de `openModal`, que é onde o
+ * autor da chamada pode ser ajudado pelo compilador.
+ */
+type PropsAbertas = Record<string, unknown>;
+
 interface OpenModal {
   id: string;
-  Component: React.ComponentType<any>;
-  props: Record<string, unknown>;
+  Component: React.ComponentType<PropsAbertas>;
+  props: PropsAbertas;
   options: ModalOptions;
 }
 
 interface ModalContextValue {
-  openModal: (
+  openModal: <P extends PropsAbertas>(
     id: string,
-    Component: React.ComponentType<any>,
-    props?: Record<string, unknown>,
+    Component: React.ComponentType<P>,
+    props?: P,
     options?: ModalOptions
   ) => void;
   closeModal: (id: string) => void;
@@ -53,13 +61,14 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openModal = React.useCallback<ModalContextValue["openModal"]>(
-    (id, Component, props = {}, options = {}) => {
+    (id, Component, props, options = {}) => {
       setModals((prev) => [
         ...prev.filter((m) => m.id !== id),
         {
           id,
-          Component,
-          props,
+          // único ponto de conversão: a genérica acima já validou o par
+          Component: Component as React.ComponentType<PropsAbertas>,
+          props: props ?? {},
           options: {
             size: "md",
             closeOnOverlayClick: true,

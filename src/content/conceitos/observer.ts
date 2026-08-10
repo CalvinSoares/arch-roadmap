@@ -73,7 +73,6 @@ export const observer: Conceito = {
   dificuldade: "intermediario",
   tempoLeitura: 7,
   relacionados: ["strategy", "factory-method"],
-  roadmapNodes: ["comportamentais"],
   problema: [
     "Vários objetos precisam reagir a mudanças em outro objeto, mas checar por mudança em loop (polling) é caro e acopla todos ao sujeito.",
     "Adicionar/remover interessados em tempo de execução sem alterar o objeto observado é difícil quando as dependências são fixas.",

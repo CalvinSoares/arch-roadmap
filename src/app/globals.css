@@ -5,44 +5,85 @@
  * Convenção herdada do front-nextjs-paas: cores por CSS var, nunca    *
  * hex hardcoded em componente.                                        *
  * ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ *
+ * Paleta "Espresso & Matcha" — terra torrada + verde matcha.          *
+ * Base quente (papel/café) em vez de cinza-azulado; acento terracota  *
+ * com contra-acento matcha. Nada de dourado/roxo genérico.            *
+ * ------------------------------------------------------------------ */
 :root {
-  --background: #f6f7fb;
-  --canvas: #eef1f8;
-  --foreground: #101322;
-  --muted: #5b6178;
-  --card: #ffffff;
-  --card-border: #e5e8f0;
-  --primary: #4f46e5;
-  --primary-foreground: #ffffff;
-  --section-icon: #232f63;
-  --ring: #4f46e5;
+  --background: #f7f3ec;
+  --canvas: #efe7db;
+  --foreground: #211a15;
+  --muted: #6e6157;
+  --card: #fffdf9;
+  --card-border: #e4d8c8;
+  --primary: #b4482a;
+  --primary-foreground: #fff8f2;
+  --accent: #2f6f55;
+  --accent-foreground: #f4fbf7;
+  --section-icon: #6b3a24;
+  --ring: #b4482a;
+
+  /* Superfície elevada e sombras quentes (nunca preto puro) */
+  --elevated: #ffffff;
+  --shadow-color: 24 40% 22%;
+  --shadow-sm: 0 1px 2px 0 rgb(74 46 30 / 0.06);
+  --shadow-md: 0 4px 16px -4px rgb(74 46 30 / 0.12);
+  --shadow-lg: 0 18px 44px -18px rgb(74 46 30 / 0.28);
+
+  /* Auroras decorativas do hero */
+  --glow-a: #e0703f;
+  --glow-b: #3f8f6b;
+  --glow-c: #c9a227;
+  --grain-opacity: 0.035;
+
+  /* Semânticas de conteúdo (use / evite / cuidado) */
+  --ok: #2f7d5b;
+  --alerta: #8b6a12;
+  --perigo: #b02b3a;
 
   /* Cores por categoria de conceito */
-  --cat-criacional: #059669;
-  --cat-estrutural: #2563eb;
-  --cat-comportamental: #7c3aed;
-  --cat-principio: #d97706;
-  --cat-arquitetura: #e11d48;
+  --cat-criacional: #2f7d5b;
+  --cat-estrutural: #1f6c8c;
+  --cat-comportamental: #9b3d63;
+  --cat-principio: #8b6a12;
+  --cat-arquitetura: #6e4b3a;
 }
 
 .dark {
-  --background: #0b0d16;
-  --canvas: #0f1220;
-  --foreground: #e7e9f3;
-  --muted: #9aa1bd;
-  --card: #151827;
-  --card-border: #262a3d;
+  --background: #100d0b;
+  --canvas: #16120f;
+  --foreground: #f0e7db;
+  --muted: #a39387;
+  --card: #1c1714;
+  --card-border: #2e2621;
   /* claro o suficiente p/ contraste AA sobre primary/12 (axe: ≥4.5) */
-  --primary: #918fff;
-  --primary-foreground: #0b0d16;
-  --section-icon: #b9c0ff;
-  --ring: #7c7bff;
+  --primary: #f08a5d;
+  --primary-foreground: #1a0f09;
+  --accent: #7fd1a6;
+  --accent-foreground: #0d1a14;
+  --section-icon: #f0a882;
+  --ring: #f08a5d;
 
-  --cat-criacional: #34d399;
-  --cat-estrutural: #60a5fa;
-  --cat-comportamental: #a78bfa;
-  --cat-principio: #fbbf24;
-  --cat-arquitetura: #fb7185;
+  --elevated: #221c18;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 16px -4px rgb(0 0 0 / 0.55);
+  --shadow-lg: 0 18px 44px -18px rgb(0 0 0 / 0.7);
+
+  --glow-a: #f0784a;
+  --glow-b: #4bb383;
+  --glow-c: #d9a441;
+  --grain-opacity: 0.05;
+
+  --ok: #6fd3a1;
+  --alerta: #dfb94e;
+  --perigo: #f5808f;
+
+  --cat-criacional: #6fd3a1;
+  --cat-estrutural: #6bbbdd;
+  --cat-comportamental: #ee8cb0;
+  --cat-principio: #dfb94e;
+  --cat-arquitetura: #c9a184;
 }
 
 @theme inline {
@@ -52,16 +93,26 @@
   --color-muted: var(--muted);
   --color-card: var(--card);
   --color-card-border: var(--card-border);
+  --color-elevated: var(--elevated);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-section-icon: var(--section-icon);
   --color-ring: var(--ring);
+
+  --color-ok: var(--ok);
+  --color-alerta: var(--alerta);
+  --color-perigo: var(--perigo);
 
   --color-cat-criacional: var(--cat-criacional);
   --color-cat-estrutural: var(--cat-estrutural);
   --color-cat-comportamental: var(--cat-comportamental);
   --color-cat-principio: var(--cat-principio);
   --color-cat-arquitetura: var(--cat-arquitetura);
+
+  --shadow-soft: var(--shadow-md);
+  --shadow-float: var(--shadow-lg);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -71,10 +122,178 @@
   border-color: var(--card-border);
 }
 
+/* Scrollbar minimalista — fina, discreta, aparece com mais contraste no hover */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 28%, transparent) transparent;
+}
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted) 26%, transparent);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--muted) 50%, transparent);
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 26%, transparent);
+  color: var(--foreground);
+}
+
+/* ------------------------------------------------------------------ *
+ * Efeitos — textura, brilhos, realces                                 *
+ * ------------------------------------------------------------------ */
+
+/* Grão sutil de papel sobre o app inteiro (dá "impressão" à base quente) */
+.textura-grao::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Auroras do hero — manchas de cor que respiram devagar */
+.aurora {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  opacity: 0.55;
+  pointer-events: none;
+  will-change: transform;
+  animation: aurora-deriva 18s ease-in-out infinite;
+}
+.dark .aurora { opacity: 0.4; }
+
+@keyframes aurora-deriva {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(6%, -8%, 0) scale(1.12); }
+  66% { transform: translate3d(-7%, 5%, 0) scale(0.94); }
+}
+
+/* Texto com gradiente terracota → matcha em movimento lento */
+.texto-gradiente {
+  background-image: linear-gradient(
+    100deg,
+    var(--primary) 0%,
+    var(--glow-c) 38%,
+    var(--accent) 62%,
+    var(--primary) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradiente-desliza 9s linear infinite;
+}
+
+@keyframes gradiente-desliza {
+  to { background-position: -220% 0; }
+}
+
+/* Varredura de brilho (botões primários / cards em destaque) */
+.brilho-varredura {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.brilho-varredura::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    color-mix(in srgb, white 34%, transparent) 50%,
+    transparent 62%
+  );
+  transform: translateX(-140%);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.brilho-varredura:hover::after { transform: translateX(140%); }
+
+/* Card com "holofote" seguindo o mouse (vars vêm do componente) */
+.card-holofote {
+  position: relative;
+  isolation: isolate;
+}
+.card-holofote::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--holofote, var(--primary)) 42%, transparent),
+    transparent 68%
+  );
+}
+.card-holofote:hover::before { opacity: 1; }
+
+/* Entrada suave em cascata (usa --atraso do inline style) */
+.entra-subindo {
+  animation: entra-subindo 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--atraso, 0ms);
+}
+@keyframes entra-subindo {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Barra de leitura do header */
+@keyframes pulso-anel {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 45%, transparent); }
+  70% { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.pulso-anel { animation: pulso-anel 2.4s ease-out infinite; }
+
+/* Borda gradiente reutilizável (cards em destaque, hero) */
+.borda-gradiente {
+  position: relative;
+  background-clip: padding-box;
+}
+.borda-gradiente::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--primary) 55%, transparent),
+    transparent 42%,
+    color-mix(in srgb, var(--accent) 45%, transparent)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* Shell de página (equivalente ao .page-shell do PaaS) */
@@ -94,14 +313,15 @@ body {
 /* Título / subtítulo de página (tokens herdados) */
 .page-header-title {
   font-size: 1.75rem;
-  font-weight: 400;
+  font-weight: 600;
+  letter-spacing: -0.022em;
   line-height: 2.25rem;
   color: var(--foreground);
 }
 .page-header-subtitle {
-  font-size: 1rem;
-  font-weight: 300;
-  line-height: 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.6;
   color: var(--muted);
 }
 

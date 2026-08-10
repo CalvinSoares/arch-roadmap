@@ -113,7 +113,6 @@ export const hexagonal: Conceito = {
   dificuldade: "avancado",
   tempoLeitura: 9,
   relacionados: ["adapter", "cqrs"],
-  roadmapNodes: ["arq-hexagonal"],
   problema: [
     "Quando as regras de negócio ficam grudadas no framework web, no ORM ou no SDK de terceiros, o domínio passa a depender de detalhes de infraestrutura. Trocar o banco, o broker de mensagens ou a camada HTTP obriga a reescrever lógica que nada tem a ver com essas tecnologias.",
     "Esse acoplamento também sabota os testes: para exercitar uma regra simples é preciso subir banco, servidor e filas.",

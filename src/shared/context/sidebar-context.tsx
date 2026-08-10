@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useArmazenamentoLocal } from "@/shared/hook/use-armazenamento-local";
 
 interface SidebarContextValue {
   collapsed: boolean;
@@ -11,27 +12,23 @@ interface SidebarContextValue {
 
 const SidebarContext = React.createContext<SidebarContextValue | null>(null);
 
-const CHAVE = "devatlas:sidebar-collapsed";
+/**
+ * `:v2` porque a versão anterior guardava as strings "1"/"0" e agora o valor
+ * é JSON. Ler o formato antigo devolveria o número 1 num campo tipado como
+ * boolean; trocar a chave descarta a preferência uma única vez, o que para um
+ * menu recolhido é inofensivo.
+ */
+const CHAVE = "devatlas:sidebar-collapsed:v2";
+const PADRAO = false;
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [collapsed, setCollapsed] = useArmazenamentoLocal(CHAVE, PADRAO);
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    setCollapsed(localStorage.getItem(CHAVE) === "1");
-  }, []);
-
-  const toggleCollapsed = React.useCallback(() => {
-    setCollapsed((v) => {
-      const next = !v;
-      try {
-        localStorage.setItem(CHAVE, next ? "1" : "0");
-      } catch {
-        /* ignora */
-      }
-      return next;
-    });
-  }, []);
+  const toggleCollapsed = React.useCallback(
+    () => setCollapsed(!collapsed),
+    [collapsed, setCollapsed]
+  );
 
   const value = React.useMemo(
     () => ({ collapsed, toggleCollapsed, mobileOpen, setMobileOpen }),

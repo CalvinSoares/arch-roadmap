@@ -143,7 +143,6 @@ export const abstractFactory: Conceito = {
   dificuldade: "intermediario",
   tempoLeitura: 7,
   relacionados: ["factory-method", "builder"],
-  roadmapNodes: ["criacionais"],
   problema: [
     "Alguns objetos só fazem sentido juntos: um botão do tema escuro ao lado de um checkbox do tema claro denuncia o bug na primeira tela. Quando o código cria cada produto isoladamente com new, nada impede a mistura de variantes incompatíveis.",
     "Espalhar condicionais de variante (if tema === 'escuro') por cada ponto de criação multiplica os lugares que precisam mudar quando surge uma variante nova — e basta esquecer um deles para a inconsistência aparecer.",

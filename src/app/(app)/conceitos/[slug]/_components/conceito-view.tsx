@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
-import { Badge } from "@/shared/components/global/ui/badge";
-import { Card } from "@/shared/components/global/ui/card";
+import { ArrowUpRight, Map } from "lucide-react";
 import { CodeTabs } from "@/shared/components/conteudo/code-tabs";
 import { QuandoUsar } from "@/shared/components/conteudo/quando-usar";
 import { DiagramaClasse } from "@/shared/components/diagramas/diagrama-classe";
@@ -10,104 +8,127 @@ import {
   BlocoRenderer,
   extrairMetaBlocos,
 } from "@/shared/components/conteudo/bloco-renderer";
-import { ConceitoSubnav } from "@/shared/components/conteudo/conceito-subnav";
+import { SecaoConteudo } from "@/shared/components/conteudo/secao-conteudo";
+import {
+  SubnavFita,
+  SubnavTrilha,
+} from "@/shared/components/conteudo/conceito-subnav";
+import { ConceitoHero } from "@/shared/components/conteudo/conceito-hero";
 import { CATEGORIAS } from "@/shared/config/categorias";
-import { getConceitos } from "@/shared/lib/content";
+import { getConceitos, roadmapsDoConceito } from "@/shared/lib/content";
 import { highlightCode } from "@/shared/lib/highlight";
 import type { Conceito } from "@/shared/types/conceito";
 
-function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  return (
-    <section>
-      <h2 className="mb-3 text-xl font-semibold">{titulo}</h2>
-      {children}
-    </section>
-  );
-}
+/**
+ * Volta do roadmap: em que trilhas este conceito aparece. Derivado dos
+ * roadmaps, então nunca diverge deles.
+ */
+function EmRoadmaps({ slug }: { slug: string }) {
+  const ocorrencias = roadmapsDoConceito(slug);
+  if (ocorrencias.length === 0) return null;
 
-function TagsDoConceito({ conceito }: { conceito: Conceito }) {
-  const cat = CATEGORIAS[conceito.categoria];
   return (
-    <div className="flex flex-wrap gap-2">
-      <Badge className={cat.badge}>{cat.label}</Badge>
-      {conceito.tags.map((t) => (
-        <Badge key={t} className="bg-muted/12 text-muted">
-          #{t}
-        </Badge>
-      ))}
-    </div>
-  );
-}
-
-function Relacionados({ conceito }: { conceito: Conceito }) {
-  const relacionados = getConceitos(conceito.relacionados);
-  if (relacionados.length === 0) return null;
-  return (
-    <Card className="p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted">
-        Relacionados
-      </p>
-      <ul className="mt-2 space-y-1">
-        {relacionados.map((r) => (
-          <li key={r.slug}>
+    <section className="border-t border-card-border pt-8">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+        Onde isto aparece
+      </h2>
+      <ul className="mt-4 flex flex-wrap gap-2">
+        {ocorrencias.map((o) => (
+          <li key={`${o.roadmapSlug}:${o.secaoTitulo}`}>
             <Link
-              href={`/conceitos/${r.slug}`}
-              className="flex items-center justify-between gap-1 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted/10"
+              href={`/roadmaps/${o.roadmapSlug}`}
+              className="flex items-center gap-2 rounded-xl border border-card-border bg-card px-3 py-2 text-sm transition-colors hover:border-primary/60"
             >
-              <span>
-                {r.titulo}
-                <span className="ml-2 text-xs text-muted">{r.resumo.slice(0, 60)}…</span>
-              </span>
-              <ArrowUpRight className="size-3.5 shrink-0 text-muted" />
+              <Map className="size-3.5 shrink-0 text-primary" />
+              <span className="font-medium">{o.roadmapTitulo}</span>
+              <span className="text-muted">· {o.secaoTitulo}</span>
             </Link>
           </li>
         ))}
       </ul>
-    </Card>
+    </section>
+  );
+}
+
+/** Fecho da página: para onde ir depois de entender este conceito. */
+function Relacionados({ conceito }: { conceito: Conceito }) {
+  const relacionados = getConceitos(conceito.relacionados);
+  if (relacionados.length === 0) return null;
+
+  return (
+    <section className="border-t border-card-border pt-8">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+        Continue por aqui
+      </h2>
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        {relacionados.map((r) => {
+          const cat = CATEGORIAS[r.categoria];
+          return (
+            <li key={r.slug}>
+              <Link
+                href={`/conceitos/${r.slug}`}
+                className="group/rel flex h-full items-start gap-3 rounded-2xl border border-card-border bg-card p-4 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+                style={{ ["--acento" as string]: cat.cssVar }}
+              >
+                <span
+                  aria-hidden
+                  className="mt-1.5 size-2 shrink-0 rounded-full"
+                  style={{ background: cat.cssVar }}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block font-medium leading-snug">{r.titulo}</span>
+                  <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted">
+                    {r.resumo}
+                  </span>
+                </span>
+                <ArrowUpRight className="size-4 shrink-0 text-muted transition-transform duration-300 group-hover/rel:-translate-y-0.5 group-hover/rel:translate-x-0.5" />
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
 export async function ConceitoView({ conceito }: { conceito: Conceito }) {
-  // ——— v3: blocos com subnav (tem "secao" ou "tldr") ———
+  const cat = CATEGORIAS[conceito.categoria];
+  // toda a página herda o acento da categoria daqui
+  const acento = { ["--acento" as string]: cat.cssVar };
+
+  // ——— v3: blocos com trilha de seções ———
   if (conceito.blocos?.some((b) => b.tipo === "secao" || b.tipo === "tldr")) {
     const { secoes, tldr } = extrairMetaBlocos(conceito.blocos);
     return (
-      <div className="space-y-6">
-        <TagsDoConceito conceito={conceito} />
-        {tldr && (
-          <div className="flex gap-3 rounded-xl border border-primary/30 bg-primary/8 p-4">
-            <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
-            <p className="text-[15px] leading-relaxed">
-              <b className="mr-1 text-primary">Em 10 segundos:</b>
-              {tldr}
-            </p>
-          </div>
-        )}
-        <div className="gap-8 lg:grid lg:grid-cols-[190px_minmax(0,1fr)]">
-          <ConceitoSubnav secoes={secoes} />
-          <article className="mt-4 min-w-0 space-y-10 lg:mt-0">
+      <div style={acento} className="space-y-6">
+        <ConceitoHero
+          conceito={conceito}
+          tldr={tldr}
+          totalSecoes={secoes.length}
+        />
+        <SubnavFita secoes={secoes} />
+        <div className="gap-12 xl:grid xl:grid-cols-[minmax(0,1fr)_14rem]">
+          <article className="min-w-0 space-y-12 pt-2">
             <BlocoRenderer blocos={conceito.blocos} />
+            <EmRoadmaps slug={conceito.slug} />
             <Relacionados conceito={conceito} />
           </article>
+          <SubnavTrilha secoes={secoes} />
         </div>
       </div>
     );
   }
 
-  // ——— blocos v1 (sem subnav) ———
+  // ——— blocos v1 (sem trilha de seções) ———
   if (conceito.blocos) {
     return (
-      <div className="grid gap-8 lg:grid-cols-[1fr_240px]">
-        <article className="min-w-0 space-y-8">
-          <TagsDoConceito conceito={conceito} />
+      <div style={acento} className="space-y-6">
+        <ConceitoHero conceito={conceito} />
+        <article className="min-w-0 space-y-12">
           <BlocoRenderer blocos={conceito.blocos} />
-        </article>
-        <aside
-        aria-label="Conteúdo relacionado"
-        className="space-y-4 lg:sticky lg:top-6 lg:self-start"
-      >
+          <EmRoadmaps slug={conceito.slug} />
           <Relacionados conceito={conceito} />
-        </aside>
+        </article>
       </div>
     );
   }
@@ -122,52 +143,56 @@ export async function ConceitoView({ conceito }: { conceito: Conceito }) {
   );
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_240px]">
-      <article className="min-w-0 space-y-8">
-        <TagsDoConceito conceito={conceito} />
-        <div className="prose-doc space-y-8">
-          <Secao titulo="O problema">
+    <div style={acento} className="space-y-6">
+      <ConceitoHero conceito={conceito} />
+      <article className="min-w-0 space-y-12">
+        <SecaoConteudo numero={1} etiqueta="Conceito" titulo="O problema">
+          <div className="prose-doc max-w-[68ch]">
             {conceito.problema.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
-          </Secao>
+          </div>
+        </SecaoConteudo>
 
-          <Secao titulo="A solução">
+        <SecaoConteudo numero={2} etiqueta="Conceito" titulo="A solução">
+          <div className="prose-doc max-w-[68ch]">
             {conceito.solucao.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
-          </Secao>
+          </div>
+        </SecaoConteudo>
 
-          {conceito.mermaid && (
-            <Secao titulo="Estrutura (diagrama de classes)">
-              <DiagramaClasse source={conceito.mermaid} />
-            </Secao>
-          )}
+        {conceito.mermaid && (
+          <SecaoConteudo numero={3} etiqueta="Estrutura" titulo="Estrutura">
+            <DiagramaClasse source={conceito.mermaid} />
+          </SecaoConteudo>
+        )}
 
-          {conceito.camadas && conceito.camadas.length > 0 && (
-            <Secao titulo="Onde atua (camadas)">
-              <DiagramaCamadas camadas={conceito.camadas} />
-            </Secao>
-          )}
+        {conceito.camadas && conceito.camadas.length > 0 && (
+          <SecaoConteudo numero={4} etiqueta="Anatomia" titulo="Onde atua">
+            <DiagramaCamadas camadas={conceito.camadas} />
+          </SecaoConteudo>
+        )}
 
-          <Secao titulo="Código">
-            <CodeTabs exemplos={exemplos} />
-          </Secao>
+        <SecaoConteudo numero={5} etiqueta="Implementação" titulo="Código">
+          <CodeTabs exemplos={exemplos} />
+        </SecaoConteudo>
 
-          <Secao titulo="Quando usar × evitar">
-            <QuandoUsar
-              quandoUsar={conceito.quandoUsar}
-              quandoEvitar={conceito.quandoEvitar}
-            />
-          </Secao>
-        </div>
-      </article>
-      <aside
-        aria-label="Conteúdo relacionado"
-        className="space-y-4 lg:sticky lg:top-6 lg:self-start"
-      >
+        <SecaoConteudo
+          numero={6}
+          etiqueta="Decisão"
+          titulo="Quando usar × quando evitar"
+        >
+          <QuandoUsar
+            quandoUsar={conceito.quandoUsar}
+            quandoEvitar={conceito.quandoEvitar}
+          />
+        </SecaoConteudo>
+
+        <EmRoadmaps slug={conceito.slug} />
+
         <Relacionados conceito={conceito} />
-      </aside>
+      </article>
     </div>
   );
 }

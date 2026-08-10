@@ -133,7 +133,6 @@ export const builder: Conceito = {
   dificuldade: "intermediario",
   tempoLeitura: 6,
   relacionados: ["factory-method", "abstract-factory"],
-  roadmapNodes: ["criacionais"],
   problema: [
     "Objetos com muitos parâmetros opcionais empurram o código para o telescoping constructor: uma escada de construtores sobrecarregados ou chamadas como new Pedido(itens, null, true, null, false), em que ninguém sabe o que cada posição significa.",
     "A alternativa ingênua — criar vazio e preencher com setters — deixa o objeto existir em estados intermediários inválidos: qualquer código pode usá-lo pela metade, e a validação se espalha por todos os pontos de uso.",

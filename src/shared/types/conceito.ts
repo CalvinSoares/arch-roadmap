@@ -32,8 +32,14 @@ export interface Conceito {
   dificuldade: Dificuldade;
   tempoLeitura: number;
   relacionados: string[];
-  /** Nós de roadmap que referenciam este conceito. */
-  roadmapNodes: string[];
+  /*
+   * Não existe campo apontando para os roadmaps: a ligação é declarada no
+   * item do roadmap (`conceito: "slug"`) e o caminho inverso sai de
+   * `roadmapsDoConceito()`. Havia aqui um `roadmapNodes: string[]`, preenchido
+   * em todos os conceitos, nunca lido por ninguém e com ids que não existiam
+   * mais nos roadmaps — duas fontes de verdade, uma delas silenciosamente
+   * errada.
+   */
   /** Diagrama de classes/sequência em sintaxe Mermaid. */
   mermaid?: string;
   /** Camadas para a visualização arquitetural. */

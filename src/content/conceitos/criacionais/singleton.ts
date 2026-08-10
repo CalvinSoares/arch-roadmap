@@ -95,7 +95,6 @@ export const singleton: Conceito = {
   dificuldade: "iniciante",
   tempoLeitura: 6,
   relacionados: ["factory-method"],
-  roadmapNodes: ["criacionais"],
   problema: [
     "Alguns objetos precisam existir uma única vez por processo: o pool de conexões com o banco, a configuração carregada do disco, o logger que escreve no mesmo arquivo. Duas cópias significam recursos desperdiçados ou, pior, dados inconsistentes entre elas.",
     "Confiar em disciplina ('ninguém dá new duas vezes, combinado?') não é garantia: o construtor público continua lá, e basta um import distraído para nascer a segunda instância que corrompe a premissa do sistema inteiro.",

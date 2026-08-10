@@ -443,6 +443,35 @@ export const REGRAS: Regra[] = [
     conceitos: ["event-sourcing", "cqrs"],
   },
 
+  // ——— criacionais / estado ———
+  {
+    id: "state-no-dominio",
+    quando: (p) => padraoEm(p, "state", "dominio"),
+    nivel: "sinergia",
+    titulo: "Máquina de estados no domínio",
+    explicacao:
+      "State no domínio: o ciclo de vida da entidade (pedido → pago → enviado) vira objetos com transições explícitas, em vez de um enum com if/else espalhado.",
+    conceitos: ["state"],
+  },
+  {
+    id: "state-e-strategy",
+    quando: (p) => temPadrao(p, "state") && temPadrao(p, "strategy"),
+    nivel: "info",
+    titulo: "State ≠ Strategy",
+    explicacao:
+      "Os dois trocam comportamento por composição, mas quem decide difere: no Strategy o CLIENTE escolhe o algoritmo; no State o próprio estado decide a transição para o próximo. Estrutura parecida, intenção oposta.",
+    conceitos: ["state", "strategy"],
+  },
+  {
+    id: "builder-com-abstract-factory",
+    quando: (p) => temPadrao(p, "builder") && temPadrao(p, "abstract-factory"),
+    nivel: "info",
+    titulo: "Builder e Abstract Factory juntos",
+    explicacao:
+      "Papéis complementares: Abstract Factory garante que uma FAMÍLIA de objetos combine entre si; Builder monta UM objeto complexo passo a passo. Juntos fazem sentido — só não confunda os papéis.",
+    conceitos: ["builder", "abstract-factory"],
+  },
+
   // ——— tecnologias ———
   {
     id: "redis-read-model",
@@ -543,6 +572,183 @@ export const REGRAS: Regra[] = [
     explicacao:
       "CDN servindo a UI: assets chegam de um ponto a ~20ms do usuário e a origem quase não vê tráfego estático. Versione os arquivos para invalidar cache sem sofrimento.",
   },
+
+  // ——— tecnologias: rodada 2 ———
+  {
+    id: "cache-na-aplicacao",
+    quando: (p) => techEm(p, "redis", "aplicacao") || techEm(p, "memcached", "aplicacao"),
+    nivel: "info",
+    titulo: "Cache na aplicação",
+    explicacao:
+      "Cache junto dos casos de uso serve bem para sessão, rate limiting e lock distribuído. Mas cachear dado de negócio aqui esconde a invalidação dentro da regra — para dado quente, prefira o read store.",
+  },
+  {
+    id: "memcached-para-sessao",
+    quando: (p) => temTech(p, "memcached") && !temTech(p, "redis"),
+    nivel: "info",
+    titulo: "Memcached é 100% volátil",
+    explicacao:
+      "Sem persistência nem replicação: um restart limpa tudo. Ótimo para cache descartável de consulta; para sessão de usuário ou carrinho, Redis (com AOF) evita derrubar todo mundo num deploy.",
+  },
+  {
+    id: "elastic-sem-fila",
+    quando: (p) => temTech(p, "elasticsearch") && !temTech(p, "kafka") && !temTech(p, "rabbitmq"),
+    nivel: "alerta",
+    titulo: "Índice sem pipeline de atualização",
+    explicacao:
+      "Elasticsearch está no projeto, mas não há broker para alimentá-lo. Sem eventos, a indexação acaba acoplada à escrita (lenta e frágil) ou feita por cron — e o reindex completo não tem por onde correr.",
+    conceitos: ["cqrs", "event-sourcing"],
+  },
+  {
+    id: "kafka-sem-consumidor-concreto",
+    quando: (p) =>
+      temTech(p, "kafka") &&
+      !temTech(p, "worker") &&
+      !temPadrao(p, "cqrs") &&
+      !temPadrao(p, "saga") &&
+      !temPadrao(p, "observer"),
+    nivel: "info",
+    titulo: "Kafka sem quem consuma",
+    explicacao:
+      "Tópicos sem consumidor viram log que ninguém lê. Adicione um Worker de jobs, ou um padrão que consuma (CQRS projeta, Saga coordena, Observer reage).",
+    conceitos: ["observer", "cqrs", "saga"],
+  },
+  {
+    id: "poliglota-justifique",
+    quando: (p) => temTech(p, "postgres") && temTech(p, "mongodb"),
+    nivel: "info",
+    titulo: "Persistência poliglota",
+    explicacao:
+      "Postgres e MongoDB juntos: defensável quando cada um resolve uma coisa (relacional na escrita, documentos nas projeções). Mas são dois bancos para operar, versionar e restaurar — justifique com um caso, não com preferência.",
+  },
+  {
+    id: "prometheus-sozinho",
+    quando: (p) => temTech(p, "prometheus") && totalTechs(p) === 1,
+    nivel: "info",
+    titulo: "Métricas sem sistema",
+    explicacao:
+      "Observabilidade é o único componente concreto do projeto. Ela mede as outras peças — comece pela fonte da verdade (um banco) e volte aqui.",
+  },
+  {
+    id: "rabbitmq-com-saga",
+    quando: (p) => temTech(p, "rabbitmq") && temPadrao(p, "saga"),
+    nivel: "sinergia",
+    titulo: "Compensações com retry e DLQ",
+    explicacao:
+      "RabbitMQ dá à Saga o que ela precisa operacionalmente: ack por mensagem, retry com backoff e dead-letter para o passo que não compensou. Cada etapa vira uma tarefa rastreável.",
+    conceitos: ["saga"],
+  },
+  {
+    id: "s3-com-cdn",
+    quando: (p) => temTech(p, "s3") && temTech(p, "cdn"),
+    nivel: "sinergia",
+    titulo: "Mídia servida da borda",
+    explicacao:
+      "S3 guarda o arquivo, CDN entrega perto do usuário: upload direto ao bucket por URL assinada e download cacheado na borda. A sua aplicação nunca vê o byte do arquivo.",
+  },
+  {
+    id: "replica-sem-cqrs",
+    quando: (p) => temTech(p, "replica-leitura") && !temPadrao(p, "cqrs"),
+    nivel: "info",
+    titulo: "Réplica sem separar responsabilidade",
+    explicacao:
+      "A réplica escala leitura, mas o código continua tratando tudo igual. Com CQRS explícito, fica claro qual caminho tolera lag de replicação e qual exige o primário.",
+    conceitos: ["cqrs"],
+  },
+  {
+    id: "replica-lag",
+    quando: (p) => temTech(p, "replica-leitura"),
+    nivel: "alerta",
+    titulo: "Cuidado com o lag da réplica",
+    explicacao:
+      "Ler da réplica logo após escrever pode devolver o dado ANTERIOR (replication lag). Para fluxos 'salvei e mostro o resultado', force a leitura no primário ou responda com o retorno da própria escrita.",
+    conceitos: ["cqrs"],
+  },
+  {
+    id: "replica-e-cache",
+    quando: (p) => temTech(p, "replica-leitura") && (temTech(p, "redis") || temTech(p, "memcached")),
+    nivel: "info",
+    titulo: "Réplica e cache resolvem o mesmo problema",
+    explicacao:
+      "Ambos aliviam leitura, por caminhos diferentes: cache elimina a consulta (µs, mas exige invalidação); réplica mantém o SQL e a flexibilidade (ms, com lag). Ter os dois é válido em escala — só saiba qual atende cada tela.",
+  },
+  {
+    id: "worker-sem-fila",
+    quando: (p) => temTech(p, "worker") && !temTech(p, "kafka") && !temTech(p, "rabbitmq"),
+    nivel: "alerta",
+    titulo: "Worker sem fila para consumir",
+    explicacao:
+      "Um worker sem broker fica varrendo o banco em polling — desperdício e corrida entre instâncias. Adicione RabbitMQ (jobs) ou Kafka (eventos) para ele ter de onde puxar trabalho.",
+  },
+  {
+    id: "worker-com-fila",
+    quando: (p) => temTech(p, "worker") && (temTech(p, "kafka") || temTech(p, "rabbitmq")),
+    nivel: "sinergia",
+    titulo: "Trabalho pesado fora da requisição",
+    explicacao:
+      "Worker + broker: o usuário recebe 202 na hora e PDF, e-mail ou processamento de imagem acontecem em segundo plano, com retry. Só garanta idempotência — entrega é at-least-once.",
+    conceitos: ["saga"],
+  },
+  {
+    id: "gateway-com-facade",
+    quando: (p) => temTech(p, "api-gateway") && temPadrao(p, "facade"),
+    nivel: "sinergia",
+    titulo: "Facade na infra e no código",
+    explicacao:
+      "O gateway é o Facade em forma de infraestrutura: um ponto de entrada esconde o subsistema. Com o padrão Facade também no código, a simplificação é coerente das duas pontas.",
+    conceitos: ["facade"],
+  },
+  {
+    id: "gateway-com-decorator",
+    quando: (p) => temTech(p, "api-gateway") && temPadrao(p, "decorator"),
+    nivel: "info",
+    titulo: "Plugins do gateway são Decorators",
+    explicacao:
+      "Autenticação, rate limit e log no gateway são exatamente o Decorator aplicado à infraestrutura: camadas empilhadas em volta da requisição, cada uma adicionando um comportamento.",
+    conceitos: ["decorator"],
+  },
+  {
+    id: "gateway-e-nginx",
+    quando: (p) => temTech(p, "api-gateway") && temTech(p, "nginx"),
+    nivel: "info",
+    titulo: "Duas camadas na borda",
+    explicacao:
+      "Nginx e API Gateway se sobrepõem em TLS, roteamento e rate limit. Combinação comum é Nginx/LB na frente e gateway cuidando de auth e quotas — mas se um só resolve, tire uma peça de operação.",
+  },
+  {
+    id: "grpc-interno",
+    quando: (p) => techEm(p, "grpc", "aplicacao"),
+    nivel: "sinergia",
+    titulo: "Contrato forte entre serviços",
+    explicacao:
+      "gRPC na aplicação: chamadas internas binárias com contrato versionado em protobuf — mais rápidas que JSON e sem quebra silenciosa de campo.",
+    conceitos: ["adapter"],
+  },
+  {
+    id: "grpc-na-borda",
+    quando: (p) => techEm(p, "grpc", "api") && !temTech(p, "api-gateway") && !temTech(p, "nginx"),
+    nivel: "alerta",
+    titulo: "gRPC exposto ao browser",
+    explicacao:
+      "Browser não fala gRPC nativamente — precisa de gRPC-Web com proxy de tradução. Sem gateway ou Nginx na frente, clientes web simplesmente não conseguem chamar essa API.",
+    conceitos: ["adapter"],
+  },
+  {
+    id: "sem-gestao-de-segredos",
+    quando: (p) => totalTechs(p) >= 4 && !temTech(p, "vault"),
+    nivel: "info",
+    titulo: "Onde ficam as credenciais?",
+    explicacao:
+      "Com quatro ou mais tecnologias, são várias credenciais circulando (banco, broker, storage). Um gerenciador de segredos tira isso do .env, permite rotação sem redeploy e deixa o acesso auditável.",
+  },
+  {
+    id: "vault-com-segredos",
+    quando: (p) => temTech(p, "vault"),
+    nivel: "sinergia",
+    titulo: "Segredos fora do código",
+    explicacao:
+      "Credenciais saem do repositório e do ambiente: acesso por identidade, rotação automática e auditoria. Lembre-se de cachear localmente — o cofre passa a ser dependência do boot.",
+  },
 ];
 
 /**
@@ -598,7 +804,14 @@ function insightsTechForaDoLugar(p: EstadoProjeto): Insight[] {
 
 export function avaliarRegras(p: EstadoProjeto) {
   return [
-    ...REGRAS.filter((r) => r.quando(p)).map(({ quando: _q, ...insight }) => insight),
+    // o predicado não faz parte do insight entregue à UI
+    ...REGRAS.filter((r) => r.quando(p)).map((r) => ({
+      id: r.id,
+      nivel: r.nivel,
+      titulo: r.titulo,
+      explicacao: r.explicacao,
+      ...(r.conceitos ? { conceitos: r.conceitos } : {}),
+    })),
     ...insightsPadraoForaDoLugar(p),
     ...insightsTechForaDoLugar(p),
   ];
@@ -658,9 +871,75 @@ export function calcularScore(p: EstadoProjeto): ScoreProjeto {
     fatores.push("+ observabilidade: comportamento verificável em produção");
   }
 
+  // ——— resiliência: aguenta perder peças? ———
+  let resiliencia = 20;
+  const cacheNaLeitura =
+    techEm(p, "redis", "read-store") || techEm(p, "memcached", "read-store");
+  if (cacheNaLeitura) {
+    resiliencia += 15;
+    fatores.push("+ cache quente serve leitura mesmo se o banco cair");
+  }
+  if (temTech(p, "kafka") || temTech(p, "rabbitmq")) {
+    resiliencia += 20;
+    fatores.push("+ fila absorve escrita durante incidentes (202 em vez de 503)");
+  }
+  if (temPadrao(p, "saga")) {
+    resiliencia += 15;
+    fatores.push("+ Saga compensa passos quando algo falha no meio");
+  }
+  if (temTech(p, "prometheus")) {
+    resiliencia += 10;
+    fatores.push("+ métricas: incidente vira alerta antes de virar reclamação");
+  }
+  if (temTech(p, "cdn")) {
+    resiliencia += 5;
+    fatores.push("+ CDN mantém estáticos no ar independente da origem");
+  }
+  if (temBancoDuravel(p) && !cacheNaLeitura && p.camadas.length >= 5) {
+    resiliencia -= 10;
+    fatores.push("− banco é ponto único de leitura: sem cache, ele absorve tudo");
+  }
+  if (!temBancoDuravel(p) && p.camadas.length > 0) {
+    resiliencia -= 15;
+    fatores.push("− sem fonte da verdade durável: perda de dados em restart");
+  }
+
+  // ——— custo operacional: quantas peças e quão pesadas ———
+  const PESO_OPERACIONAL: Record<string, number> = {
+    kafka: 18,
+    elasticsearch: 14,
+    mongodb: 10,
+    postgres: 9,
+    rabbitmq: 10,
+    redis: 6,
+    memcached: 5,
+    nginx: 5,
+    prometheus: 7,
+    s3: 3,
+    cdn: 3,
+  };
+  const custoOperacional = Math.min(
+    100,
+    p.camadas.reduce(
+      (acc, c) => acc + c.tecnologias.reduce((a, t) => a + (PESO_OPERACIONAL[t] ?? 5), 0),
+      0
+    )
+  );
+  if (custoOperacional >= 55)
+    fatores.push("• muitas peças para operar: cada uma pede deploy, backup e alerta");
+
+  /**
+   * Pesos calibrados para que uma arquitetura real e completa (8 camadas, ~5
+   * padrões, ~8 tecnologias) caia por volta de 85 — alto, mas ainda com
+   * resolução acima. Com os pesos antigos (8/7/4) qualquer projeto sério
+   * estourava 100 e a barra ficava presa no teto: 4 dos 6 templates marcavam
+   * exatamente 100, então "cada peça precisa pagar o próprio custo" deixava de
+   * ser visível justamente onde importa, e a marca de referência do modelo
+   * carregado não tinha como mostrar diferença. O teto agora é para exagero.
+   */
   const complexidade = Math.min(
     100,
-    p.camadas.length * 8 + totalPadroes(p) * 7 + totalTechs(p) * 4
+    p.camadas.length * 5 + totalPadroes(p) * 4 + totalTechs(p) * 3
   );
   if (complexidade > 60)
     fatores.push("• complexidade alta: cada peça precisa pagar o próprio custo");
@@ -669,7 +948,9 @@ export function calcularScore(p: EstadoProjeto): ScoreProjeto {
   return {
     desacoplamento: clamp(desacoplamento),
     testabilidade: clamp(testabilidade),
+    resiliencia: clamp(resiliencia),
     complexidade,
+    custoOperacional,
     fatores,
   };
 }
@@ -747,12 +1028,57 @@ export const TEMPLATES: TemplateProjeto[] = [
     estado: {
       camadas: [
         { camadaId: "api", padroes: ["facade", "adapter"], tecnologias: ["nginx"] },
-        { camadaId: "aplicacao", padroes: ["cqrs"], tecnologias: [] },
+        { camadaId: "aplicacao", padroes: ["cqrs"], tecnologias: ["worker"] },
         { camadaId: "dominio", padroes: ["hexagonal"], tecnologias: [] },
         { camadaId: "write-store", padroes: ["event-sourcing"], tecnologias: ["postgres"] },
         { camadaId: "read-store", padroes: [], tecnologias: ["mongodb"] },
         { camadaId: "fila", padroes: ["observer"], tecnologias: ["kafka"] },
-        { camadaId: "infra", padroes: ["singleton"], tecnologias: ["prometheus"] },
+        { camadaId: "infra", padroes: ["singleton"], tecnologias: ["prometheus", "vault"] },
+      ],
+    },
+  },
+  {
+    id: "servico-midia",
+    nome: "Serviço de mídia",
+    descricao: "Upload direto ao bucket, entrega pela borda, banco só com metadados.",
+    porQue: [
+      "S3 + URL assinada: o arquivo vai do cliente direto ao bucket — a aplicação nunca carrega o byte.",
+      "CDN entrega o download da borda; o banco guarda apenas caminho e metadados (não BLOBs).",
+      "Worker + fila processam derivados (thumbnail, transcode) fora da requisição, com retry; segredos no cofre.",
+    ],
+    estado: {
+      camadas: [
+        { camadaId: "ui", padroes: [], tecnologias: ["cdn"] },
+        { camadaId: "api", padroes: ["facade"], tecnologias: ["api-gateway"] },
+        { camadaId: "aplicacao", padroes: ["strategy"], tecnologias: ["worker"] },
+        { camadaId: "dominio", padroes: ["hexagonal"], tecnologias: [] },
+        { camadaId: "write-store", padroes: [], tecnologias: ["postgres"] },
+        { camadaId: "fila", padroes: ["observer"], tecnologias: ["rabbitmq"] },
+        { camadaId: "infra", padroes: ["adapter"], tecnologias: ["s3", "prometheus", "vault"] },
+      ],
+    },
+  },
+  {
+    id: "tempo-real",
+    nome: "Tempo real (chat/notificações)",
+    descricao: "Redis pub/sub distribuindo eventos entre instâncias, fila para o durável.",
+    porQue: [
+      "Observer na UI e na fila: a tela reage a eventos em vez de ficar perguntando (polling).",
+      "Redis faz pub/sub entre instâncias — sem ele, um usuário conectado no servidor A não recebe a mensagem publicada no servidor B.",
+      "Kafka guarda o histórico durável (Redis pub/sub é fire-and-forget: quem estava offline perde).",
+    ],
+    estado: {
+      camadas: [
+        { camadaId: "ui", padroes: ["observer"], tecnologias: ["cdn"] },
+        { camadaId: "api", padroes: ["decorator"], tecnologias: ["nginx"] },
+        // Observer fica na UI (tela reage) e na fila (consome o log). Aqui o
+        // fan-out é capacidade do Redis (pub/sub), não um terceiro Observer —
+        // três camadas com Observer disparariam a cascata de notificações.
+        { camadaId: "aplicacao", padroes: ["state"], tecnologias: ["redis"] },
+        { camadaId: "dominio", padroes: ["hexagonal"], tecnologias: [] },
+        { camadaId: "write-store", padroes: [], tecnologias: ["postgres"] },
+        { camadaId: "fila", padroes: ["observer"], tecnologias: ["kafka"] },
+        { camadaId: "infra", padroes: [], tecnologias: ["prometheus", "vault"] },
       ],
     },
   },
