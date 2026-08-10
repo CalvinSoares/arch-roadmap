@@ -4,21 +4,31 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/shared/utils/cn";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+  [
+    "group/btn relative inline-flex items-center justify-center gap-2 rounded-xl text-sm font-medium",
+    "outline-none transition-all duration-300 ease-out",
+    "focus-visible:ring-2 focus-visible:ring-ring",
+    "active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50",
+    "[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-300",
+  ],
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-foreground hover:opacity-90",
+        primary:
+          "brilho-varredura bg-gradient-to-br from-primary to-[color-mix(in_srgb,var(--primary)_78%,var(--glow-c))] text-primary-foreground shadow-[var(--shadow-md)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]",
+        accent:
+          "brilho-varredura bg-accent text-accent-foreground shadow-[var(--shadow-md)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]",
         outline:
-          "border border-card-border bg-card text-foreground hover:bg-muted/10",
-        ghost: "text-foreground hover:bg-muted/10",
-        subtle: "bg-muted/10 text-foreground hover:bg-muted/20",
+          "border border-card-border bg-card/70 text-foreground hover:-translate-y-0.5 hover:border-primary/45 hover:bg-card hover:shadow-[var(--shadow-md)]",
+        ghost: "text-muted hover:bg-foreground/5 hover:text-foreground",
+        subtle:
+          "bg-foreground/[0.06] text-foreground hover:bg-foreground/10 hover:-translate-y-0.5",
       },
       size: {
-        sm: "h-8 px-3",
+        sm: "h-8 rounded-lg px-3",
         md: "h-10 px-4",
-        lg: "h-11 px-6 text-base",
-        icon: "size-9",
+        lg: "h-12 px-6 text-[15px]",
+        icon: "size-9 rounded-lg",
       },
     },
     defaultVariants: { variant: "primary", size: "md" },
