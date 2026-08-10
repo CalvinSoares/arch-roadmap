@@ -749,6 +749,72 @@ export const REGRAS: Regra[] = [
     explicacao:
       "Credenciais saem do repositório e do ambiente: acesso por identidade, rotação automática e auditoria. Lembre-se de cachear localmente — o cofre passa a ser dependência do boot.",
   },
+  // ——— dinheiro, eventos e repetição ———
+  {
+    id: "fila-sem-idempotencia",
+    quando: (p) => tem(p, "fila") && !temPadrao(p, "idempotencia"),
+    nivel: "info",
+    titulo: "Quem consome essa fila aguenta repetição?",
+    explicacao:
+      "Fila entrega ao-menos-uma-vez: rebalanceamento e timeout reentregam a mesma mensagem. Sem consumo idempotente, todo retry é um efeito duplicado esperando acontecer — e a corrida entre duas entregas simultâneas vem de brinde.",
+    conceitos: ["idempotencia", "race-condition"],
+  },
+  {
+    id: "idempotencia-com-saga",
+    quando: (p) => temPadrao(p, "idempotencia") && temPadrao(p, "saga"),
+    nivel: "sinergia",
+    titulo: "Saga com passos idempotentes",
+    explicacao:
+      "Saga reexecuta passos e compensações quando algo falha no meio — e reexecutar só é seguro se cada passo tolerar repetição. Juntas, as duas peças fazem a transação distribuída sobreviver a retry sem efeito dobrado.",
+    conceitos: ["saga", "idempotencia"],
+  },
+  {
+    id: "webhooks-sem-fila",
+    quando: (p) => temPadrao(p, "webhooks") && !tem(p, "fila"),
+    nivel: "alerta",
+    titulo: "Webhook processando dentro do request",
+    explicacao:
+      "Sem fila, o handler trabalha enquanto o emissor espera — o timeout dele dispara reenvio, que vira processamento duplicado em paralelo. Receba, valide a assinatura, enfileire e responda 200; o trabalho pesado acontece depois.",
+    conceitos: ["webhooks", "idempotencia"],
+  },
+  {
+    id: "webhooks-com-fila",
+    quando: (p) => temPadrao(p, "webhooks") && tem(p, "fila"),
+    nivel: "sinergia",
+    titulo: "Webhook que responde em milissegundos",
+    explicacao:
+      "O endpoint valida, deduplica, enfileira e devolve 200 na hora — o emissor não reenvia, e o worker processa no ritmo do sistema. É o desenho canônico de recepção de eventos externos.",
+    conceitos: ["webhooks"],
+  },
+  {
+    id: "ledger-sem-store-duravel",
+    quando: (p) =>
+      temPadrao(p, "ledger") && !tem(p, "write-store") && !tem(p, "infra"),
+    nivel: "alerta",
+    titulo: "Ledger sem onde morar",
+    explicacao:
+      "O livro-razão é a fonte da verdade do dinheiro: precisa de armazenamento durável (write store ou infra com banco) para os lançamentos imutáveis. Sem isso, é contabilidade em memória — some no primeiro restart.",
+    conceitos: ["ledger", "append-only"],
+  },
+  {
+    id: "ledger-com-append-only",
+    quando: (p) => temPadrao(p, "ledger") && temPadrao(p, "append-only"),
+    nivel: "sinergia",
+    titulo: "Lançamentos que ninguém edita",
+    explicacao:
+      "Ledger sobre armazenamento append-only é o par natural: partidas dobradas dão a estrutura contábil, a imutabilidade física dá o valor de prova — nem bug nem UPDATE de emergência reescrevem o passado.",
+    conceitos: ["ledger", "append-only"],
+  },
+  {
+    id: "maquina-de-estados-com-fila",
+    quando: (p) => temPadrao(p, "maquina-de-estados") && tem(p, "fila"),
+    nivel: "sinergia",
+    titulo: "Transições à prova de eventos atrasados",
+    explicacao:
+      "Eventos de fila chegam duplicados e fora de ordem — e a tabela de transições rejeita o que não vale mais ('paga' não expira). A máquina de estados é o porteiro que faz o consumo assíncrono ficar seguro.",
+    conceitos: ["maquina-de-estados", "webhooks"],
+  },
+
 ];
 
 /**
@@ -1082,4 +1148,27 @@ export const TEMPLATES: TemplateProjeto[] = [
       ],
     },
   },
+  {
+    id: "carteira",
+    nome: "Carteira digital (fintech)",
+    descricao:
+      "Dinheiro de terceiros: idempotência na borda, ledger no núcleo, eventos auditáveis.",
+    porQue: [
+      "Idempotência + webhooks na API: o PSP pode reenviar a notificação à vontade — nada é processado duas vezes, e o endpoint responde 200 antes de trabalhar.",
+      "Ledger em partidas dobradas no domínio: saldo é soma de lançamentos, a soma do sistema fecha em zero, e auditoria vira consulta — não perícia.",
+      "Máquina de estados nas cobranças: 'paga não expira' é transição impossível na tabela, não um if espalhado torcendo para ninguém esquecer.",
+      "Write store append-only com Postgres: o passado não se edita; estorno é lançamento inverso, e a conciliação diária bate o livro com o extrato do banco.",
+    ],
+    estado: {
+      camadas: [
+        { camadaId: "api", padroes: ["idempotencia", "webhooks"], tecnologias: ["nginx"] },
+        { camadaId: "aplicacao", padroes: ["saga"], tecnologias: ["worker"] },
+        { camadaId: "dominio", padroes: ["ledger", "maquina-de-estados", "hexagonal"], tecnologias: [] },
+        { camadaId: "write-store", padroes: ["append-only"], tecnologias: ["postgres"] },
+        { camadaId: "fila", padroes: [], tecnologias: ["rabbitmq"] },
+        { camadaId: "infra", padroes: [], tecnologias: ["vault", "prometheus"] },
+      ],
+    },
+  },
+
 ];

@@ -38,6 +38,11 @@ import {
   Cog,
   Cable,
   KeyRound,
+  Repeat,
+  Milestone,
+  Landmark,
+  ScrollText,
+  Webhook,
   type LucideIcon,
 } from "lucide-react";
 import type { CategoriaTech } from "@/shared/types/construtor";
@@ -119,6 +124,11 @@ export const PADRAO_ICON: Record<string, LucideIcon> = {
   saga: Undo2,
   hexagonal: Hexagon,
   "event-sourcing": History,
+  idempotencia: Repeat,
+  "maquina-de-estados": Milestone,
+  ledger: Landmark,
+  "append-only": ScrollText,
+  webhooks: Webhook,
 };
 
 export function iconeDoPadrao(id: string): LucideIcon {

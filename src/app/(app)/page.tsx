@@ -79,6 +79,11 @@ const FAMILIAS: { id: Categoria; pergunta: string; desc: string }[] = [
     pergunta: "Como o sistema inteiro se organiza?",
     desc: "Decisões de fronteira: o que fica no núcleo e o que é detalhe plugável.",
   },
+  {
+    id: "infra",
+    pergunta: "Onde isso roda?",
+    desc: "Containers, orquestração e servidores — o caminho do código até produção.",
+  },
 ];
 
 /** A trilha de leitura de um verbete — mostra a profundidade do conteúdo. */

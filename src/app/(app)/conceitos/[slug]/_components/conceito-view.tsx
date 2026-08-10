@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Map } from "lucide-react";
+import { ArrowUpRight, Map, GitCompareArrows } from "lucide-react";
 import { CodeTabs } from "@/shared/components/conteudo/code-tabs";
 import { QuandoUsar } from "@/shared/components/conteudo/quando-usar";
 import { DiagramaClasse } from "@/shared/components/diagramas/diagrama-classe";
@@ -15,9 +15,43 @@ import {
 } from "@/shared/components/conteudo/conceito-subnav";
 import { ConceitoHero } from "@/shared/components/conteudo/conceito-hero";
 import { CATEGORIAS } from "@/shared/config/categorias";
-import { getConceitos, roadmapsDoConceito } from "@/shared/lib/content";
+import {
+  getConceitos,
+  roadmapsDoConceito,
+  comparacoesDoConceito,
+} from "@/shared/lib/content";
 import { highlightCode } from "@/shared/lib/highlight";
+import { QuizDoConceito } from "@/shared/components/conteudo/quiz-do-conceito";
+import { todasAsArmadilhas } from "@/shared/lib/quiz";
 import type { Conceito } from "@/shared/types/conceito";
+
+/** Duelos em que este conceito entra — derivado do registro de comparações. */
+function ConfundidoCom({ slug }: { slug: string }) {
+  const duelos = comparacoesDoConceito(slug);
+  if (duelos.length === 0) return null;
+
+  return (
+    <section className="border-t border-card-border pt-8">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+        Costuma ser confundido com
+      </h2>
+      <ul className="mt-4 flex flex-wrap gap-2">
+        {duelos.map((d) => (
+          <li key={d.slug}>
+            <Link
+              href={`/comparar/${d.slug}`}
+              className="flex items-center gap-2 rounded-xl border border-card-border bg-card px-3 py-2 text-sm transition-colors hover:border-primary/60"
+            >
+              <GitCompareArrows className="size-3.5 shrink-0 text-primary" />
+              <span className="font-medium">{d.outro.titulo}</span>
+              <span className="text-muted">· ver comparação</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 /**
  * Volta do roadmap: em que trilhas este conceito aparece. Derivado dos
@@ -110,6 +144,16 @@ export async function ConceitoView({ conceito }: { conceito: Conceito }) {
         <div className="gap-12 xl:grid xl:grid-cols-[minmax(0,1fr)_14rem]">
           <article className="min-w-0 space-y-12 pt-2">
             <BlocoRenderer blocos={conceito.blocos} />
+            <QuizDoConceito
+
+              slug={conceito.slug}
+
+              titulo={conceito.titulo}
+
+              total={todasAsArmadilhas([conceito.slug]).length}
+
+            />
+            <ConfundidoCom slug={conceito.slug} />
             <EmRoadmaps slug={conceito.slug} />
             <Relacionados conceito={conceito} />
           </article>
@@ -126,6 +170,16 @@ export async function ConceitoView({ conceito }: { conceito: Conceito }) {
         <ConceitoHero conceito={conceito} />
         <article className="min-w-0 space-y-12">
           <BlocoRenderer blocos={conceito.blocos} />
+          <QuizDoConceito
+
+            slug={conceito.slug}
+
+            titulo={conceito.titulo}
+
+            total={todasAsArmadilhas([conceito.slug]).length}
+
+          />
+          <ConfundidoCom slug={conceito.slug} />
           <EmRoadmaps slug={conceito.slug} />
           <Relacionados conceito={conceito} />
         </article>
@@ -188,6 +242,22 @@ export async function ConceitoView({ conceito }: { conceito: Conceito }) {
             quandoEvitar={conceito.quandoEvitar}
           />
         </SecaoConteudo>
+
+        <QuizDoConceito
+
+
+          slug={conceito.slug}
+
+
+          titulo={conceito.titulo}
+
+
+          total={todasAsArmadilhas([conceito.slug]).length}
+
+
+        />
+
+        <ConfundidoCom slug={conceito.slug} />
 
         <EmRoadmaps slug={conceito.slug} />
 

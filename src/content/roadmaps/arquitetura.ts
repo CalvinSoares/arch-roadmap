@@ -29,7 +29,7 @@ export const roadmapArquitetura: Roadmap = {
       items: [
         { id: "ar-linguagem", titulo: "Linguagem ubíqua e contextos delimitados" },
         { id: "ar-agregados", titulo: "Agregados e invariantes" },
-        { id: "ar-state", titulo: "Máquinas de estado explícitas", conceito: "state", opcional: true },
+        { id: "ar-state", titulo: "Máquinas de estado explícitas", conceito: "maquina-de-estados" },
         { id: "ar-lsp", titulo: "LSP e contratos honestos", conceito: "lsp", opcional: true },
         { id: "ar-interpreter", titulo: "Regras configuráveis com Interpreter", conceito: "interpreter", opcional: true },
       ],
@@ -42,6 +42,8 @@ export const roadmapArquitetura: Roadmap = {
         { id: "ar-cqs", titulo: "CQS", conceito: "cqs" },
         { id: "ar-cqrs", titulo: "CQRS", conceito: "cqrs" },
         { id: "ar-event-sourcing", titulo: "Event Sourcing", conceito: "event-sourcing", opcional: true },
+        { id: "ar-append-only", titulo: "Logs append-only", conceito: "append-only" },
+        { id: "ar-ledger", titulo: "Ledger e partidas dobradas", conceito: "ledger", descricao: "Saldo é soma de lançamentos — não uma coluna." },
         { id: "ar-consistencia", titulo: "Consistência eventual", descricao: "O que muda para o usuário quando a leitura atrasa." },
         { id: "ar-particionamento", titulo: "Réplicas, particionamento e sharding", opcional: true },
       ],
@@ -53,7 +55,8 @@ export const roadmapArquitetura: Roadmap = {
       items: [
         { id: "ar-falacias", titulo: "As falácias da computação distribuída", descricao: "A rede não é confiável, a latência não é zero." },
         { id: "ar-saga", titulo: "Saga e compensações", conceito: "saga" },
-        { id: "ar-idempotencia", titulo: "Idempotência e entrega ao menos uma vez" },
+        { id: "ar-idempotencia", titulo: "Idempotência e entrega ao menos uma vez", conceito: "idempotencia" },
+        { id: "ar-webhooks", titulo: "Webhooks entre sistemas", conceito: "webhooks", opcional: true },
         { id: "ar-resiliencia", titulo: "Timeout, retry, circuit breaker" },
         { id: "ar-proxy", titulo: "Chamada remota é um Proxy", conceito: "proxy", opcional: true },
         { id: "ar-cap", titulo: "CAP e seus mal-entendidos", opcional: true },

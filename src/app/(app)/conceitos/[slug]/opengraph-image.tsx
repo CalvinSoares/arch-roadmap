@@ -18,6 +18,8 @@ const COR: Record<Categoria, string> = {
   comportamental: "#a78bfa",
   principio: "#fbbf24",
   arquitetura: "#fb7185",
+  // o mesmo --cat-infra do tema escuro (ImageResponse não lê CSS vars)
+  infra: "#89bdd1",
 };
 
 export default async function Image({

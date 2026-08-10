@@ -22,6 +22,7 @@ import {
   type Sugestao,
 } from "@/content/construtor/sugestoes";
 import { useArmazenamentoLocal } from "@/shared/hook/use-armazenamento-local";
+import { gerarADR, nomeArquivoADR } from "../utils/adr";
 
 const CHAVE = "devatlas:construtor:v1";
 const VAZIO: EstadoProjeto = { camadas: [] };
@@ -344,6 +345,44 @@ export function useConstrutor() {
   const sugestoes = useMemo(() => sugerir(estado), [estado]);
   const revisao = useMemo(() => revisarProjeto(estado), [estado]);
 
+  /**
+   * Baixa o projeto como Architecture Decision Record.
+   *
+   * O relógio é lido aqui, na borda, e passado para `gerarADR` — a geração em
+   * si é pura e testável sem mockar tempo.
+   */
+  const exportarADR = useCallback(() => {
+    if (estado.camadas.length === 0) {
+      toast.info("Monte o projeto antes de exportar.");
+      return;
+    }
+    const data = new Date().toISOString().slice(0, 10);
+    const markdown = gerarADR({
+      data,
+      estado,
+      score,
+      revisao,
+      insights,
+      link: `${window.location.origin}/construtor?p=${codificarEstado(estado)}`,
+    });
+
+    try {
+      const url = URL.createObjectURL(
+        new Blob([markdown], { type: "text/markdown;charset=utf-8" })
+      );
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = nomeArquivoADR(data);
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("ADR baixado!", {
+        description: "Markdown pronto para o repositório ou a reunião.",
+      });
+    } catch {
+      toast.error("Não foi possível gerar o arquivo.");
+    }
+  }, [estado, score, revisao, insights]);
+
   return {
     estado,
     ultimaAcao,
@@ -365,5 +404,6 @@ export function useConstrutor() {
     carregarTemplate,
     limpar,
     compartilhar,
+    exportarADR,
   };
 }

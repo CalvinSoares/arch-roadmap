@@ -16,27 +16,51 @@ export default function Image() {
           alignItems: "center",
           justifyContent: "center",
           gap: 28,
-          background: "#0b0d16",
-          color: "#e7e9f3",
+          background: "#100d0b",
+          color: "#f2ece4",
           fontFamily: "sans-serif",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          {/* mesma marca do favicon: globo sobre o gradiente da identidade */}
           <div
             style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              background: "#7c7bff",
+              width: 76,
+              height: 76,
+              borderRadius: 20,
+              background: "linear-gradient(135deg, #b4482a 0%, #c9a227 100%)",
               display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-          />
-          <span style={{ fontSize: 56, fontWeight: 700 }}>DevAtlas</span>
+          >
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 40,
+                border: "5px solid rgba(255, 248, 242, 0.85)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                style={{
+                  width: 20,
+                  height: 40,
+                  borderRadius: 20,
+                  border: "5px solid rgba(255, 248, 242, 0.85)",
+                }}
+              />
+            </div>
+          </div>
+          <span style={{ fontSize: 64, fontWeight: 700 }}>DevAtlas</span>
         </div>
-        <span style={{ fontSize: 40, color: "#e7e9f3", textAlign: "center" }}>
+        <span style={{ fontSize: 40, color: "#f2ece4", textAlign: "center" }}>
           Estude padrões e arquitetura visualmente
         </span>
-        <span style={{ fontSize: 28, color: "#9aa1bd" }}>
+        <span style={{ fontSize: 28, color: "#a39387" }}>
           roadmaps · conceitos interativos · construtor de projetos
         </span>
       </div>

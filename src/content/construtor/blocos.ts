@@ -136,6 +136,36 @@ export const PADROES_DEF: PadraoDef[] = [
     descricao: "O objeto muda de comportamento conforme o estado interno.",
     aplicaEm: ["dominio", "aplicacao"],
   },
+  {
+    id: "idempotencia",
+    nome: "Idempotência",
+    descricao: "Repetir a operação não repete o efeito: chave única + resultado guardado.",
+    aplicaEm: ["api", "aplicacao", "fila"],
+  },
+  {
+    id: "maquina-de-estados",
+    nome: "Máquina de estados",
+    descricao: "Ciclo de vida com transições declaradas — fora da tabela, impossível.",
+    aplicaEm: ["dominio", "aplicacao"],
+  },
+  {
+    id: "ledger",
+    nome: "Ledger",
+    descricao: "Saldo como soma de lançamentos imutáveis, em partidas dobradas.",
+    aplicaEm: ["dominio", "write-store"],
+  },
+  {
+    id: "append-only",
+    nome: "Append-only",
+    descricao: "Só se escreve no fim: histórico imutável, correção é registro novo.",
+    aplicaEm: ["write-store", "fila"],
+  },
+  {
+    id: "webhooks",
+    nome: "Webhooks",
+    descricao: "Receber eventos de terceiros: assinatura, dedupe e 200 rápido.",
+    aplicaEm: ["api"],
+  },
 ];
 
 export const camadaDef = (id: string) => CAMADAS_DEF.find((c) => c.id === id);

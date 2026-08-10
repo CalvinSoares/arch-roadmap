@@ -7,6 +7,18 @@ export interface Mudanca {
 }
 
 /**
+ * Algo planejado e ainda não entregue — vira o bloco "A seguir" na página de
+ * novidades. Quando a feature sai, a entrada morre daqui e renasce como
+ * `Mudanca` numa entrega; os dois nunca coexistem.
+ */
+export interface ItemPlanejado {
+  /** id estável — o componente mapeia para o ícone por ele. */
+  id: string;
+  titulo: string;
+  descricao: string;
+}
+
+/**
  * Uma entrega publicada. É a **fonte única** do que mudou e quando: o badge
  * "novo" do catálogo deriva daqui, então nada precisa ser marcado à mão em
  * dois lugares.
