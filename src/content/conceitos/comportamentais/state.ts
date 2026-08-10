@@ -129,7 +129,6 @@ export const state: Conceito = {
   dificuldade: "intermediario",
   tempoLeitura: 7,
   relacionados: ["strategy", "observer"],
-  roadmapNodes: ["comportamentais"],
   problema: [
     "Um objeto se comporta diferente conforme sua situação — pedido novo pode cancelar de graça, pago cancela com estorno, enviado não cancela. Modelar isso com um campo status e switch/if em cada método espalha a máquina de estados pelo código inteiro.",
     "Cada estado novo exige revisitar todos esses switches; cada método novo, reescrever todos os ramos. Transições inválidas passam batido porque nada centraliza o que pode virar o quê.",

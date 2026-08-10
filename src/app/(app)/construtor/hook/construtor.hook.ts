@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { arrayMove } from "@dnd-kit/sortable";
-import type { CamadaId, EstadoProjeto } from "@/shared/types/construtor";
+import type { CamadaId, EstadoProjeto, ScoreProjeto } from "@/shared/types/construtor";
 import {
   camadaDef,
   padraoDef,
@@ -16,6 +16,12 @@ import {
   paresForaDeOrdem,
   TEMPLATES,
 } from "@/content/construtor/regras";
+import {
+  revisarProjeto,
+  sugerir,
+  type Sugestao,
+} from "@/content/construtor/sugestoes";
+import { useArmazenamentoLocal } from "@/shared/hook/use-armazenamento-local";
 
 const CHAVE = "devatlas:construtor:v1";
 const VAZIO: EstadoProjeto = { camadas: [] };
@@ -76,53 +82,58 @@ function decodificarEstado(b64: string): EstadoProjeto | null {
   }
 }
 
+/** Lê o projeto da query `?p=` — leitura pura, sem efeito colateral. */
+function projetoDoLink(): EstadoProjeto | null {
+  if (typeof window === "undefined") return null;
+  const compartilhado = new URLSearchParams(window.location.search).get("p");
+  return compartilhado ? decodificarEstado(compartilhado) : null;
+}
+
+/**
+ * Semeia o localStorage com o projeto da URL, se houver, e devolve a narração
+ * correspondente. Roda no inicializador preguiçoso do `useState` — antes,
+ * portanto, de o `useArmazenamentoLocal` abaixo ler a chave.
+ *
+ * É idempotente de propósito: gravar o mesmo projeto duas vezes (StrictMode
+ * renderiza o inicializador duas vezes em desenvolvimento) não muda nada.
+ */
+function adotarProjetoDoLink(): UltimaAcao | null {
+  const doLink = projetoDoLink();
+  if (!doLink) return null;
+  try {
+    localStorage.setItem(CHAVE, JSON.stringify(doLink));
+  } catch {
+    /* storage indisponível — o projeto vive só nesta sessão */
+  }
+  return {
+    titulo: "Projeto carregado do link",
+    descricao: "Este é um projeto compartilhado — edite à vontade, a cópia é sua.",
+  };
+}
+
 /** Estado do projeto do usuário: camadas ordenadas + padrões aplicados. */
 export function useConstrutor() {
-  const [estado, setEstado] = useState<EstadoProjeto>(VAZIO);
-  const [ultimaAcao, setUltimaAcao] = useState<UltimaAcao | null>(null);
-  const [hidratado, setHidratado] = useState(false);
+  /**
+   * Antes isto era um `useEffect` com quatro `setState` em sequência: além da
+   * renderização em cascata, o usuário via o projeto vazio piscar antes de o
+   * conteúdo aparecer.
+   */
+  const [narracaoDoLink] = useState(adotarProjetoDoLink);
 
+  const [guardado, persistir] = useArmazenamentoLocal(CHAVE, VAZIO);
+  /** normaliza estados salvos antes de as tecnologias existirem. */
+  const estado = useMemo(() => normalizarEstado(guardado), [guardado]);
+
+  const [ultimaAcao, setUltimaAcao] = useState<UltimaAcao | null>(narracaoDoLink);
+  /** score do último modelo carregado — referência para comparar evolução. */
+  const [referencia, setReferencia] = useState<ScoreProjeto | null>(null);
+
+  // Só efeito colateral externo: limpa a query para as edições seguintes não
+  // parecerem "o link". Nenhum setState aqui.
   useEffect(() => {
-    // 1) URL compartilhada tem precedência sobre o localStorage
-    const params = new URLSearchParams(window.location.search);
-    const compartilhado = params.get("p");
-    if (compartilhado) {
-      const doLink = decodificarEstado(compartilhado);
-      if (doLink) {
-        setEstado(doLink);
-        try {
-          localStorage.setItem(CHAVE, JSON.stringify(doLink));
-        } catch {
-          /* storage indisponível */
-        }
-        // limpa a query para edições seguintes não parecerem "o link"
-        window.history.replaceState(null, "", window.location.pathname);
-        setUltimaAcao({
-          titulo: "Projeto carregado do link",
-          descricao: "Este é um projeto compartilhado — edite à vontade, a cópia é sua.",
-        });
-        setHidratado(true);
-        return;
-      }
-    }
-    // 2) senão, restaura do localStorage
-    try {
-      const bruto = localStorage.getItem(CHAVE);
-      if (bruto) setEstado(normalizarEstado(JSON.parse(bruto) as EstadoProjeto));
-    } catch {
-      /* estado corrompido — começa vazio */
-    }
-    setHidratado(true);
-  }, []);
-
-  const persistir = useCallback((novo: EstadoProjeto) => {
-    setEstado(novo);
-    try {
-      localStorage.setItem(CHAVE, JSON.stringify(novo));
-    } catch {
-      /* storage indisponível */
-    }
-  }, []);
+    if (!narracaoDoLink) return;
+    window.history.replaceState(null, "", window.location.pathname);
+  }, [narracaoDoLink]);
 
   const adicionarCamada = useCallback(
     (camadaId: CamadaId, indice?: number) => {
@@ -251,7 +262,9 @@ export function useConstrutor() {
     (id: string) => {
       const t = TEMPLATES.find((x) => x.id === id);
       if (!t) return;
-      persistir(structuredClone(t.estado));
+      const novo = structuredClone(t.estado);
+      persistir(novo);
+      setReferencia(calcularScore(novo));
       setUltimaAcao({
         titulo: `Modelo carregado: ${t.nome}`,
         descricao: t.descricao,
@@ -285,7 +298,29 @@ export function useConstrutor() {
   const limpar = useCallback(() => {
     persistir(VAZIO);
     setUltimaAcao(null);
+    setReferencia(null);
   }, [persistir]);
+
+  /** Aplica uma sugestão do motor proativo com um clique. */
+  const aplicarSugestao = useCallback(
+    (s: Sugestao) => {
+      switch (s.acao.tipo) {
+        case "camada":
+          adicionarCamada(s.acao.camadaId);
+          break;
+        case "padrao":
+          aplicarPadrao(s.acao.padraoId, s.acao.camadaId);
+          break;
+        case "tech":
+          aplicarTecnologia(s.acao.techId, s.acao.camadaId);
+          break;
+        case "ordem":
+          organizarOrdem();
+          break;
+      }
+    },
+    [adicionarCamada, aplicarPadrao, aplicarTecnologia, organizarOrdem]
+  );
 
   const compartilhar = useCallback(async () => {
     if (estado.camadas.length === 0) {
@@ -306,13 +341,18 @@ export function useConstrutor() {
   const insights = useMemo(() => avaliarRegras(estado), [estado]);
   const score = useMemo(() => calcularScore(estado), [estado]);
   const foraDeOrdem = useMemo(() => paresForaDeOrdem(estado).length > 0, [estado]);
+  const sugestoes = useMemo(() => sugerir(estado), [estado]);
+  const revisao = useMemo(() => revisarProjeto(estado), [estado]);
 
   return {
     estado,
-    hidratado,
     ultimaAcao,
     insights,
     score,
+    referencia,
+    sugestoes,
+    revisao,
+    aplicarSugestao,
     foraDeOrdem,
     organizarOrdem,
     adicionarCamada,

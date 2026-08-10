@@ -4,7 +4,13 @@ import { listConceitos, listRoadmaps } from "@/shared/lib/content";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://devatlas.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const estaticas = ["", "/conceitos", "/roadmaps", "/construtor"].map((p) => ({
+  const estaticas = [
+    "",
+    "/conceitos",
+    "/roadmaps",
+    "/construtor",
+    "/novidades",
+  ].map((p) => ({
     url: `${SITE_URL}${p}`,
     changeFrequency: "weekly" as const,
     priority: p === "" ? 1 : 0.8,

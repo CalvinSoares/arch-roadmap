@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { X, ArrowUpRight, Check } from "lucide-react";
 import { Badge } from "@/shared/components/global/ui/badge";
+import { Icone } from "@/shared/components/global/icone";
 import { cn } from "@/shared/utils/cn";
 import { tecnologiaDef } from "@/content/construtor/tecnologias";
 import { camadaDef } from "@/content/construtor/blocos";
@@ -33,7 +34,6 @@ export function FichaTecnologia({ techId, onClose }: Props) {
   const def = tecnologiaDef(techId);
   if (!def) return null;
 
-  const Icone = iconeDaTech(def.id);
   const cat = CATEGORIA_TECH_VISUAL[def.categoria];
 
   return (
@@ -46,7 +46,11 @@ export function FichaTecnologia({ techId, onClose }: Props) {
         <div className="flex items-start justify-between gap-3 border-b border-card-border p-5">
           <div className="flex items-center gap-3">
             <span className={cn("flex size-11 items-center justify-center rounded-xl", cat.bg)}>
-              <Icone className={cn("size-5", cat.text)} strokeWidth={1.8} />
+              <Icone
+                de={iconeDaTech(def.id)}
+                className={cn("size-5", cat.text)}
+                strokeWidth={1.8}
+              />
             </span>
             <div>
               <h2 className="text-xl font-semibold">{def.nome}</h2>
@@ -74,7 +78,6 @@ export function FichaTecnologia({ techId, onClose }: Props) {
               {def.viveEm.map((cid) => {
                 const c = camadaDef(cid);
                 const v = CAMADA_VISUAL[cid];
-                const IconeC = v?.icon;
                 return (
                   <span
                     key={cid}
@@ -84,7 +87,7 @@ export function FichaTecnologia({ techId, onClose }: Props) {
                       v?.text
                     )}
                   >
-                    {IconeC && <IconeC className="size-3.5" />}
+                    {v?.icon && <Icone de={v.icon} className="size-3.5" />}
                     {c?.nome ?? cid}
                   </span>
                 );

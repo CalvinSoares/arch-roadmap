@@ -82,7 +82,6 @@ export const adapter: Conceito = {
   dificuldade: "iniciante",
   tempoLeitura: 5,
   relacionados: ["factory-method", "hexagonal"],
-  roadmapNodes: ["estruturais"],
   problema: [
     "Você tem uma classe/biblioteca útil, mas a interface dela não bate com a que o seu código espera.",
     "Não dá (ou não vale a pena) reescrever a biblioteca de terceiros nem mudar todo o cliente.",

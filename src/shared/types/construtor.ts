@@ -30,7 +30,9 @@ export type CategoriaTech =
   | "busca"
   | "borda"
   | "storage"
-  | "observabilidade";
+  | "observabilidade"
+  | "compute"
+  | "seguranca";
 
 export interface TecnologiaDef {
   id: string;
@@ -87,7 +89,11 @@ export interface Regra extends Omit<Insight, "id"> {
 export interface ScoreProjeto {
   desacoplamento: number;
   testabilidade: number;
+  /** quanto o sistema aguenta perder peças sem parar. */
+  resiliencia: number;
   complexidade: number;
+  /** esforço de operar as peças escolhidas (menor é melhor). */
+  custoOperacional: number;
   fatores: string[];
 }
 

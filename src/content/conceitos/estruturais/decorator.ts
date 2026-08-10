@@ -122,7 +122,6 @@ export const decorator: Conceito = {
   dificuldade: "intermediario",
   tempoLeitura: 7,
   relacionados: ["adapter", "facade"],
-  roadmapNodes: ["estruturais"],
   problema: [
     "Você precisa adicionar responsabilidades a um objeto — log, retry, cache, criptografia — mas criar uma subclasse para cada combinação explode: com 4 extras opcionais já são 16 classes possíveis, e a escolha fica congelada em tempo de compilação.",
     "Herança também é tudo-ou-nada: a subclasse ganha o comportamento extra para sempre, para todas as instâncias. Não dá para dizer 'este notificador específico, neste fluxo, também manda SMS'.",
@@ -186,6 +185,35 @@ export const decorator: Conceito = {
       ],
       legenda:
         "A chamada atravessa as camadas: cada decorator faz seu extra e repassa — o cliente vê uma interface só, sem saber quantas camadas existem.",
+    },
+    {
+      tipo: "ilustracao",
+      arquetipo: "estrutura",
+      blocos: [
+        {
+          id: "auditoria",
+          label: "ComAuditoria",
+          nota: "casca externa — registra e delega",
+          destaque: true,
+          filhos: [
+            {
+              id: "sms",
+              label: "ComSMS",
+              nota: "manda SMS e delega",
+              destaque: true,
+              filhos: [
+                {
+                  id: "email",
+                  label: "NotificadorEmail",
+                  nota: "o objeto real, intocado",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      legenda:
+        "A mesma pilha vista por dentro: cada decorator embrulha o anterior, e o objeto original fica no centro sem ter sido modificado. Trocar a ordem das cascas troca a ordem dos efeitos.",
     },
     {
       tipo: "camadas-nav",

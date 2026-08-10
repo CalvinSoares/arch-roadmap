@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTheme } from "next-themes";
+import { useMontado } from "@/shared/hook/use-montado";
 import {
   ReactFlow,
   Background,
@@ -28,8 +29,7 @@ const HANDLES = [
  */
 export function DiagramaCamadas({ camadas }: { camadas: Camada[] }) {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useMontado();
 
   const { nodes, edges } = useMemo(() => {
     const nodes: Node[] = camadas.map((c, i) => ({

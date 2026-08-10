@@ -99,7 +99,6 @@ export const strategy: Conceito = {
   dificuldade: "iniciante",
   tempoLeitura: 6,
   relacionados: ["observer", "factory-method"],
-  roadmapNodes: ["comportamentais"],
   problema: [
     "Um objeto precisa executar uma tarefa que tem várias variações de algoritmo — ordenar de formas diferentes, calcular frete por transportadora, aplicar descontos por tipo de cliente. Concentrar tudo numa classe leva a um emaranhado de condicionais que cresce a cada nova variação.",
     "Esses blocos condicionais violam o princípio Aberto/Fechado: adicionar um novo comportamento exige mexer no código que já funciona, aumentando o risco de regressão.",
@@ -164,6 +163,32 @@ export const strategy: Conceito = {
       ],
       legenda:
         "O contexto enxerga só a interface — qual algoritmo roda é decisão de quem injeta, em tempo de execução.",
+    },
+    {
+      tipo: "ilustracao",
+      arquetipo: "antes-depois",
+      antes: {
+        titulo: "Sem Strategy: um if/else que cresce",
+        itens: [
+          "calcularFrete() com um switch sobre o tipo de entrega",
+          "cada modalidade nova reabre o mesmo método",
+          "testar uma regra exige montar o objeto inteiro",
+          "duas pessoas mexendo em modalidades diferentes conflitam no mesmo arquivo",
+        ],
+        nota: "O custo aparece na manutenção: o método vira o ponto de encontro de todas as regras, e ninguém consegue mudar uma sem ler as outras.",
+      },
+      depois: {
+        titulo: "Com Strategy: uma classe por regra",
+        itens: [
+          "FreteSedex, FretePac, FreteRetirada implementam a mesma interface",
+          "modalidade nova é arquivo novo — o cálculo existente não é tocado",
+          "cada regra é testável isolada, sem montar o contexto",
+          "quem injeta decide, em tempo de execução",
+        ],
+        nota: "O custo se desloca para a indireção: mais arquivos e um salto a mais para ler o fluxo. Vale quando as regras mudam com frequência — não quando são duas e estáveis.",
+      },
+      legenda:
+        "O padrão não elimina a complexidade das regras: ele troca ramificação dentro de um método por polimorfismo entre classes. A pergunta certa é se as regras mudam o bastante para pagar a indireção.",
     },
     {
       tipo: "demo",

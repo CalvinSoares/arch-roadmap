@@ -20,6 +20,7 @@ import {
   iconeDoPadrao,
   iconeDaTech,
 } from "@/shared/config/construtor-visual";
+import { Icone } from "@/shared/components/global/icone";
 import { cn } from "@/shared/utils/cn";
 import type { CamadaId } from "@/shared/types/construtor";
 import { Hammer, Waypoints } from "lucide-react";
@@ -38,18 +39,15 @@ interface DragInfo {
 
 /** Ícone do bloco arrastado (camada com acento; padrão/tech com o próprio ícone). */
 function OverlayIcone({ drag }: { drag: DragInfo }) {
-  if (drag.tipo === "pal-padrao") {
-    const Icone = iconeDoPadrao(drag.id);
-    return <Icone className="size-4 text-primary" />;
-  }
-  if (drag.tipo === "pal-tech") {
-    const Icone = iconeDaTech(drag.id);
-    return <Icone className="size-4 text-primary" />;
-  }
+  if (drag.tipo === "pal-padrao")
+    return <Icone de={iconeDoPadrao(drag.id)} className="size-4 text-primary" />;
+
+  if (drag.tipo === "pal-tech")
+    return <Icone de={iconeDaTech(drag.id)} className="size-4 text-primary" />;
+
   const v = CAMADA_VISUAL[drag.id];
   if (!v) return null;
-  const Icone = v.icon;
-  return <Icone className={cn("size-4", v.text)} />;
+  return <Icone de={v.icon} className={cn("size-4", v.text)} />;
 }
 
 export function ConstrutorApp() {
@@ -154,8 +152,8 @@ export function ConstrutorApp() {
         className={cn(
           "grid gap-5",
           visao === "montar"
-            ? "lg:grid-cols-[250px_minmax(0,1fr)_310px]"
-            : "lg:grid-cols-[minmax(0,1fr)_310px]"
+            ? "lg:grid-cols-[230px_minmax(0,1fr)_330px] xl:grid-cols-[250px_minmax(0,1fr)_370px]"
+            : "lg:grid-cols-[minmax(0,1fr)_330px] xl:grid-cols-[minmax(0,1fr)_370px]"
         )}
       >
         {visao === "montar" && (
@@ -224,6 +222,10 @@ export function ConstrutorApp() {
           ultimaAcao={c.ultimaAcao}
           insights={c.insights}
           score={c.score}
+          referencia={c.referencia}
+          sugestoes={c.sugestoes}
+          revisao={c.revisao}
+          onAplicarSugestao={c.aplicarSugestao}
           temCamadas={c.estado.camadas.length > 0}
           onTemplate={c.carregarTemplate}
           onLimpar={c.limpar}

@@ -21,7 +21,6 @@ export function useContentError() {
   const log = useCallback((error: unknown, context?: string) => {
     // Detalhe técnico só em log — nunca na UI.
     if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
       console.error(`[content-error${context ? `:${context}` : ""}]`, error);
     }
   }, []);

@@ -243,6 +243,117 @@ export const TECNOLOGIAS_DEF: TecnologiaDef[] = [
       "Sem métricas você descobre incidentes pelo usuário reclamando. Com elas, o 'cache hit caiu para 40%' vira alerta antes de virar lentidão — observabilidade é o que torna as outras escolhas auditáveis.",
     alternativas: ["Datadog", "New Relic", "OpenTelemetry + backend"],
   },
+  {
+    id: "replica-leitura",
+    nome: "Réplica de leitura",
+    categoria: "banco",
+    descricao: "Cópia do banco que só atende consultas — alivia o primário.",
+    viveEm: ["read-store"],
+    usos: [
+      "Consultas e relatórios fora do primário",
+      "Read model do CQRS sem trocar de tecnologia",
+      "Failover: promover a réplica se o primário cair",
+    ],
+    especificacoes: {
+      modelo: "cópia streaming do primário (mesmo esquema)",
+      persistencia: "durável (segue o primário)",
+      consistencia: "eventual — há lag de replicação (ms a s)",
+      latencia: "igual ao primário (~10ms)",
+    },
+    diferencaQueFaz:
+      "Escala leitura sem reescrever nada: o mesmo SQL roda na réplica. O preço é o lag — ler imediatamente após escrever pode devolver dado velho, então a app precisa saber quando exigir o primário.",
+    alternativas: ["Cache (Redis)", "Read model dedicado", "Sharding"],
+    conceitos: ["cqrs"],
+  },
+  {
+    id: "worker",
+    nome: "Worker de jobs",
+    categoria: "compute",
+    descricao: "Processo separado que consome a fila e executa tarefas longas.",
+    viveEm: ["aplicacao", "infra"],
+    usos: [
+      "Gerar PDF/relatório, processar imagem, enviar e-mail",
+      "Retentativas com backoff e dead-letter",
+      "Projeções do CQRS e handlers de Saga",
+    ],
+    especificacoes: {
+      modelo: "consumidor de fila (pool de processos)",
+      persistencia: "estado vive na fila/banco, não no worker",
+      consistencia: "at-least-once — exige idempotência",
+      latencia: "assíncrona (segundos a minutos)",
+    },
+    diferencaQueFaz:
+      "Tira o trabalho pesado da requisição: o usuário recebe 202 na hora e o worker processa depois. Em troca, você opera outro processo e precisa lidar com reprocessamento (idempotência) e visibilidade do que falhou.",
+    alternativas: ["Serverless (Lambda)", "Cron job", "Processar inline (não recomendado)"],
+    conceitos: ["saga", "observer"],
+  },
+  {
+    id: "api-gateway",
+    nome: "API Gateway",
+    categoria: "borda",
+    descricao: "Porta única com autenticação, rate limit e roteamento.",
+    viveEm: ["api"],
+    usos: [
+      "Autenticação/autorização centralizada (JWT, API key)",
+      "Rate limiting e quotas por cliente",
+      "Roteamento e versionamento de APIs",
+      "Agregação de múltiplos serviços numa fachada",
+    ],
+    especificacoes: {
+      modelo: "proxy de aplicação com plugins",
+      persistencia: "config declarativa (sem dados de negócio)",
+      consistencia: "n/a",
+      latencia: "1-5ms de overhead",
+    },
+    diferencaQueFaz:
+      "Preocupações transversais saem de cada serviço e viram configuração num ponto só. O risco é o gateway virar um monolito de regras — mantenha lógica de negócio fora dele.",
+    alternativas: ["Nginx + Lua", "Envoy", "BFF próprio"],
+    conceitos: ["facade", "decorator"],
+  },
+  {
+    id: "grpc",
+    nome: "gRPC",
+    categoria: "compute",
+    descricao: "RPC binário com contrato forte para comunicação interna.",
+    viveEm: ["aplicacao", "api"],
+    usos: [
+      "Chamadas entre serviços internos (baixa latência)",
+      "Contrato versionado via protobuf",
+      "Streaming bidirecional",
+    ],
+    especificacoes: {
+      modelo: "RPC sobre HTTP/2 com protobuf",
+      persistencia: "n/a (transporte)",
+      consistencia: "síncrono request/response",
+      latencia: "~1-3ms (menor que JSON/REST)",
+    },
+    diferencaQueFaz:
+      "Payload binário e contrato gerado por código: mais rápido e sem 'campo que mudou de nome sem avisar'. Custo: menos legível para depurar, suporte fraco em browser (precisa de proxy) e disciplina de versionamento do .proto.",
+    alternativas: ["REST + OpenAPI", "GraphQL", "Mensageria assíncrona"],
+    conceitos: ["adapter"],
+  },
+  {
+    id: "vault",
+    nome: "Gerenciador de segredos",
+    categoria: "seguranca",
+    descricao: "Guarda credenciais e chaves fora do código e do ambiente.",
+    viveEm: ["infra"],
+    usos: [
+      "Credenciais de banco e chaves de API",
+      "Rotação automática de segredos",
+      "Certificados e criptografia como serviço",
+      "Auditoria de quem acessou o quê",
+    ],
+    especificacoes: {
+      modelo: "cofre com política de acesso por identidade",
+      persistencia: "durável e criptografado em repouso",
+      consistencia: "forte",
+      latencia: "poucos ms (com cache local do cliente)",
+    },
+    diferencaQueFaz:
+      "Segredo sai do .env e do repositório: acesso auditável, rotação sem redeploy e vazamento com raio limitado. Adiciona uma dependência crítica no boot da aplicação — precisa de cache e plano para quando o cofre estiver fora.",
+    alternativas: ["Secrets do orquestrador (K8s)", "AWS Secrets Manager", "SOPS + git"],
+  },
 ];
 
 export function tecnologiaDef(id: string): TecnologiaDef | undefined {

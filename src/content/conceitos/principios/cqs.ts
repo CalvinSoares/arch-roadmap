@@ -80,7 +80,6 @@ export const cqs: Conceito = {
   dificuldade: "iniciante",
   tempoLeitura: 5,
   relacionados: ["cqrs"],
-  roadmapNodes: ["arq-cqrs"],
   problema: [
     "Métodos que ao mesmo tempo alteram estado e devolvem um valor escondem seus efeitos colaterais. Ler um valor deveria ser inofensivo, mas quando a leitura também muta algo, cada chamada carrega consequências difíceis de prever.",
     "Isso fragiliza o raciocínio sobre o código: você não pode repetir, reordenar ou cachear uma leitura sem medo, porque ela pode ter mudado o mundo no caminho. Bugs sutis surgem quando alguém chama o método só pelo retorno, sem notar o efeito embutido.",

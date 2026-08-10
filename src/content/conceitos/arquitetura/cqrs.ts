@@ -91,7 +91,6 @@ export const cqrs: Conceito = {
   dificuldade: "avancado",
   tempoLeitura: 9,
   relacionados: ["cqs", "saga", "hexagonal"],
-  roadmapNodes: ["arq-cqrs"],
   problema: [
     "Um único modelo que serve leitura e escrita acaba sendo um mau compromisso para os dois: escrita pede normalização e invariantes; leitura pede dados agregados, desnormalizados e rápidos.",
     "Leitura e escrita escalam de formas distintas — amarradas ao mesmo modelo, uma prejudica a outra.",

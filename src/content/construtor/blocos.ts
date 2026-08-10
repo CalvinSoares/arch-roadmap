@@ -118,6 +118,24 @@ export const PADROES_DEF: PadraoDef[] = [
     descricao: "O estado é a sequência de eventos imutáveis, não um snapshot.",
     aplicaEm: ["write-store"],
   },
+  {
+    id: "abstract-factory",
+    nome: "Abstract Factory",
+    descricao: "Cria famílias de objetos que precisam combinar entre si.",
+    aplicaEm: ["aplicacao", "dominio", "infra"],
+  },
+  {
+    id: "builder",
+    nome: "Builder",
+    descricao: "Monta objetos complexos passo a passo, sem construtor gigante.",
+    aplicaEm: ["aplicacao", "dominio"],
+  },
+  {
+    id: "state",
+    nome: "State",
+    descricao: "O objeto muda de comportamento conforme o estado interno.",
+    aplicaEm: ["dominio", "aplicacao"],
+  },
 ];
 
 export const camadaDef = (id: string) => CAMADAS_DEF.find((c) => c.id === id);

@@ -25,7 +25,16 @@ export interface ConnectorPath {
  * Recalcula em resize do container e após as fontes carregarem.
  */
 export function useConnectorLayout(links: ConnectorLink[]) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  /**
+   * Ref por callback: guardar o elemento em estado faz o observer ser
+   * reinstalado quando o container é remontado (ex.: entrar/sair da tela
+   * cheia) — com `useRef` o ResizeObserver seguia observando o nó antigo e
+   * as linhas ficavam com a geometria da visão anterior.
+   */
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const containerRef = useCallback((el: HTMLDivElement | null) => {
+    setContainer(el);
+  }, []);
   const nodesRef = useRef(new Map<string, HTMLElement>());
   const [paths, setPaths] = useState<ConnectorPath[]>([]);
 
@@ -38,7 +47,6 @@ export function useConnectorLayout(links: ConnectorLink[]) {
   );
 
   const medir = useCallback(() => {
-    const container = containerRef.current;
     if (!container) return;
     const cr = container.getBoundingClientRect();
     const novos: ConnectorPath[] = [];
@@ -80,24 +88,27 @@ export function useConnectorLayout(links: ConnectorLink[]) {
       }
     }
     setPaths(novos);
-  }, [links]);
+  }, [links, container]);
 
   useEffect(() => {
-    medir();
-    const container = containerRef.current;
     if (!container) return;
+    // mede após o layout assentar (evita geometria da visão anterior)
+    const quadro = requestAnimationFrame(() => medir());
 
     const ro = new ResizeObserver(() => medir());
     ro.observe(container);
+    // nós mudam de tamanho independentemente do container (chips, textos)
+    for (const el of nodesRef.current.values()) ro.observe(el);
     window.addEventListener("resize", medir);
     // reflow tardio de fontes muda as larguras dos cards
     document.fonts?.ready.then(() => medir()).catch(() => {});
 
     return () => {
+      cancelAnimationFrame(quadro);
       ro.disconnect();
       window.removeEventListener("resize", medir);
     };
-  }, [medir]);
+  }, [medir, container]);
 
   return { containerRef, registerNode, paths };
 }
