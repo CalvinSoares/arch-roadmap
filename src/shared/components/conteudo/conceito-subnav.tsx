@@ -64,7 +64,8 @@ export function SubnavFita({ secoes }: { secoes: SecaoNav[] }) {
                 : "text-muted hover:bg-foreground/5 hover:text-foreground"
             )}
           >
-            <span className="font-mono text-[10px] opacity-70">
+            {/* sem opacity: a 10px, `text-muted` a 70% caía para 3.67:1 */}
+            <span className="font-mono text-[10px]">
               {String(i + 1).padStart(2, "0")}
             </span>
             {s.titulo}

@@ -6,9 +6,22 @@ export const JANELA_NOVO_DIAS = 21;
 
 const MS_POR_DIA = 86_400_000;
 
+/** Maior primeiro. Duas entregas podem sair no mesmo dia — a versão desempata. */
+function compararVersao(a: string, b: string): number {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    const d = (pb[i] ?? 0) - (pa[i] ?? 0);
+    if (d !== 0) return d;
+  }
+  return 0;
+}
+
 /** Entregas da mais recente para a mais antiga. */
 export function listNovidades(): Novidade[] {
-  return [...NOVIDADES].sort((a, b) => b.data.localeCompare(a.data));
+  return [...NOVIDADES].sort(
+    (a, b) => b.data.localeCompare(a.data) || compararVersao(a.versao, b.versao)
+  );
 }
 
 export function ultimaNovidade(): Novidade | undefined {

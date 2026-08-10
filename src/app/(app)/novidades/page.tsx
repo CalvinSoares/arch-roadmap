@@ -2,6 +2,7 @@ import { Sparkles } from "lucide-react";
 import { PageTemplate } from "@/shared/components/templates/page-template";
 import { listNovidades, formatarData } from "@/shared/lib/novidades";
 import { LinhaDoTempo } from "./_components/linha-do-tempo";
+import { ASeguir } from "./_components/a-seguir";
 
 export const metadata = {
   title: "Novidades",
@@ -30,6 +31,7 @@ export default function NovidadesPage() {
         )
       }
     >
+      <ASeguir />
       <LinhaDoTempo entradas={entradas} />
     </PageTemplate>
   );

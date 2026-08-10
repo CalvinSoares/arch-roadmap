@@ -1,5 +1,8 @@
 import type { Conceito } from "@/shared/types/conceito";
 import type { Roadmap } from "@/shared/types/roadmap";
+import type { Comparacao } from "@/shared/types/comparacao";
+import { slugComparacao } from "@/shared/types/comparacao";
+import { COMPARACOES } from "@/content/comparacoes/registro";
 import { factoryMethod } from "@/content/conceitos/factory-method";
 import { observer } from "@/content/conceitos/observer";
 import { adapter } from "@/content/conceitos/adapter";
@@ -33,6 +36,15 @@ import { bridge } from "@/content/conceitos/estruturais/bridge";
 import { flyweight } from "@/content/conceitos/estruturais/flyweight";
 import { state } from "@/content/conceitos/comportamentais/state";
 import { eventSourcing } from "@/content/conceitos/arquitetura/event-sourcing";
+import { idempotencia } from "@/content/conceitos/principios/idempotencia";
+import { raceCondition } from "@/content/conceitos/arquitetura/race-condition";
+import { maquinaDeEstados } from "@/content/conceitos/comportamentais/maquina-de-estados";
+import { ledger } from "@/content/conceitos/arquitetura/ledger";
+import { appendOnly } from "@/content/conceitos/arquitetura/append-only";
+import { webhooks } from "@/content/conceitos/arquitetura/webhooks";
+import { docker } from "@/content/conceitos/infra/docker";
+import { kubernetes } from "@/content/conceitos/infra/kubernetes";
+import { vps } from "@/content/conceitos/infra/vps";
 import { roadmapPadroes } from "@/content/roadmaps/padroes";
 import { roadmapBackend } from "@/content/roadmaps/backend";
 import { roadmapFrontend } from "@/content/roadmaps/frontend";
@@ -76,6 +88,15 @@ const CONCEITOS: Conceito[] = [
   cqrs,
   saga,
   eventSourcing,
+  idempotencia,
+  raceCondition,
+  maquinaDeEstados,
+  ledger,
+  appendOnly,
+  webhooks,
+  docker,
+  kubernetes,
+  vps,
 ];
 const ROADMAPS: Roadmap[] = [
   roadmapPadroes,
@@ -100,6 +121,32 @@ export function getConceitos(slugs: string[]): Conceito[] {
 
 export function listRoadmaps(): Roadmap[] {
   return [...ROADMAPS];
+}
+
+/** Todas as comparações, com o slug de rota já derivado. */
+export function listComparacoes(): (Comparacao & { slug: string })[] {
+  return COMPARACOES.map((c) => ({ ...c, slug: slugComparacao(c.a, c.b) }));
+}
+
+export function getComparacao(
+  slug: string
+): (Comparacao & { slug: string }) | undefined {
+  return listComparacoes().find((c) => c.slug === slug);
+}
+
+/**
+ * Com quais conceitos este costuma ser confundido — derivado do registro de
+ * comparações, nunca declarado no conceito.
+ */
+export function comparacoesDoConceito(
+  slug: string
+): { slug: string; outro: Conceito }[] {
+  return listComparacoes().flatMap((c) => {
+    if (c.a !== slug && c.b !== slug) return [];
+    const outroSlug = c.a === slug ? c.b : c.a;
+    const outro = getConceito(outroSlug);
+    return outro ? [{ slug: c.slug, outro }] : [];
+  });
 }
 
 /** Onde um conceito aparece nas trilhas (roadmap + seção). */

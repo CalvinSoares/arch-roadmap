@@ -12,6 +12,9 @@ import {
   X,
   Blocks,
   Sparkles,
+  GraduationCap,
+  GitCompareArrows,
+  CircleHelp,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
@@ -48,6 +51,9 @@ const GRUPOS: Grupo[] = [
     titulo: "Ferramentas",
     itens: [
       { href: "/construtor", label: "Construtor", icon: Blocks, cor: "var(--cat-comportamental)" },
+      { href: "/estudar", label: "Estudar", icon: GraduationCap, cor: "var(--cat-arquitetura)" },
+      { href: "/comparar", label: "Comparar", icon: GitCompareArrows, cor: "var(--cat-estrutural)" },
+      { href: "/quiz", label: "Quiz", icon: CircleHelp, cor: "var(--cat-principio)" },
     ],
   },
   {

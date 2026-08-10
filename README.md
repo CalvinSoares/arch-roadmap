@@ -11,12 +11,23 @@ e arquitetura. Três frentes:
   Frontend, Arquitetura) com conectores bezier medidos, estilo roadmap.sh.
 - **`/construtor`** — playground de arquitetura: monte a pilha arrastando
   camadas, padrões e tecnologias; o motor explica o que cada escolha muda,
-  sugere o próximo passo e **simula a requisição** (incluindo cenários de falha).
+  sugere o próximo passo, **simula a requisição** (incluindo cenários de falha)
+  e exporta o resultado como **ADR em Markdown**.
+- **`/estudar`** — modo estudo sobre o progresso das trilhas: continue de onde
+  parou, próximos conceitos sugeridos e **revisão espaçada**.
+- **`/quiz`** — as armadilhas viram perguntas com o nome do padrão mascarado,
+  filtráveis **por categoria ou por trilha**. Cada conceito também tem o quiz
+  das próprias armadilhas no fim da página.
+- **`/comparar`** — os duelos que mais confundem, critério a critério.
 
-Planejamento: [PLANEJAMENTO.md](./PLANEJAMENTO.md) (visão original) ·
-[PLANEJAMENTO-V3.md](./PLANEJAMENTO-V3.md) (reimaginação) ·
-[PLANEJAMENTO-CONSTRUTOR.md](./PLANEJAMENTO-CONSTRUTOR.md) (construtor, fases e
-pendências).
+## Onde fica o quê
+
+- **O que já entrou** — a página `/novidades`, alimentada por
+  `content/novidades/registro.ts`. É a fonte única: dela saem o histórico de
+  entregas, o badge "novo" no catálogo e a seção "A seguir".
+- **O que vem depois** — [PLANEJAMENTO-PRODUTOS.md](./PLANEJAMENTO-PRODUTOS.md):
+  plano das próximas quatro features (export ADR, comparador de conceitos,
+  modo estudo e quiz), com modelo de dados, testes e ordem recomendada.
 
 ## Stack
 

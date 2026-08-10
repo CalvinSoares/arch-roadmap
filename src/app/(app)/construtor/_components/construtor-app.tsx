@@ -230,6 +230,7 @@ export function ConstrutorApp() {
           onTemplate={c.carregarTemplate}
           onLimpar={c.limpar}
           onCompartilhar={c.compartilhar}
+          onExportarADR={c.exportarADR}
         />
       </div>
 

@@ -48,6 +48,7 @@
   --cat-comportamental: #9b3d63;
   --cat-principio: #8b6a12;
   --cat-arquitetura: #6e4b3a;
+  --cat-infra: #45636e;
 }
 
 .dark {
@@ -84,6 +85,7 @@
   --cat-comportamental: #ee8cb0;
   --cat-principio: #dfb94e;
   --cat-arquitetura: #c9a184;
+  --cat-infra: #89bdd1;
 }
 
 @theme inline {
@@ -110,6 +112,7 @@
   --color-cat-comportamental: var(--cat-comportamental);
   --color-cat-principio: var(--cat-principio);
   --color-cat-arquitetura: var(--cat-arquitetura);
+  --color-cat-infra: var(--cat-infra);
 
   --shadow-soft: var(--shadow-md);
   --shadow-float: var(--shadow-lg);

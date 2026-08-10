@@ -2,9 +2,23 @@
 
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
-import { Blocks, LayoutGrid, Map, Search, Sparkles } from "lucide-react";
+import {
+  Blocks,
+  GitCompareArrows,
+  GraduationCap,
+  CircleHelp,
+  LayoutGrid,
+  Map,
+  Search,
+  Sparkles,
+} from "lucide-react";
 import { CATEGORIAS } from "@/shared/config/categorias";
-import { listConceitos, listRoadmaps } from "@/shared/lib/content";
+import {
+  listConceitos,
+  listRoadmaps,
+  listComparacoes,
+  getConceito,
+} from "@/shared/lib/content";
 
 interface Props {
   open: boolean;
@@ -15,6 +29,12 @@ export function CommandPalette({ open, onOpenChange }: Props) {
   const router = useRouter();
   const conceitos = listConceitos();
   const roadmaps = listRoadmaps();
+  // título dos dois lados resolvido aqui para a busca casar por nome
+  const comparacoes = listComparacoes().map((c) => ({
+    slug: c.slug,
+    tituloA: getConceito(c.a)?.titulo ?? c.a,
+    tituloB: getConceito(c.b)?.titulo ?? c.b,
+  }));
 
   const ir = (href: string) => {
     onOpenChange(false);
@@ -54,6 +74,25 @@ export function CommandPalette({ open, onOpenChange }: Props) {
             Construtor de Projeto
           </Command.Item>
           <Command.Item
+            value="estudar revisar progresso trilha memoria espacada"
+            onSelect={() => ir("/estudar")}
+            className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-all duration-150 data-[selected=true]:translate-x-0.5 data-[selected=true]:bg-primary/12 data-[selected=true]:text-primary"
+            >
+              <GraduationCap className="size-4 shrink-0 text-muted" />
+              Estudar
+            </Command.Item>
+
+          <Command.Item
+            value="quiz armadilhas perguntas teste treinar"
+            onSelect={() => ir("/quiz")}
+            className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-all duration-150 data-[selected=true]:translate-x-0.5 data-[selected=true]:bg-primary/12 data-[selected=true]:text-primary"
+            >
+              <CircleHelp className="size-4 shrink-0 text-muted" />
+              Quiz das armadilhas
+            </Command.Item>
+
+
+          <Command.Item
             value="novidades changelog atualizacoes mudancas versao release"
             onSelect={() => ir("/novidades")}
             className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-all duration-150 data-[selected=true]:translate-x-0.5 data-[selected=true]:bg-primary/12 data-[selected=true]:text-primary"
@@ -61,6 +100,23 @@ export function CommandPalette({ open, onOpenChange }: Props) {
             <Sparkles className="size-4 shrink-0 text-muted" />
             Novidades
           </Command.Item>
+        </Command.Group>
+
+        <Command.Group
+          heading="Comparações"
+          className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.14em] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted"
+        >
+          {comparacoes.map((c) => (
+            <Command.Item
+              key={c.slug}
+              value={`comparar ${c.tituloA} ${c.tituloB} versus diferenca`}
+              onSelect={() => ir(`/comparar/${c.slug}`)}
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-all duration-150 data-[selected=true]:translate-x-0.5 data-[selected=true]:bg-primary/12 data-[selected=true]:text-primary"
+            >
+              <GitCompareArrows className="size-4 shrink-0 text-muted" />
+              {c.tituloA} × {c.tituloB}
+            </Command.Item>
+          ))}
         </Command.Group>
 
         <Command.Group

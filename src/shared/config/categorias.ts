@@ -41,6 +41,12 @@ export const CATEGORIAS: Record<Categoria, CategoriaMeta> = {
     badge: "bg-cat-arquitetura/12 text-cat-arquitetura",
     cssVar: "var(--cat-arquitetura)",
   },
+  infra: {
+    label: "Infra",
+    text: "text-cat-infra",
+    badge: "bg-cat-infra/12 text-cat-infra",
+    cssVar: "var(--cat-infra)",
+  },
 };
 
 export const DIFICULDADES: Record<Dificuldade, string> = {

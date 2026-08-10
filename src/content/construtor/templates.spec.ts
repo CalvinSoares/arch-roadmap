@@ -11,8 +11,8 @@ import { tecnologiaDef } from "./tecnologias";
  * acaso. Estes testes tornam o acaso desnecessário.
  */
 describe("templates curados", () => {
-  it("existem 6 templates com ids únicos", () => {
-    expect(TEMPLATES).toHaveLength(6);
+  it("existem 7 templates com ids únicos", () => {
+    expect(TEMPLATES).toHaveLength(7);
     const ids = TEMPLATES.map((t) => t.id);
     expect(new Set(ids).size).toBe(ids.length);
   });

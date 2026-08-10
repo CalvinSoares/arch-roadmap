@@ -108,8 +108,8 @@ describe("simulador — cache quente x frio", () => {
 });
 
 /**
- * Os cenários de chaos descritos na Fase C do PLANEJAMENTO-CONSTRUTOR.
- * Estavam documentados como "verificados no browser" — aqui viram asserção.
+ * Os cenários de falha que o simulador precisa ensinar. Já foram verificados
+ * só no browser uma vez; aqui viram asserção para não regredirem em silêncio.
  */
 describe("simulador — chaos (Fase C)", () => {
   it("banco fora + cache frio → erro (não há de onde servir)", () => {

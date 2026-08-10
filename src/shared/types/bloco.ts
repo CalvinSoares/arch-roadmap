@@ -90,7 +90,20 @@ export type Bloco =
       extensao?: string[];
     }
   | { tipo: "casos"; titulo?: string; casos: CasoDeUso[] }
-  | { tipo: "armadilhas"; titulo?: string; itens: { titulo: string; texto: string }[] }
+  | {
+      tipo: "armadilhas";
+      titulo?: string;
+      itens: {
+        titulo: string;
+        texto: string;
+        /**
+         * Enunciado alternativo para o quiz, quando `texto` cita o nome do
+         * padrão e a substituição automática por "este padrão" produziria uma
+         * frase ruim. Escape manual — a regra geral é automática.
+         */
+        enunciadoQuiz?: string;
+      }[];
+    }
   | { tipo: "camadas-nav"; titulo?: string; camadas: CamadaNav[] }
   | {
       tipo: "ilustracao";

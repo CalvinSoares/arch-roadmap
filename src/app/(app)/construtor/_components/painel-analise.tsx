@@ -9,6 +9,7 @@ import {
   Trash2,
   Wand2,
   Share2,
+  FileDown,
   Unlink,
   FlaskConical,
   Gauge,
@@ -188,6 +189,7 @@ interface Props {
   onTemplate: (id: string) => void;
   onLimpar: () => void;
   onCompartilhar: () => void;
+  onExportarADR: () => void;
   onAplicarSugestao: (s: Sugestao) => void;
 }
 
@@ -202,6 +204,7 @@ export function PainelAnalise({
   onTemplate,
   onLimpar,
   onCompartilhar,
+  onExportarADR,
   onAplicarSugestao,
 }: Props) {
   const [aba, setAba] = useState<Aba>("analise");
@@ -708,13 +711,24 @@ export function PainelAnalise({
 
       {/* ═══ Rodapé fixo ═══ */}
       {temCamadas && (
-        <div className="flex shrink-0 gap-2 border-t border-card-border pt-3">
-          <Button variant="outline" size="sm" className="flex-1" onClick={onCompartilhar}>
-            <Share2 /> Compartilhar
+        <div className="shrink-0 space-y-2 border-t border-card-border pt-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={onExportarADR}
+            title="Baixa o projeto como Architecture Decision Record em Markdown"
+          >
+            <FileDown /> Exportar como ADR
           </Button>
-          <Button variant="ghost" size="sm" className="flex-1" onClick={onLimpar}>
-            <Trash2 /> Limpar
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" className="flex-1" onClick={onCompartilhar}>
+              <Share2 /> Compartilhar
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-1" onClick={onLimpar}>
+              <Trash2 /> Limpar
+            </Button>
+          </div>
         </div>
       )}
     </aside>

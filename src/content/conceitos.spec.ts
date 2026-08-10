@@ -38,9 +38,14 @@ describe("catálogo de conceitos", () => {
       expect(c.tags.length).toBeGreaterThan(0);
       expect(["iniciante", "intermediario", "avancado"]).toContain(c.dificuldade);
       expect(c.tempoLeitura).toBeGreaterThan(0);
-      expect(["criacional", "estrutural", "comportamental", "principio", "arquitetura"]).toContain(
-        c.categoria
-      );
+      expect([
+        "criacional",
+        "estrutural",
+        "comportamental",
+        "principio",
+        "arquitetura",
+        "infra",
+      ]).toContain(c.categoria);
     }
   );
 
@@ -67,9 +72,9 @@ describe("catálogo de conceitos", () => {
 });
 
 /**
- * A "barra de qualidade v3" de PLANEJAMENTO-V3 §2.6, automatizada: TL;DR +
- * ≥2 casos de uso + ≥2 armadilhas + seções com resumo. Era uma promessa em
- * prosa; aqui vira condição de merge.
+ * A barra de qualidade de um conceito publicado: TL;DR + ≥2 casos de uso reais
+ * + ≥2 armadilhas + seções com resumo. Era uma promessa em prosa na
+ * documentação; aqui vira condição de merge.
  */
 describe("barra de qualidade v3", () => {
   const v3 = CONCEITOS.filter((c) => (c.blocos ?? []).some((b) => b.tipo === "tldr"));

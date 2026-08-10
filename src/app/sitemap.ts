@@ -1,5 +1,9 @@
 import type { MetadataRoute } from "next";
-import { listConceitos, listRoadmaps } from "@/shared/lib/content";
+import {
+  listConceitos,
+  listRoadmaps,
+  listComparacoes,
+} from "@/shared/lib/content";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://devatlas.vercel.app";
 
@@ -9,6 +13,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/conceitos",
     "/roadmaps",
     "/construtor",
+    "/comparar",
+    "/estudar",
+    "/quiz",
     "/novidades",
   ].map((p) => ({
     url: `${SITE_URL}${p}`,
@@ -28,5 +35,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }));
 
-  return [...estaticas, ...roadmaps, ...conceitos];
+  const comparacoes = listComparacoes().map((c) => ({
+    url: `${SITE_URL}/comparar/${c.slug}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [...estaticas, ...roadmaps, ...conceitos, ...comparacoes];
 }

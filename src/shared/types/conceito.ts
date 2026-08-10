@@ -3,7 +3,8 @@ export type Categoria =
   | "estrutural"
   | "comportamental"
   | "principio"
-  | "arquitetura";
+  | "arquitetura"
+  | "infra";
 
 export type Dificuldade = "iniciante" | "intermediario" | "avancado";
 
