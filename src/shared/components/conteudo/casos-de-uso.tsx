@@ -1,27 +1,55 @@
-import { Briefcase, Scale } from "lucide-react";
+import { Scale, TriangleAlert } from "lucide-react";
 import type { CasoDeUso } from "@/shared/types/bloco";
 
-/** Cards de casos de uso reais: cenário → como o padrão entra → trade-off. */
+function Rotulo({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+      {children}
+    </p>
+  );
+}
+
+/**
+ * Casos de uso reais. Cada card segue sempre a mesma narrativa em três
+ * tempos — cenário → como o padrão entra → o que se paga por isso — para o
+ * leitor comparar casos sem reler a estrutura toda vez.
+ */
 export function CasosDeUso({ casos }: { casos: CasoDeUso[] }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {casos.map((c) => (
+    <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+      {casos.map((c, i) => (
         <article
           key={c.titulo}
-          className="flex flex-col rounded-xl border border-card-border bg-card p-5"
+          className="flex flex-col overflow-hidden rounded-2xl border border-card-border bg-card transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
         >
-          <p className="flex items-center gap-2 font-medium">
-            <Briefcase className="size-4 shrink-0 text-primary" />
-            {c.titulo}
-          </p>
-          <p className="mt-2 text-sm text-muted">{c.cenario}</p>
-          <p className="mt-3 flex-1 text-sm leading-relaxed text-foreground">
-            {c.aplicacao}
-          </p>
-          <p className="mt-3 flex gap-2 rounded-lg bg-muted/8 p-3 text-xs leading-relaxed text-muted">
-            <Scale className="mt-0.5 size-3.5 shrink-0" />
+          <header className="flex items-start gap-3 border-b border-card-border px-5 py-4">
+            <span
+              aria-hidden
+              className="grid size-7 shrink-0 place-items-center rounded-lg bg-[color-mix(in_srgb,var(--acento)_14%,transparent)] font-mono text-[11px] font-bold text-[var(--acento)]"
+            >
+              {i + 1}
+            </span>
+            <h3 className="font-semibold leading-snug tracking-tight">{c.titulo}</h3>
+          </header>
+
+          <div className="flex flex-1 flex-col gap-4 px-5 py-4">
+            <div>
+              <Rotulo>Cenário</Rotulo>
+              <p className="mt-1 text-sm leading-relaxed text-muted">{c.cenario}</p>
+            </div>
+            <div className="flex-1">
+              <Rotulo>Como o padrão entra</Rotulo>
+              <p className="mt-1 text-sm leading-relaxed text-foreground">
+                {c.aplicacao}
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-auto flex gap-2.5 border-t border-card-border bg-[color-mix(in_srgb,var(--alerta)_7%,transparent)] px-5 py-3.5 text-[13px] leading-relaxed text-muted">
+            <Scale className="mt-0.5 size-3.5 shrink-0 text-[var(--alerta)]" />
             <span>
-              <b className="text-foreground">Trade-off:</b> {c.tradeoff}
+              <b className="font-semibold text-foreground">Trade-off:</b>{" "}
+              {c.tradeoff}
             </span>
           </p>
         </article>
@@ -30,19 +58,31 @@ export function CasosDeUso({ casos }: { casos: CasoDeUso[] }) {
   );
 }
 
-/** Lista de armadilhas/erros comuns. */
+/** Erros comuns — numerados, para virar checklist de revisão de código. */
 export function Armadilhas({ itens }: { itens: { titulo: string; texto: string }[] }) {
   return (
-    <ul className="space-y-3">
+    <ol className="overflow-hidden rounded-2xl border border-card-border bg-card">
       {itens.map((a) => (
         <li
           key={a.titulo}
-          className="rounded-xl border border-cat-arquitetura/30 bg-cat-arquitetura/6 p-4"
+          className="flex gap-4 border-b border-card-border p-5 last:border-b-0 transition-colors hover:bg-[color-mix(in_srgb,var(--perigo)_5%,transparent)]"
         >
-          <p className="font-medium text-cat-arquitetura">{a.titulo}</p>
-          <p className="mt-1 text-sm leading-relaxed text-foreground">{a.texto}</p>
+          <span
+            aria-hidden
+            className="grid size-8 shrink-0 place-items-center rounded-lg bg-[color-mix(in_srgb,var(--perigo)_12%,transparent)] text-[var(--perigo)]"
+          >
+            <TriangleAlert className="size-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-semibold leading-snug text-[var(--perigo)]">
+              {a.titulo}
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-foreground">
+              {a.texto}
+            </p>
+          </div>
         </li>
       ))}
-    </ul>
+    </ol>
   );
 }

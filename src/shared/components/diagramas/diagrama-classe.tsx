@@ -59,13 +59,21 @@ export function DiagramaClasse({ source }: { source: string }) {
   }
 
   return (
-    <div
-      tabIndex={0}
-      role="img"
-      aria-label="Diagrama do conceito"
-      className="overflow-x-auto rounded-xl border border-card-border bg-card p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <div ref={containerRef} className="mermaid flex justify-center [&_svg]:max-w-full" />
-    </div>
+    <figure className="overflow-hidden rounded-2xl border border-card-border bg-card">
+      <figcaption className="border-b border-card-border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+        Diagrama de classes
+      </figcaption>
+      <div
+        tabIndex={0}
+        role="img"
+        aria-label="Diagrama de classes do conceito"
+        className="overflow-x-auto p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+      >
+        <div
+          ref={containerRef}
+          className="mermaid flex justify-center [&_svg]:max-w-full"
+        />
+      </div>
+    </figure>
   );
 }

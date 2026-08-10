@@ -40,6 +40,32 @@ export interface FluxoSeta {
 }
 
 /**
+ * Bloco do arquétipo "estrutura": caixas aninhadas ou empilhadas.
+ * O aninhamento é a mensagem — Decorator embrulha, Facade esconde atrás de
+ * si, Composite se contém. `filhos` é recursivo de propósito.
+ */
+export interface EstruturaBloco {
+  id: string;
+  label: string;
+  /** anotação curta à direita do rótulo (papel da peça, contrato, custo). */
+  nota?: string;
+  /** peça onde o conceito atua — ganha o acento da categoria. */
+  destaque?: boolean;
+  /** borda tracejada: peça opcional ou substituível. */
+  opcional?: boolean;
+  filhos?: EstruturaBloco[];
+}
+
+/** Um dos dois lados do arquétipo "antes-depois". */
+export interface LadoComparacao {
+  titulo: string;
+  /** 2–5 itens curtos: o que existe/acontece deste lado. */
+  itens: string[];
+  /** veredito de uma linha — o custo (antes) ou o ganho (depois). */
+  nota: string;
+}
+
+/**
  * Conteúdo rico de um conceito como lista ordenada de blocos — permite
  * intercalar texto, figura, diagrama, demo interativa e código.
  */
@@ -72,5 +98,18 @@ export type Bloco =
       atores: FluxoAtor[];
       setas: FluxoSeta[];
       direcao?: "horizontal" | "vertical";
+      legenda: string;
+    }
+  | {
+      tipo: "ilustracao";
+      arquetipo: "estrutura";
+      blocos: EstruturaBloco[];
+      legenda: string;
+    }
+  | {
+      tipo: "ilustracao";
+      arquetipo: "antes-depois";
+      antes: LadoComparacao;
+      depois: LadoComparacao;
       legenda: string;
     };

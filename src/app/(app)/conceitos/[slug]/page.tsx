@@ -1,8 +1,5 @@
 import { notFound } from "next/navigation";
-import { BookOpen } from "lucide-react";
-import { PageTemplate } from "@/shared/components/templates/page-template";
 import { getConceito, listConceitos } from "@/shared/lib/content";
-import { CATEGORIAS, DIFICULDADES } from "@/shared/config/categorias";
 import { ConceitoView } from "./_components/conceito-view";
 
 export function generateStaticParams() {
@@ -23,25 +20,11 @@ export default async function ConceitoPage({
   const conceito = getConceito(slug);
   if (!conceito) notFound();
 
-  const cat = CATEGORIAS[conceito.categoria];
-
+  // A página do conceito tem cabeçalho próprio (ConceitoHero) — não usa o
+  // PageTemplate, porque hero e trilha de leitura formam uma peça só.
   return (
-    <PageTemplate
-      icon={BookOpen}
-      title={conceito.titulo}
-      subtitle={conceito.resumo}
-      breadcrumb={[
-        { label: "Conceitos", href: "/conceitos" },
-        { label: cat.label },
-        { label: conceito.titulo },
-      ]}
-      actions={
-        <span className="text-sm text-muted">
-          {DIFICULDADES[conceito.dificuldade]} · {conceito.tempoLeitura} min
-        </span>
-      }
-    >
+    <div className="page-shell">
       <ConceitoView conceito={conceito} />
-    </PageTemplate>
+    </div>
   );
 }

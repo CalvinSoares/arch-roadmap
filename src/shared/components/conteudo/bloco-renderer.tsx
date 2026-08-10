@@ -5,7 +5,13 @@ import { Passos } from "@/shared/components/conteudo/passos";
 import { Aprofundar } from "@/shared/components/conteudo/aprofundar";
 import { CamadasInterativas } from "@/shared/components/conteudo/camadas-interativas";
 import { IlustracaoFluxo } from "@/shared/components/conteudo/ilustracao-fluxo";
+import { IlustracaoEstrutura } from "@/shared/components/conteudo/ilustracao-estrutura";
+import { IlustracaoAntesDepois } from "@/shared/components/conteudo/ilustracao-antes-depois";
 import { CasosDeUso, Armadilhas } from "@/shared/components/conteudo/casos-de-uso";
+import {
+  SecaoConteudo,
+  FiguraApoio,
+} from "@/shared/components/conteudo/secao-conteudo";
 import { Demo } from "@/shared/components/conteudo/demos/demo";
 import { DiagramaClasse } from "@/shared/components/diagramas/diagrama-classe";
 import { DiagramaCamadas } from "@/shared/components/diagramas/diagrama-camadas";
@@ -13,9 +19,20 @@ import { highlightCode } from "@/shared/lib/highlight";
 import type { Bloco } from "@/shared/types/bloco";
 import type { SecaoNav } from "@/shared/components/conteudo/conceito-subnav";
 
-function Titulo({ children }: { children: React.ReactNode }) {
-  return <h2 className="mb-3 text-xl font-semibold">{children}</h2>;
-}
+/**
+ * Rótulo do tipo de seção. Serve de "gênero" da parada: o leitor sabe se
+ * vai ler teoria, mexer numa demo, ver código ou tomar decisão.
+ */
+const ETIQUETA: Partial<Record<Bloco["tipo"], string>> = {
+  secao: "Conceito",
+  "camadas-nav": "Anatomia",
+  demo: "Interativo",
+  diagrama: "Estrutura",
+  codigo: "Implementação",
+  casos: "No mundo real",
+  armadilhas: "Cuidado",
+  quando: "Decisão",
+};
 
 /** id/título de navegação para blocos que merecem entrada na subnav. */
 export function navDoBloco(bloco: Bloco): SecaoNav | null {
@@ -53,106 +70,159 @@ export function extrairMetaBlocos(blocos: Bloco[]) {
   return { secoes, tldr };
 }
 
-async function renderBloco(bloco: Bloco, i: number) {
+/** Numeração da trilha: id da seção → posição de leitura. */
+function mapaDeNumeros(blocos: Bloco[]) {
+  const mapa = new Map<string, number>();
+  for (const b of blocos) {
+    const nav = navDoBloco(b);
+    if (nav && !mapa.has(nav.id)) mapa.set(nav.id, mapa.size + 1);
+  }
+  return mapa;
+}
+
+async function renderBloco(
+  bloco: Bloco,
+  i: number,
+  numeros: Map<string, number>
+) {
   const nav = navDoBloco(bloco);
-  const secProps = nav ? { id: nav.id, className: "scroll-mt-28" } : {};
+  const chrome = nav
+    ? {
+        id: nav.id,
+        numero: numeros.get(nav.id),
+        etiqueta: ETIQUETA[bloco.tipo],
+        titulo: nav.titulo,
+      }
+    : null;
 
   switch (bloco.tipo) {
     case "tldr":
       return null; // renderizado no hero via extrairMetaBlocos
+
     case "texto":
       return (
         <section key={i} className="prose-doc">
-          {bloco.titulo && <Titulo>{bloco.titulo}</Titulo>}
+          {bloco.titulo && (
+            <h3 className="mb-2 text-lg font-semibold tracking-tight">
+              {bloco.titulo}
+            </h3>
+          )}
           {bloco.paragrafos.map((p, j) => (
             <p key={j}>{p}</p>
           ))}
         </section>
       );
+
     case "secao":
       return (
-        <section key={i} {...secProps}>
-          <Titulo>{bloco.titulo}</Titulo>
-          <div className="prose-doc">
+        <SecaoConteudo key={i} {...chrome!}>
+          <div className="prose-doc max-w-[68ch]">
             {bloco.resumo.map((p, j) => (
               <p key={j}>{p}</p>
             ))}
           </div>
           {bloco.extensao && bloco.extensao.length > 0 && (
-            <Aprofundar>
+            <Aprofundar paragrafos={bloco.extensao.length}>
               {bloco.extensao.map((p, j) => (
                 <p key={j}>{p}</p>
               ))}
             </Aprofundar>
           )}
-        </section>
+        </SecaoConteudo>
       );
+
     case "analogia":
       return (
-        <section key={i}>
-          <Analogia emoji={bloco.emoji} titulo={bloco.titulo} texto={bloco.texto} />
-        </section>
+        <Analogia
+          key={i}
+          emoji={bloco.emoji}
+          titulo={bloco.titulo}
+          texto={bloco.texto}
+        />
       );
+
     case "passos":
       return (
-        <section key={i}>
-          {bloco.titulo && <Titulo>{bloco.titulo}</Titulo>}
-          <Passos passos={bloco.passos} />
-        </section>
+        <FiguraApoio key={i} etiqueta="Passo a passo" titulo={bloco.titulo}>
+          <div className="rounded-2xl border border-card-border bg-card p-5 sm:p-6">
+            <Passos passos={bloco.passos} />
+          </div>
+        </FiguraApoio>
       );
+
     case "ilustracao":
+      if (bloco.arquetipo === "estrutura")
+        return (
+          <FiguraApoio key={i} etiqueta="Como se organiza">
+            <IlustracaoEstrutura blocos={bloco.blocos} legenda={bloco.legenda} />
+          </FiguraApoio>
+        );
+      if (bloco.arquetipo === "antes-depois")
+        return (
+          <FiguraApoio key={i} etiqueta="Sem o padrão × com o padrão">
+            <IlustracaoAntesDepois
+              antes={bloco.antes}
+              depois={bloco.depois}
+              legenda={bloco.legenda}
+            />
+          </FiguraApoio>
+        );
       return (
-        <section key={i}>
+        <FiguraApoio key={i} etiqueta="Como se encaixa">
           <IlustracaoFluxo
             atores={bloco.atores}
             setas={bloco.setas}
             direcao={bloco.direcao}
             legenda={bloco.legenda}
           />
-        </section>
+        </FiguraApoio>
       );
+
     case "camadas-nav":
       return (
-        <section key={i} {...secProps}>
-          <Titulo>{bloco.titulo ?? "Camadas"}</Titulo>
+        <SecaoConteudo key={i} {...chrome!}>
           <CamadasInterativas camadas={bloco.camadas} />
-        </section>
+        </SecaoConteudo>
       );
+
     case "casos":
       return (
-        <section key={i} {...secProps}>
-          <Titulo>{bloco.titulo ?? "Casos de uso"}</Titulo>
+        <SecaoConteudo key={i} {...chrome!}>
           <CasosDeUso casos={bloco.casos} />
-        </section>
+        </SecaoConteudo>
       );
+
     case "armadilhas":
       return (
-        <section key={i} {...secProps}>
-          <Titulo>{bloco.titulo ?? "Armadilhas comuns"}</Titulo>
+        <SecaoConteudo key={i} {...chrome!}>
           <Armadilhas itens={bloco.itens} />
-        </section>
+        </SecaoConteudo>
       );
+
     case "diagrama":
       return (
-        <section key={i} {...secProps}>
-          <Titulo>{bloco.titulo ?? "Estrutura"}</Titulo>
+        <SecaoConteudo key={i} {...chrome!}>
           <DiagramaClasse source={bloco.mermaid} />
-        </section>
+        </SecaoConteudo>
       );
+
     case "camadas":
       return (
-        <section key={i}>
-          {bloco.titulo && <Titulo>{bloco.titulo}</Titulo>}
+        <FiguraApoio key={i} etiqueta="Camadas" titulo={bloco.titulo}>
           <DiagramaCamadas camadas={bloco.camadas} />
-        </section>
+        </FiguraApoio>
       );
+
     case "demo":
       return (
-        <section key={i} {...secProps}>
-          <Titulo>{bloco.titulo ?? "Veja funcionando"}</Titulo>
+        <SecaoConteudo key={i} {...chrome!}>
+          <p className="mb-4 max-w-[68ch] text-[15px] leading-relaxed text-muted">
+            Mexa nos controles: a teoria acima vira comportamento observável.
+          </p>
           <Demo id={bloco.demo} />
-        </section>
+        </SecaoConteudo>
       );
+
     case "codigo": {
       const exemplos = await Promise.all(
         bloco.exemplos.map(async (ex) => ({
@@ -162,19 +232,19 @@ async function renderBloco(bloco: Bloco, i: number) {
         }))
       );
       return (
-        <section key={i} {...secProps}>
-          <Titulo>{bloco.titulo ?? "Código"}</Titulo>
+        <SecaoConteudo key={i} {...chrome!}>
           <CodeTabs exemplos={exemplos} />
-        </section>
+        </SecaoConteudo>
       );
     }
+
     case "quando":
       return (
-        <section key={i} {...secProps}>
-          <Titulo>Quando usar × evitar</Titulo>
+        <SecaoConteudo key={i} {...chrome!} titulo="Quando usar × quando evitar">
           <QuandoUsar quandoUsar={bloco.usar} quandoEvitar={bloco.evitar} />
-        </section>
+        </SecaoConteudo>
       );
+
     default:
       return null;
   }
@@ -182,6 +252,9 @@ async function renderBloco(bloco: Bloco, i: number) {
 
 /** Renderiza a lista de blocos ricos de um conceito (server component). */
 export async function BlocoRenderer({ blocos }: { blocos: Bloco[] }) {
-  const rendered = await Promise.all(blocos.map((b, i) => renderBloco(b, i)));
-  return <div className="space-y-10">{rendered}</div>;
+  const numeros = mapaDeNumeros(blocos);
+  const rendered = await Promise.all(
+    blocos.map((b, i) => renderBloco(b, i, numeros))
+  );
+  return <div className="space-y-12">{rendered}</div>;
 }
