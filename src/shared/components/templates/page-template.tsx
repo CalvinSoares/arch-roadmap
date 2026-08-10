@@ -33,36 +33,45 @@ export function PageTemplate({
 }: PageTemplateProps) {
   return (
     <div className={cn("page-shell", className)}>
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <header className="entra-subindo relative flex flex-col gap-3 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        {/* filete de encerramento do cabeçalho */}
+        <span
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-primary/40 via-card-border to-transparent"
+        />
+
         <div className="min-w-0">
           {breadcrumb && breadcrumb.length > 0 && (
             <nav
               aria-label="Trilha de navegação"
-              className="mb-2 flex flex-wrap items-center gap-1 text-[13px] text-muted"
+              className="mb-2.5 flex flex-wrap items-center gap-1 text-[13px] text-muted"
             >
+              <Link href="/" className="transition-colors hover:text-primary">
+                Início
+              </Link>
+              <ChevronRight className="size-3.5 opacity-50" />
               {breadcrumb.map((c, i) => (
                 <span key={`${c.label}-${i}`} className="flex items-center gap-1">
                   {c.href ? (
-                    <Link href={c.href} className="hover:text-foreground">
+                    <Link href={c.href} className="transition-colors hover:text-primary">
                       {c.label}
                     </Link>
                   ) : (
-                    <span>{c.label}</span>
+                    <span className="font-medium text-foreground">{c.label}</span>
                   )}
                   {i < breadcrumb.length - 1 && (
-                    <ChevronRight className="size-3.5 opacity-60" />
+                    <ChevronRight className="size-3.5 opacity-50" />
                   )}
                 </span>
               ))}
             </nav>
           )}
-          <div className="flex items-center gap-2.5">
+
+          <div className="flex items-center gap-3">
             {Icon && (
-              <Icon
-                size={26}
-                strokeWidth={1.5}
-                className="shrink-0 text-section-icon"
-              />
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-card-border bg-gradient-to-br from-primary/12 to-accent/10 text-section-icon shadow-[var(--shadow-sm)]">
+                <Icon size={22} strokeWidth={1.6} />
+              </span>
             )}
             {typeof title === "string" ? (
               <h1 className="page-header-title truncate">{title}</h1>
@@ -70,13 +79,15 @@ export function PageTemplate({
               title
             )}
           </div>
+
           {subtitle &&
             (typeof subtitle === "string" ? (
-              <p className="page-header-subtitle mt-1">{subtitle}</p>
+              <p className="page-header-subtitle mt-2">{subtitle}</p>
             ) : (
               subtitle
             ))}
         </div>
+
         {actions && <div className="shrink-0">{actions}</div>}
       </header>
       {children}
