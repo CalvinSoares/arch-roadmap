@@ -1,5 +1,9 @@
 # DevAtlas — Planejamento
 
+> **⚠ Direção atual:** a reimaginação do roadmap (conectores estilo sh),
+> conceitos v3 (profundidade navegável) e o **Construtor de Projeto
+> (drag & drop)** estão planejados em [PLANEJAMENTO-V3.md](./PLANEJAMENTO-V3.md).
+
 > Sistema de estudo e visualização: um **roadmap.sh mais enxuto** + um **catálogo visual de conceitos** (design patterns, arquitetura, SOLID) com diagramas, camadas e exemplos de código.
 >
 > **Front-only.** Sem backend, sem banco, sem login. Todo conteúdo mora no repositório e é buildado estaticamente. Deploy na Vercel.
@@ -337,6 +341,134 @@ Herdadas de Nival/Jacson:
 
 ### Providers raiz
 Um único `src/shared/context/providers.tsx` na ordem correta (`ThemeProvider → ModalProvider → SearchProvider → children`). Nunca espalhar providers soltos.
+
+---
+
+## 11.9. Estado atual (Fase 0 + fatia da Fase 1 — concluído)
+
+Scaffold rodando e **build 100% estático (SSG)** verde. Implementado:
+- Next.js **16** (o `create-next-app@latest` trouxe 16, não 15) + React 19 + Tailwind v4.
+- Estrutura `shared/` + padrão por página (catálogo usa `_components/`+`hook/`+`utils/`).
+- Templates (`PageTemplate`), UI kit (Button/Badge/Card/Dialog/Tabs), tema dark/light.
+- Sistema de modais central (`useModal`), padrão de erros de conteúdo, providers raiz.
+- Diagramas: **Mermaid** (classe) + **React Flow** (camadas e roadmap navegável).
+- 3 conceitos-piloto (Factory Method, Adapter, Observer) + 1 roadmap, ponta a ponta.
+
+**Aprendizado técnico (React Flow v12):** para diagramas **estáticos**, os nós devem
+trazer `measured: {width,height}` e `handles` explícitos (topo=target/base=source).
+Sem isso, o cálculo de arestas depende do `ResizeObserver`, que não roda em ambientes
+sem compositing (SSR/preview headless) → arestas somem. Diagramas também usam um
+mount-gate (só renderizam no cliente) para evitar mismatch de `colorMode` no SSR.
+
+## 11.95. Incremento (roadmap.sh + conceitos + polish)
+
+Baseado na análise do roadmap.sh (caixas arredondadas, tópico primário/subtópico,
+conectores tracejados, estados de progresso marcáveis):
+
+- **Conceitos novos (detalhados):** Strategy, Arquitetura Hexagonal, CQS, CQRS, Saga
+  — total de **8 conceitos**, cada um com diagrama, camadas e código multi-linguagem.
+- **Código colorido (Shiki):** highlight real dual-theme gerado no build (SSG); claro/
+  escuro via CSS var, sem custo em runtime. `CodeTabs` renderiza o HTML destacado.
+- **Roadmap estilo roadmap.sh:** nó customizado (`TopicNode`) com **checkbox de
+  validação**, variantes topic/subtopic, cores por status (concluído/em progresso/
+  pulado/pendente), conectores tracejados, **barra de progresso + legenda + "Zerar"**.
+  Progresso persistido em `localStorage` (`use-roadmap-progress`).
+- **Header colapsável:** `AppHeader` sticky que recolhe ao rolar para baixo e reaparece
+  ao subir (transição fluida).
+- **Troca de tema animada:** reveal circular com a **View Transitions API** partindo do
+  botão e cobrindo a tela (fallback para troca direta sem suporte / reduced-motion).
+
+## 11.97. Incremento (busca, sidebar, roadmap estilo-sh) — concluído
+
+- **Busca global (Ctrl/⌘+K):** command palette com `cmdk`, busca fuzzy sobre conceitos
+  e roadmaps, navegação por teclado. Aberta por atalho, pelo botão no header e na sidebar.
+  Providers: `SearchProvider`.
+- **Sidebar colapsável:** rail de 64px ↔ 240px (persistido em localStorage), rótulos
+  somem no modo estreito; **drawer off-canvas no mobile** com overlay. `SidebarProvider`.
+  (Fix técnico: `overflow-hidden` no `<aside>` para o `min-width:auto` do flex não
+  travar a largura.)
+- **Roadmap redesenhado estilo roadmap.sh (sem React Flow):** layout HTML/CSS em
+  espinha vertical de seções numeradas + itens (subtópicos), conectores tracejados,
+  itens opcionais com borda tracejada. Modelo de dados agora **hierárquico**
+  (`RoadmapSection` → `RoadmapItem`).
+- **Checklist funcionando:** checkbox por nó (ciclo concluído → pulado → pendente),
+  barra de progresso, legenda e "Zerar". Persistido por roadmap em localStorage.
+- **Área de entendimento interativa:** clicar num nó abre um **drawer** com contexto
+  (seção), resumo do conceito, dificuldade/tempo, "Marcar como concluído" e
+  "Abrir conceito completo".
+
+---
+
+## 11.98. PLANO — Conceitos ricos (imagens/figuras/interação) e roadmap didático
+
+> Objetivo: sair do "muro de texto" para conceitos **demonstrados** visualmente e
+> interativos. Como é front-only e sem hospedagem de imagens, "imagens/figuras" =
+> **SVG inline** e **componentes visuais**, theme-aware e acessíveis (não raster).
+
+### A. Novo modelo de conteúdo — blocos compostos
+Migrar `Conceito` de campos soltos (prosa em arrays) para uma **lista ordenada de
+blocos** (union discriminada), permitindo intercalar texto, figura e interação:
+
+```ts
+type Bloco =
+  | { tipo: "texto"; titulo?: string; paragrafos: string[] }
+  | { tipo: "analogia"; icone: string; titulo: string; texto: string }
+  | { tipo: "figura"; legenda: string; svg: FiguraId }        // SVG anotado
+  | { tipo: "passos"; titulo: string; passos: { titulo; texto; svg? }[] }
+  | { tipo: "antes-depois"; antes: Snippet; depois: Snippet }
+  | { tipo: "diagrama"; kind: "classe" | "sequencia"; mermaid: string }
+  | { tipo: "camadas"; camadas: Camada[] }
+  | { tipo: "demo"; demo: DemoId }                            // widget interativo
+  | { tipo: "codigo"; exemplos: ExemploCodigo[] }
+  | { tipo: "quando-usar"; usar: string[]; evitar: string[] };
+```
+Na Fase 1, o corpo migra para **MDX** com esses blocos como componentes — o autor
+escreve markdown e insere `<Figura/>`, `<Passos/>`, `<Demo/>` no fluxo.
+
+### B. Biblioteca de figuras/interação (SVG-first)
+Componentes reutilizáveis em `shared/components/conteudo/figuras/`:
+- `AnatomiaAnotada` — diagrama SVG com **callouts** numerados apontando partes.
+- `PassoAPasso` — stepper visual: avança e a figura muda/realça a cada passo.
+- `AntesDepois` — comparação lado a lado (código/estrutura) com slider ou toggle.
+- `Analogia` — cartão com ícone + metáfora do mundo real (ex.: Adapter = adaptador
+  de tomada; Observer = inscrição em newsletter).
+- `FluxoInterativo` — mini-fluxo clicável (clicar num passo destaca o efeito).
+- `Playground` — **demo executável** por conceito, ex.:
+  - Observer → botão "publicar" dispara e vê N observadores reagindo ao vivo.
+  - Strategy → dropdown troca a estratégia e recalcula o resultado na hora.
+  - Adapter → "encaixe" animado entre interface incompatível e alvo.
+  - CQRS → dois caminhos (command/query) animando escrita→projeção→leitura.
+
+### C. Meta por conceito (barra de qualidade)
+Cada conceito deve ter, no mínimo: **1 analogia + 1 figura anotada + 1 diagrama +
+1 demo interativa + código multi-linguagem + quando usar/evitar**. Menos que isso
+= incompleto.
+
+### D. Roadmap ainda mais didático (evolução do que já existe)
+- **Destacar caminho/pré-requisitos:** ao abrir um nó, realçar de onde ele depende.
+- **"Próximo recomendado":** sugerir o próximo item pendente na trilha.
+- **Filtro por progresso** (mostrar só pendentes) e **estimativa de tempo** por seção.
+- **Mini-mapa/índice** lateral das seções (scroll-spy).
+
+### STATUS — infra + 2 conceitos-piloto concluídos
+- ✅ Modelo `Bloco` (union) + campo opcional `blocos` no `Conceito` (retrocompatível:
+  quem não tem `blocos` usa o layout clássico).
+- ✅ `BlocoRenderer` (server, com highlight Shiki) + componentes `Analogia`, `Passos`,
+  e reuso de `DiagramaClasse`/`DiagramaCamadas`/`CodeTabs`/`QuandoUsar`.
+- ✅ **Demos interativas** (`framer-motion`): `ObserverPlayground` (publica → 3
+  observadores reagem ao vivo) e `StrategyPlayground` (troca de estratégia recalcula
+  o frete na hora).
+- ✅ **Observer** e **Strategy** reescritos no formato rico (analogia + problema +
+  demo + passos + diagrama + camadas + código + quando).
+- ⏳ Faltam converter: Factory, Adapter, CQS, CQRS, Saga, Hexagonal (usam o layout
+  clássico até lá). Adapter/CQRS ganham demos dedicadas (encaixe / command↔query).
+
+### E. Ordem sugerida de execução
+1. Refatorar `Conceito` → `blocos` + renderer de blocos (mantém SSG + Shiki).
+2. Construir `AnatomiaAnotada`, `Analogia`, `PassoAPasso` (SVG puro).
+3. `Playground` (Observer e Strategy primeiro — maior valor didático).
+4. Reescrever os 8 conceitos no novo formato, começando por Factory/Observer/Adapter.
+5. Enriquecer o roadmap (caminho, próximo, filtro, scroll-spy).
 
 ---
 

@@ -1,26 +1,182 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------ *
+ * Tokens de tema — light por padrão, dark via classe (.dark)          *
+ * Convenção herdada do front-nextjs-paas: cores por CSS var, nunca    *
+ * hex hardcoded em componente.                                        *
+ * ------------------------------------------------------------------ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f7fb;
+  --canvas: #eef1f8;
+  --foreground: #101322;
+  --muted: #5b6178;
+  --card: #ffffff;
+  --card-border: #e5e8f0;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --section-icon: #232f63;
+  --ring: #4f46e5;
+
+  /* Cores por categoria de conceito */
+  --cat-criacional: #059669;
+  --cat-estrutural: #2563eb;
+  --cat-comportamental: #7c3aed;
+  --cat-principio: #d97706;
+  --cat-arquitetura: #e11d48;
+}
+
+.dark {
+  --background: #0b0d16;
+  --canvas: #0f1220;
+  --foreground: #e7e9f3;
+  --muted: #9aa1bd;
+  --card: #151827;
+  --card-border: #262a3d;
+  /* claro o suficiente p/ contraste AA sobre primary/12 (axe: ≥4.5) */
+  --primary: #918fff;
+  --primary-foreground: #0b0d16;
+  --section-icon: #b9c0ff;
+  --ring: #7c7bff;
+
+  --cat-criacional: #34d399;
+  --cat-estrutural: #60a5fa;
+  --cat-comportamental: #a78bfa;
+  --cat-principio: #fbbf24;
+  --cat-arquitetura: #fb7185;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-canvas: var(--canvas);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-section-icon: var(--section-icon);
+  --color-ring: var(--ring);
+
+  --color-cat-criacional: var(--cat-criacional);
+  --color-cat-estrutural: var(--cat-estrutural);
+  --color-cat-comportamental: var(--cat-comportamental);
+  --color-cat-principio: var(--cat-principio);
+  --color-cat-arquitetura: var(--cat-arquitetura);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--card-border);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Shell de página (equivalente ao .page-shell do PaaS) */
+.page-shell {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+@media (min-width: 640px) {
+  .page-shell { padding: 1.5rem; }
+}
+@media (min-width: 1024px) {
+  .page-shell { padding: 2rem; }
+}
+
+/* Título / subtítulo de página (tokens herdados) */
+.page-header-title {
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 2.25rem;
+  color: var(--foreground);
+}
+.page-header-subtitle {
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.5rem;
+  color: var(--muted);
+}
+
+/* Prosa dos conceitos */
+.prose-doc { color: var(--foreground); line-height: 1.7; }
+.prose-doc h2 { font-size: 1.375rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+.prose-doc h3 { font-size: 1.125rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+.prose-doc p { margin: 0.75rem 0; color: var(--foreground); }
+.prose-doc ul { margin: 0.75rem 0; padding-left: 1.25rem; list-style: disc; }
+.prose-doc li { margin: 0.35rem 0; }
+/* code inline (não dentro de <pre> do Shiki) */
+.prose-doc :not(pre) > code {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.85em;
+  background: color-mix(in srgb, var(--muted) 16%, transparent);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.3rem;
+}
+
+/* Shiki — highlight dual-theme (claro por padrão, escuro via .dark) */
+.shiki {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  padding: 1rem 1.15rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--card-border);
+  overflow-x: auto;
+  tab-size: 2;
+}
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+/* Animação de troca de tema (View Transitions API) — reveal circular */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2147483646;
+}
+
+/* React Flow theme-aware */
+.react-flow__background { background: var(--canvas); }
+.react-flow__attribution { display: none; }
+/* Handles não são interativos nos diagramas estáticos — esconder os pontos. */
+.react-flow__handle { opacity: 0; pointer-events: none; }
+
+/* Conectores do fluxo do construtor: a linha "anda" na direção da requisição */
+@keyframes fluxo-andando {
+  to { stroke-dashoffset: -14; }
+}
+.conector-fluxo-ativo {
+  animation: fluxo-andando 0.55s linear infinite;
+}
+@keyframes fluxo-pulso {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.45; }
+}
+.conector-fluxo-async {
+  animation: fluxo-andando 1.1s linear infinite, fluxo-pulso 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
