@@ -15,9 +15,9 @@ export const roadmapPadroes: Roadmap = {
       titulo: "Fundamentos de OOP",
       descricao: "A base: objetos, interfaces e polimorfismo — o que os padrões exploram.",
       items: [
-        { id: "oop-encaps", titulo: "Encapsulamento & Abstração" },
-        { id: "oop-poli", titulo: "Herança & Polimorfismo" },
-        { id: "oop-composicao", titulo: "Composição sobre Herança" },
+        { id: "oop-encaps", titulo: "Encapsulamento & Abstração", descricao: "Esconder o estado atrás de um contrato: quem usa não sabe — nem depende de — como é por dentro." },
+        { id: "oop-poli", titulo: "Herança & Polimorfismo", descricao: "Um mesmo contrato, várias implementações: a base que Strategy, State e quase todo padrão comportamental explora." },
+        { id: "oop-composicao", titulo: "Composição sobre Herança", conceito: "composicao-sobre-heranca" },
       ],
     },
     {
@@ -31,7 +31,8 @@ export const roadmapPadroes: Roadmap = {
         { id: "isp", titulo: "ISP — Segregação de Interfaces", conceito: "isp" },
         { id: "dip", titulo: "DIP — Inversão de Dependência", conceito: "dip" },
         { id: "sub-cqs", titulo: "CQS", conceito: "cqs" },
-        { id: "dry-kiss", titulo: "DRY · KISS · YAGNI", opcional: true },
+        { id: "dry-kiss", titulo: "DRY · KISS · YAGNI", conceito: "dry-kiss-yagni", opcional: true },
+        { id: "demeter", titulo: "Lei de Deméter", conceito: "lei-de-demeter", opcional: true },
       ],
     },
     {

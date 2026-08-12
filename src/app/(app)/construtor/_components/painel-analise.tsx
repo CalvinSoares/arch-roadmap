@@ -30,7 +30,11 @@ import { Button } from "@/shared/components/global/ui/button";
 import { cn } from "@/shared/utils/cn";
 import { TEMPLATES } from "@/content/construtor/regras";
 import type { Insight, NivelInsight, ScoreProjeto } from "@/shared/types/construtor";
-import type { RevisaoProjeto, Sugestao } from "@/content/construtor/sugestoes";
+import type {
+  RevisaoProjeto,
+  Sugestao,
+  SugestaoAusente,
+} from "@/content/construtor/sugestoes";
 import type { UltimaAcao } from "../hook/construtor.hook";
 
 const NIVEL = {
@@ -184,6 +188,8 @@ interface Props {
   /** score do modelo carregado — marca de referência nas barras. */
   referencia: ScoreProjeto | null;
   sugestoes: Sugestao[];
+  /** O outro lado do motor: o que NÃO foi sugerido, e por quê. */
+  ausentes: SugestaoAusente[];
   revisao: RevisaoProjeto;
   temCamadas: boolean;
   onTemplate: (id: string) => void;
@@ -205,6 +211,7 @@ export function PainelAnalise({
   onLimpar,
   onCompartilhar,
   onExportarADR,
+  ausentes,
   onAplicarSugestao,
 }: Props) {
   const [aba, setAba] = useState<Aba>("analise");
@@ -214,6 +221,7 @@ export function PainelAnalise({
   const [verScore, setVerScore] = useState(true);
   const [verFatores, setVerFatores] = useState(false);
   const [verRevisao, setVerRevisao] = useState(false);
+  const [verAusentes, setVerAusentes] = useState(false);
 
   const corpoRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -342,14 +350,14 @@ export function PainelAnalise({
               tabIndex={ativa ? 0 : -1}
               onClick={() => setAba(id)}
               className={cn(
-                "flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-1 py-2 text-xs font-medium transition-colors",
+                "flex min-h-10 items-center justify-center gap-1 rounded-lg px-1 py-2 text-[10px] font-medium transition-colors sm:gap-1.5 sm:text-xs",
                 ativa
                   ? "bg-primary text-primary-foreground"
                   : "text-muted hover:bg-foreground/5 hover:text-foreground"
               )}
             >
               <Icone className="size-3.5 shrink-0" />
-              {label}
+              <span className="truncate">{label}</span>
               {badge > 0 && (
                 <span
                   className={cn(
@@ -609,6 +617,30 @@ export function PainelAnalise({
                   </Button>
                 </div>
               ))
+            )}
+
+            {temCamadas && ausentes.length > 0 && (
+              <Secao
+                titulo={`Por que não sugeriu (${ausentes.length})`}
+                aberta={verAusentes}
+                onToggle={() => setVerAusentes((v) => !v)}
+              >
+                {/* O motor já sabia a resposta e a guardava para si: cada
+                    condição não satisfeita é uma explicação de graça. */}
+                <ul className="space-y-2">
+                  {ausentes.map((a) => (
+                    <li key={a.id} className="text-xs leading-relaxed">
+                      <span className="font-medium text-foreground">
+                        {a.titulo}
+                      </span>
+                      <span className="text-muted">
+                        {" — não foi sugerido porque "}
+                        {a.porQueNao}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Secao>
             )}
 
             {temCamadas && (

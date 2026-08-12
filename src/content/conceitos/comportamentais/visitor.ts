@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class No {
@@ -136,6 +137,33 @@ export const visitor: Conceito = {
   tags: ["duplo-despacho", "arvore", "compilador", "gof"],
   dificuldade: "avancado",
   tempoLeitura: 7,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "Plugins do Babel",
+      explicacao:
+        "O objeto que você exporta se chama `visitor` — um método por tipo de nó da árvore sintática.",
+    },
+    {
+      onde: "Regras do ESLint",
+      explicacao:
+        "Cada regra visita os nós que lhe interessam sem que o parser saiba que a regra existe.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Operação nova sem mudar os elementos.
+no.accept(visitorTypeCheck);`,
+  },
+  custo: {
+    indirecoes: 2,
+    cobra: [
+      "Adicionar um tipo novo à hierarquia obriga a alterar todos os visitantes existentes",
+      "O double dispatch entre elemento e visitante confunde quem lê o padrão pela primeira vez",
+    ],
+    naoValeSe:
+      "a hierarquia de tipos muda com frequência — aí o Visitor inverte o custo e cada tipo novo dói em todo visitante.",
+  },
   relacionados: ["composite", "iterator", "state"],
   problema: [
     "Uma estrutura com vários tipos de nó precisa de operações novas com frequência: avaliar, imprimir, otimizar, validar, exportar. Colocar cada uma dentro dos nós faz classes de domínio incharem com responsabilidades que não são delas.",

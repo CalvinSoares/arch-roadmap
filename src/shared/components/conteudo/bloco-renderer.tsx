@@ -1,4 +1,7 @@
 import { CodeTabs } from "@/shared/components/conteudo/code-tabs";
+import { AntiExemplo } from "@/shared/components/conteudo/anti-exemplo";
+import { Refatoracao } from "@/shared/components/conteudo/refatoracao";
+import { TextoRico } from "@/shared/components/conteudo/texto-rico";
 import { QuandoUsar } from "@/shared/components/conteudo/quando-usar";
 import { Analogia } from "@/shared/components/conteudo/analogia";
 import { Passos } from "@/shared/components/conteudo/passos";
@@ -32,6 +35,8 @@ const ETIQUETA: Partial<Record<Bloco["tipo"], string>> = {
   casos: "No mundo real",
   armadilhas: "Cuidado",
   quando: "Decisão",
+  "anti-exemplo": "Cuidado",
+  refatoracao: "Prática",
 };
 
 /** id/título de navegação para blocos que merecem entrada na subnav. */
@@ -53,6 +58,15 @@ export function navDoBloco(bloco: Bloco): SecaoNav | null {
       return { id: "armadilhas", titulo: bloco.titulo ?? "Armadilhas" };
     case "quando":
       return { id: "quando", titulo: "Quando usar" };
+    case "anti-exemplo":
+      // Rótulo curto e fixo: o `titulo` do bloco é descritivo ("Quando o
+      // Singleton vira variável global") e destoaria dos vizinhos da trilha,
+      // que são todos de duas palavras.
+      return { id: "anti-exemplo", titulo: "O jeito errado" };
+    case "refatoracao":
+      // Mesma razão do anti-exemplo: rótulo curto e fixo, porque o `titulo`
+      // do bloco é descritivo e destoaria dos vizinhos da trilha.
+      return { id: "refatoracao", titulo: "Do cheiro ao padrão" };
     default:
       return null;
   }
@@ -108,7 +122,7 @@ async function renderBloco(
             </h3>
           )}
           {bloco.paragrafos.map((p, j) => (
-            <p key={j}>{p}</p>
+            <p key={j}><TextoRico>{p}</TextoRico></p>
           ))}
         </section>
       );
@@ -118,13 +132,13 @@ async function renderBloco(
         <SecaoConteudo key={i} {...chrome!}>
           <div className="prose-doc max-w-[68ch]">
             {bloco.resumo.map((p, j) => (
-              <p key={j}>{p}</p>
+              <p key={j}><TextoRico>{p}</TextoRico></p>
             ))}
           </div>
           {bloco.extensao && bloco.extensao.length > 0 && (
             <Aprofundar paragrafos={bloco.extensao.length}>
               {bloco.extensao.map((p, j) => (
-                <p key={j}>{p}</p>
+                <p key={j}><TextoRico>{p}</TextoRico></p>
               ))}
             </Aprofundar>
           )}
@@ -236,6 +250,41 @@ async function renderBloco(
           <CodeTabs exemplos={exemplos} />
         </SecaoConteudo>
       );
+    }
+
+    case "refatoracao": {
+      // uma etapa por highlight: a 0 é o ponto de partida, as outras os passos
+      const etapas = await Promise.all([
+        { titulo: "Como está", motivo: bloco.cheiro, ex: bloco.inicio },
+        ...bloco.passos.map((p) => ({ titulo: p.titulo, motivo: p.motivo, ex: p.depois })),
+      ].map(async (e) => ({
+        titulo: e.titulo,
+        motivo: e.motivo,
+        html: await highlightCode(e.ex.code, e.ex.lang),
+      })));
+      return (
+        <Refatoracao
+          key={i}
+          titulo={bloco.titulo}
+          cheiro={bloco.cheiro}
+          etapas={etapas}
+          veredito={bloco.veredito}
+        />
+      );
+    }
+
+    case "anti-exemplo": {
+      const { codigo, ...resto } = bloco;
+      const exemplos = [
+        {
+          lang: codigo.lang,
+          code: codigo.code,
+          html: await highlightCode(codigo.code, codigo.lang),
+        },
+      ];
+      // Sem <SecaoConteudo>: o bloco tem moldura própria, em vermelho,
+      // justamente para não se parecer com o conteúdo que ensina o certo.
+      return <AntiExemplo key={i} {...resto} exemplos={exemplos} />;
     }
 
     case "quando":

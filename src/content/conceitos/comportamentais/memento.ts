@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Editor {
@@ -144,6 +145,34 @@ export const memento: Conceito = {
   tags: ["snapshot", "undo", "encapsulamento", "gof"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "Time travel do Redux DevTools",
+      explicacao:
+        "Cada estado é guardado inteiro para poder voltar — snapshot opaco, restaurável.",
+    },
+    {
+      onde: "Undo de qualquer editor",
+      explicacao:
+        "O estado anterior é salvo sem expor a estrutura interna de quem o produziu.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Snapshot opaco para restaurar depois.
+const snap = editor.salvar();
+editor.restaurar(snap);`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Guardar snapshots consome memória proporcional ao tamanho e à frequência dos estados salvos",
+      "O memento precisa capturar estado suficiente para restaurar, sem vazar os internos do objeto",
+    ],
+    naoValeSe:
+      "o estado é trivial de reconstruir ou não precisa de undo — aí salvar snapshots é peso morto.",
+  },
   relacionados: ["command", "event-sourcing", "state"],
   problema: [
     "Para oferecer desfazer, checkpoint ou 'descartar alterações', é preciso guardar como o objeto estava antes — mas ler seus campos de fora quebra o encapsulamento que o objeto passou a existência protegendo.",

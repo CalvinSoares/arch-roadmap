@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Contexto {
@@ -89,6 +90,28 @@ print(carrinho.total(100, 2))   # 126.0`,
   },
 ];
 
+const ANTI_EXEMPLO = `interface Frete { calcular(peso: number): number; }
+class Sedex implements Frete { calcular(p: number) { return p * 2.5; } }
+class Pac   implements Frete { calcular(p: number) { return p * 1.2; } }
+
+class Carrinho {
+  // A interface existe... e a decisao continua aqui dentro.
+  private estrategia(tipo: string): Frete {
+    switch (tipo) {
+      case "sedex": return new Sedex();
+      case "pac":   return new Pac();
+      default: throw new Error("tipo desconhecido");
+    }
+  }
+
+  total(peso: number, tipo: string) {
+    return this.estrategia(tipo).calcular(peso);  // <- Carrinho conhece TODAS
+  }
+}
+
+// Transportadora nova = editar Carrinho. O Aberto/Fechado continua violado,
+// so que agora com tres arquivos em vez de um.`;
+
 export const strategy: Conceito = {
   slug: "strategy",
   titulo: "Strategy",
@@ -98,6 +121,34 @@ export const strategy: Conceito = {
   tags: ["gof", "polimorfismo", "algoritmos", "composicao"],
   dificuldade: "iniciante",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "O comparador de Array.sort",
+      explicacao:
+        "O algoritmo de ordenação é fixo; o critério de comparação entra por parâmetro.",
+    },
+    {
+      onde: "Strategies do Passport",
+      explicacao:
+        "O nome é literal: local, OAuth e JWT são estratégias plugáveis atrás de uma interface só.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// A estrategia entra de fora. So isso.
+const total = (itens, calcularFrete) =>
+  soma(itens) + calcularFrete(peso(itens));`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Uma interface e uma classe (ou função) por variante",
+      "A escolha de qual estratégia usar migra para quem compõe — e precisa morar em algum lugar",
+    ],
+    naoValeSe:
+      "existem duas variantes e elas nunca mudam. Um `if` é mais honesto que uma hierarquia.",
+  },
   relacionados: ["observer", "factory-method"],
   problema: [
     "Um objeto precisa executar uma tarefa que tem várias variações de algoritmo — ordenar de formas diferentes, calcular frete por transportadora, aplicar descontos por tipo de cliente. Concentrar tudo numa classe leva a um emaranhado de condicionais que cresce a cada nova variação.",
@@ -292,6 +343,100 @@ export const strategy: Conceito = {
             "Formatos têm capacidades desiguais (streaming, tipos ricos, schema) — a interface comum nivela por baixo, e recursos exclusivos de um formato ficam de fora do contrato.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A Strategy que continua sendo um if/else",
+      comoSeParece:
+        "As classes de estratégia existem, implementam a interface, tudo parece certo — mas quem escolhe qual usar é um `switch` dentro da própria classe que deveria ignorar a escolha. O polimorfismo foi adiado, não aplicado.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Ao adicionar variante", efeito: "É preciso editar a classe que deveria ser fechada para modificação — exatamente o que o padrão prometia evitar." },
+        { quando: "No teste", efeito: "Testar `Carrinho` exige conhecer todas as estratégias reais, porque não há como injetar uma falsa." },
+        { quando: "Na revisão", efeito: "O `switch` se multiplica: aparece de novo em cada lugar que precisa escolher, e eles saem de sincronia." },
+      ],
+      correcao:
+        "A estratégia entra **de fora** — por construtor ou parâmetro. Se ainda for preciso mapear string para implementação, esse mapa vive na composição da aplicação (ou numa Factory), e não dentro de quem usa a estratégia.",
+    },
+    {
+      tipo: "refatoracao",
+      cheiro:
+        "Um `switch` que cresce a cada regra nova de frete, dentro da classe que só queria somar o carrinho.",
+      inicio: { lang: "typescript", code: `class Carrinho {
+  total(peso: number, tipo: string) {
+    let frete = 0;
+    if (tipo === "sedex") frete = peso * 2.5;
+    else if (tipo === "pac") frete = peso * 1.2;
+    else if (tipo === "retirada") frete = 0;
+    else throw new Error("tipo desconhecido");
+    return this.soma() + frete;
+  }
+}` },
+      passos: [
+        {
+          titulo: "Extrair o cálculo",
+          motivo:
+            "Antes de trocar a estrutura, isole o que varia numa função só. Este passo **não muda comportamento** — e é o que permite verificar os próximos com o teste existente.",
+          depois: { lang: "typescript", code: `class Carrinho {
+  total(peso: number, tipo: string) {
+    return this.soma() + this.calcularFrete(peso, tipo);
+  }
+
+  private calcularFrete(peso: number, tipo: string) {
+    if (tipo === "sedex") return peso * 2.5;
+    if (tipo === "pac") return peso * 1.2;
+    if (tipo === "retirada") return 0;
+    throw new Error("tipo desconhecido");
+  }
+}` },
+        },
+        {
+          titulo: "Virar uma função por variante",
+          motivo:
+            "Cada ramo do `if` era uma regra independente disfarçada de condição. Como funções separadas, cada uma passa a ser testável sozinha.",
+          depois: { lang: "typescript", code: `type CalculoDeFrete = (peso: number) => number;
+
+const sedex: CalculoDeFrete = (peso) => peso * 2.5;
+const pac: CalculoDeFrete = (peso) => peso * 1.2;
+const retirada: CalculoDeFrete = () => 0;
+
+class Carrinho {
+  total(peso: number, tipo: string) {
+    const tabela: Record<string, CalculoDeFrete> = { sedex, pac, retirada };
+    const calculo = tabela[tipo];
+    if (!calculo) throw new Error("tipo desconhecido");
+    return this.soma() + calculo(peso);
+  }
+}` },
+        },
+        {
+          titulo: "Injetar de fora",
+          motivo:
+            "Aqui está a virada: o `Carrinho` deixa de conhecer as variantes. Ele recebe a que deve usar, e transportadora nova **não toca nesta classe** — que é o Aberto/Fechado saindo do slide e entrando no código.",
+          depois: { lang: "typescript", code: `type CalculoDeFrete = (peso: number) => number;
+
+class Carrinho {
+  // A estrategia entra pelo construtor. O Carrinho nao conhece nenhuma.
+  constructor(private readonly frete: CalculoDeFrete) {}
+
+  total(peso: number) {
+    return this.soma() + this.frete(peso);
+  }
+}
+
+// O mapeamento string -> implementacao vira responsabilidade de
+// quem COMPOE a aplicacao, nao de quem usa a estrategia.
+const FRETES = {
+  sedex: (peso: number) => peso * 2.5,
+  pac: (peso: number) => peso * 1.2,
+  retirada: () => 0,
+} as const;
+
+const carrinho = new Carrinho(FRETES[tipoEscolhido]);` },
+        },
+      ],
+      veredito:
+        "Ganhou-se: transportadora nova sem tocar no `Carrinho`, e cada cálculo testável isolado. Pagou-se: um parâmetro a mais no construtor e a decisão de qual frete usar migrou para a composição — ela não desapareceu, mudou de lugar. Se houvesse só duas variantes e elas nunca mudassem, o `if` original era mais honesto.",
     },
     {
       tipo: "armadilhas",

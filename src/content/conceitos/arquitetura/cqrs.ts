@@ -90,6 +90,55 @@ export const cqrs: Conceito = {
   tags: ["cqs", "event-sourcing", "escala", "read-model"],
   dificuldade: "avancado",
   tempoLeitura: 9,
+  nasceu: {
+    quando: {
+      rotulo: "c. 2010",
+      ano: 2010,
+      precisao: "disputada",
+      disputa:
+        "Greg Young é quem cunha e populariza o termo entre 2009 e 2010, em " +
+        "palestras e no blog; não há um marco único de publicação. Fowler " +
+        "descreve o padrão em 2011, o que muita gente cita como origem.",
+    },
+    fonte:
+      "Greg Young — palestras e posts sobre CQRS, 2009–2010; " +
+      "Martin Fowler — *CQRS*, bliki, 2011",
+    precursor:
+      "É a separação de CQS (Meyer, 1988) levada da assinatura do método " +
+      "para a arquitetura inteira — dois modelos, não só dois tipos de método.",
+  },
+  ondeAparece: [
+    {
+      onde: "réplica de leitura",
+      explicacao:
+        "Escritas vão para o primário e as consultas para réplicas: dois caminhos com modelos e escala próprios para ler e para gravar.",
+    },
+    {
+      onde: "Elasticsearch ao lado do banco",
+      explicacao:
+        "O banco transacional guarda a verdade das escritas e um índice de busca serve as leituras — modelos de leitura e escrita separados de fato.",
+    },
+    {
+      onde: "materialized views",
+      explicacao:
+        "A view materializada é um modelo de leitura pré-computado, alimentado a partir das escritas e otimizado só para consultar rápido.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Modelo de escrita ≠ modelo de leitura.
+await comandos.criarPedido(cmd);
+const view = await leituras.pedidoDetalhe(id);`,
+  },
+  custo: {
+    indirecoes: 2,
+    cobra: [
+      "Dois modelos a manter, de escrita e de leitura, que podem divergir enquanto sincronizam",
+      "A leitura passa a ser eventualmente consistente em relação à escrita",
+    ],
+    naoValeSe:
+      "leitura e escrita cabem no mesmo modelo sem se atrapalhar — separar aí dobra o trabalho sem resolver gargalo nenhum.",
+  },
   relacionados: ["cqs", "saga", "hexagonal"],
   problema: [
     "Um único modelo que serve leitura e escrita acaba sendo um mau compromisso para os dois: escrita pede normalização e invariantes; leitura pede dados agregados, desnormalizados e rápidos.",

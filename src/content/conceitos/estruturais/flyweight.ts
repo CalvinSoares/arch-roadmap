@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class TipoArvore {
@@ -139,6 +140,38 @@ export const flyweight: Conceito = {
   tags: ["memoria", "compartilhamento", "cache", "gof"],
   dificuldade: "avancado",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "Interning de string",
+      explicacao:
+        "Runtimes reaproveitam a mesma string literal em memória em vez de guardar mil cópias iguais.",
+    },
+    {
+      onde: "Symbol.for",
+      explicacao:
+        "O registro global devolve o mesmo símbolo para a mesma chave, em qualquer parte do programa.",
+    },
+    {
+      onde: "React.memo",
+      explicacao:
+        "Evita recriar a saída quando as props não mudaram — o estado extrínseco decide, o intrínseco se reaproveita.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Estado intrínseco compartilhado; extrínseco por instância.
+const glyph = GlyphFactory.obter("A", fonte);`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Separar estado intrínseco de extrínseco complica o modelo e é fácil de errar",
+      "O pool de objetos compartilhados vira estado global, com todos os cuidados que isso exige",
+    ],
+    naoValeSe:
+      "não há muitos objetos quase iguais consumindo memória — sem esse volume, a economia não paga a complexidade.",
+  },
   relacionados: ["singleton", "proxy", "composite"],
   problema: [
     "Sistemas que criam centenas de milhares de objetos parecidos gastam memória repetindo os mesmos dados: a mesma textura em cada árvore, a mesma fonte em cada caractere, o mesmo modelo em cada partícula.",

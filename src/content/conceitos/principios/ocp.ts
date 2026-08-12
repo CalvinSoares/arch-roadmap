@@ -134,6 +134,44 @@ export const ocp: Conceito = {
   tags: ["solid", "extensibilidade", "abstracao", "design"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: {
+    quando: { rotulo: "1988", ano: 1988, precisao: "aproximada" },
+    fonte:
+      "Bertrand Meyer, 'Object-Oriented Software Construction', 1988 — a formulação original, via herança; Robert C. Martin a redefiniu depois via abstração polimórfica",
+    precursor:
+      "Meyer pensava em herança; a leitura moderna, com interfaces e injeção de dependência, veio com a popularização do polimorfismo nos anos 1990-2000.",
+  },
+  ondeAparece: [
+    {
+      onde: "sistema de plugins (ESLint, Babel)",
+      explicacao:
+        "Você adiciona uma regra ou transformação escrevendo um plugin novo, sem nunca editar o núcleo — aberto para extensão, fechado para modificação.",
+    },
+    {
+      onde: "middleware do Express",
+      explicacao:
+        "Cada comportamento novo (auth, log, cors) entra como uma função na cadeia; o roteador em si não muda a cada requisito que aparece.",
+    },
+    {
+      onde: "extensões do VS Code",
+      explicacao:
+        "O editor ganha linguagens, temas e comandos novos por extensões instaladas, com o executável do VS Code intacto entre uma e outra.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Estende sem editar o núcleo fechado.
+pagamentos.registrar("pix", novoPixStrategy);`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Um ponto de extensão a projetar e manter antes mesmo de saber se aquilo vai variar",
+      "Abstração escolhida no eixo errado engessa justamente onde a mudança de fato acontece",
+    ],
+    naoValeSe:
+      "não há sinal de que aquele comportamento vá variar — abstrair por antecipação é complexidade paga sem retorno.",
+  },
   relacionados: ["srp", "lsp", "strategy"],
   problema: [
     "Requisitos novos chegam como mais um caso: mais um tipo de desconto, mais um formato de exportação, mais um meio de pagamento. Cada um reabre a mesma função e adiciona um ramo.",

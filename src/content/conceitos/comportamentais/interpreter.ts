@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Expressao {
@@ -138,6 +139,33 @@ export const interpreter: Conceito = {
   tags: ["gramatica", "dsl", "regras", "gof"],
   dificuldade: "avancado",
   tempoLeitura: 7,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "Engines de regex",
+      explicacao:
+        "A expressão é uma linguagem própria, compilada numa árvore que depois é avaliada contra o texto.",
+    },
+    {
+      onde: "Template engines",
+      explicacao:
+        "`{{ nome }}` é uma gramática pequena com um avaliador que a resolve contra um contexto.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Árvore da linguagem → avaliação.
+const n = parse("a AND b").avaliar(ctx);`,
+  },
+  custo: {
+    indirecoes: 2,
+    cobra: [
+      "Uma classe por regra gramatical, que cresce rápido conforme a linguagem ganha construções",
+      "Interpretar a árvore a cada execução costuma ser mais lento que compilar ou usar uma engine pronta",
+    ],
+    naoValeSe:
+      "a linguagem é complexa ou muda muito — aí um parser gerado ou uma engine existente supera a gramática feita à mão.",
+  },
   relacionados: ["composite", "visitor", "strategy"],
   problema: [
     "Certas regras mudam demais para viver no código: filtros de segmentação, condições de desconto, critérios de alerta. Cada ajuste vira deploy, e quem entende a regra não é quem sabe programar.",

@@ -1,3 +1,5 @@
+import { TextoRico } from "@/shared/components/conteudo/texto-rico";
+
 /**
  * Analogia do conceito — o "gancho" antes da teoria. Tratada como citação
  * destacada: emoji grande em ladrilho, etiqueta e texto em corpo maior.
@@ -32,7 +34,7 @@ export function Analogia({
           <p className="mt-1.5 text-lg font-semibold leading-snug tracking-tight">
             {titulo}
           </p>
-          <p className="mt-2 text-[15px] leading-relaxed text-muted">{texto}</p>
+          <p className="mt-2 text-[15px] leading-relaxed text-muted"><TextoRico>{texto}</TextoRico></p>
         </div>
       </div>
     </figure>

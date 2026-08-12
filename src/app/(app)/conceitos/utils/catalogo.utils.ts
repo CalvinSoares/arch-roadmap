@@ -10,7 +10,10 @@ export const OPCOES_CATEGORIA: { value: FiltroCategoria; label: string }[] = [
   { value: "comportamental", label: "Comportamental" },
   { value: "principio", label: "Princípio" },
   { value: "arquitetura", label: "Arquitetura" },
+  { value: "resiliencia", label: "Resiliência" },
+  { value: "dados", label: "Dados" },
   { value: "infra", label: "Infra" },
+  { value: "seguranca", label: "Segurança" },
 ];
 
 export const OPCOES_DIFICULDADE: { value: FiltroDificuldade; label: string }[] = [

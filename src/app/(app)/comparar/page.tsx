@@ -4,11 +4,14 @@ import { PageTemplate } from "@/shared/components/templates/page-template";
 import { CATEGORIAS } from "@/shared/config/categorias";
 import { listComparacoes, getConceito } from "@/shared/lib/content";
 
-export const metadata = {
+import { pageMetadata } from "@/shared/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Comparações",
   description:
     "Os pares de padrões que mais se confundem, lado a lado: Proxy × Decorator, Strategy × Template Method, State × Strategy e outros.",
-};
+  path: "/comparar",
+});
 
 export default function CompararPage() {
   const comparacoes = listComparacoes();

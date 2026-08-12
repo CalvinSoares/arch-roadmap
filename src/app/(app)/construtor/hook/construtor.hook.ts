@@ -19,12 +19,13 @@ import {
 import {
   revisarProjeto,
   sugerir,
+  porQueNaoSugeriu,
   type Sugestao,
 } from "@/content/construtor/sugestoes";
 import { useArmazenamentoLocal } from "@/shared/hook/use-armazenamento-local";
 import { gerarADR, nomeArquivoADR } from "../utils/adr";
 
-const CHAVE = "devatlas:construtor:v1";
+const CHAVE = "DevMappa:construtor:v1";
 const VAZIO: EstadoProjeto = { camadas: [] };
 
 export interface UltimaAcao {
@@ -343,6 +344,7 @@ export function useConstrutor() {
   const score = useMemo(() => calcularScore(estado), [estado]);
   const foraDeOrdem = useMemo(() => paresForaDeOrdem(estado).length > 0, [estado]);
   const sugestoes = useMemo(() => sugerir(estado), [estado]);
+  const ausentes = useMemo(() => porQueNaoSugeriu(estado), [estado]);
   const revisao = useMemo(() => revisarProjeto(estado), [estado]);
 
   /**
@@ -390,6 +392,8 @@ export function useConstrutor() {
     score,
     referencia,
     sugestoes,
+
+    ausentes,
     revisao,
     aplicarSugestao,
     foraDeOrdem,

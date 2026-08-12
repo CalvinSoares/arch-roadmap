@@ -108,6 +108,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
           <DialogContent
             size={options.size}
             showClose={options.showCloseButton}
+            className="p-4 sm:p-5"
             onEscapeKeyDown={(e) => {
               if (options.closeOnEscape === false) e.preventDefault();
             }}

@@ -1,5 +1,6 @@
 import { camadaDef } from "@/content/construtor/blocos";
 import { tecnologiaDef } from "@/content/construtor/tecnologias";
+import { LATENCIA } from "@/content/latencias";
 import type {
   CamadaId,
   CamadaNoProjeto,
@@ -130,6 +131,59 @@ export function montarSimulacao(
     anterior = no;
   };
 
+  /**
+   * O que uma falha custa, conforme o que protege a borda.
+   *
+   * É a coisa mais difícil de ensinar em prosa: a **mesma** dependência
+   * quebrada custa quatro tempos diferentes, separados por cinco ordens de
+   * grandeza. Sem prazo, a chamada pendura e prende a conexão; com prazo, ela
+   * falha e libera; com retry, falha três vezes; com disjuntor aberto, nem sai.
+   *
+   * A ordem dos testes é a de precedência real: um disjuntor aberto vence o
+   * timeout, porque a chamada não acontece.
+   */
+  const custoDaFalha = (): {
+    ms: number;
+    nota: string;
+    aviso: string;
+    conceito: string;
+  } => {
+    if (temPadrao("circuit-breaker")) {
+      return {
+        ms: LATENCIA.falhaRapida.ms,
+        nota: "o disjuntor já estava aberto — recusa imediata, sem tocar a dependência",
+        aviso:
+          "Com o disjuntor aberto, a falha custa microssegundos em vez de segundos: o prazo do pedido é devolvido a quem chamou, e a dependência ganha a folga que precisa para se levantar.",
+        conceito: "circuit-breaker",
+      };
+    }
+    if (temPadrao("timeout") && temPadrao("retry")) {
+      return {
+        ms: LATENCIA.prazoComRetry.ms,
+        nota: "três tentativas, cada uma esperando o prazo até estourar",
+        aviso:
+          "Retry multiplica a espera pelo número de tentativas. Vale quando a falha é passageira — e é exatamente por isso que ele pede um disjuntor ao lado, para parar de insistir quando não é.",
+        conceito: "retry",
+      };
+    }
+    if (temPadrao("timeout")) {
+      return {
+        ms: LATENCIA.prazoConfigurado.ms,
+        nota: "o prazo estoura, a chamada é abortada e a conexão volta ao pool",
+        aviso:
+          "O timeout não conserta a dependência — ele transforma espera indefinida em erro tratável, e devolve a conexão antes de o pool esgotar.",
+        conceito: "timeout",
+      };
+    }
+    return {
+      ms: LATENCIA.esperaSemPrazo.ms,
+      nota: "sem prazo, a chamada pendura até o cliente desistir — e a conexão fica presa até lá",
+      aviso:
+        "Sem timeout, esta falha custa 30 segundos de conexão presa. Com prazo configurado seriam 2 segundos; com um disjuntor aberto, microssegundos. É a mesma dependência quebrada — o que muda é o que protege a borda.",
+      conceito: "timeout",
+    };
+  };
+
   const pedido: Record<TipoRequisicao, string> = {
     leitura: "abre a tela — GET /produtos",
     escrita: "confirma a ação — POST /pedidos",
@@ -150,20 +204,76 @@ export function montarSimulacao(
         "ui",
         def.nome,
         cdn
-          ? "assets vêm da CDN na borda; a chamada de dados segue adiante (~15ms)"
-          : "browser monta a tela e dispara a chamada (~30ms de rede)",
-        cdn ? 15 : 30
+          ? "assets vêm da CDN na borda; a chamada de dados segue adiante"
+          : "browser monta a tela e dispara a chamada",
+        cdn ? LATENCIA.cdnBorda.ms : LATENCIA.redeCliente.ms
       );
     } else if (c.camadaId === "api") {
       const nginx = acha(c, ["nginx"]);
+      const gateway = acha(c, ["api-gateway"]);
+      const idp = acha(c, ["idp"]);
+      const waf = acha(c, ["waf"]);
+      const temAuth =
+        c.padroes.includes("autenticacao") ||
+        c.padroes.includes("jwt") ||
+        !!gateway ||
+        !!idp ||
+        estado.camadas.some(
+          (x) =>
+            x.padroes.includes("autenticacao") ||
+            x.padroes.includes("jwt") ||
+            x.tecnologias.includes("idp")
+        );
+      const temRate =
+        c.padroes.includes("rate-limiting") ||
+        !!waf ||
+        !!gateway ||
+        estado.camadas.some((x) => x.padroes.includes("rate-limiting"));
+      const temAllow =
+        c.padroes.includes("allowlist") ||
+        !!waf ||
+        estado.camadas.some((x) => x.padroes.includes("allowlist"));
+      const temUi = estado.camadas.some((x) => x.camadaId === "ui");
+
+      const pedacos: string[] = [];
+      if (nginx) pedacos.push("Nginx termina TLS e balanceia");
+      if (gateway) pedacos.push("gateway roteia");
+      if (waf) pedacos.push("WAF inspeciona na borda");
+      if (temAllow) pedacos.push("allowlist de origem/IP");
+      if (temRate) pedacos.push("quota (rate limit)");
+      if (temAuth) {
+        pedacos.push(
+          c.padroes.includes("jwt") || gateway || idp
+            ? "verifica sessão/JWT"
+            : "verifica sessão"
+        );
+      } else if (temUi) {
+        pedacos.push("recebe sem autenticar");
+        avisos.push(
+          "API aberta: não há autenticação, JWT, gateway com auth nem IdP. Qualquer cliente que alcançar a rota passa."
+        );
+        resultado = resultado === "ok" ? "degradado" : resultado;
+      } else {
+        pedacos.push(nginx ? "encaminha" : "recebe e valida o formato");
+      }
+      if (c.padroes.includes("autorizacao")) {
+        pedacos.push("guarda de autorização (roles)");
+      }
+
       passo(
         "api",
         def.nome,
-        nginx
-          ? "Nginx termina TLS, balanceia e encaminha (~1ms)"
-          : "API recebe, autentica e valida o formato (~2ms)",
-        nginx ? 1 : 2
+        pedacos.length > 0
+          ? pedacos.join(" → ")
+          : "API recebe e valida o formato",
+        nginx || gateway || waf ? 2 : temAuth ? 3 : 2
       );
+
+      if (!temRate && temAuth && temUi) {
+        avisos.push(
+          "Há autenticação, mas sem rate limit na borda — força bruta no login não encontra freio."
+        );
+      }
     } else if (c.camadaId === "aplicacao") {
       const leituraPura = tipo === "leitura" || tipo === "busca";
       passo(
@@ -171,9 +281,9 @@ export function montarSimulacao(
         def.nome,
         temPadrao("cqrs")
           ? leituraPura
-            ? "CQRS: roteia para o lado de LEITURA — sem passar por regras de escrita (~1ms)"
-            : "CQRS: roteia o comando para o lado de ESCRITA (~1ms)"
-          : "caso de uso orquestra a operação (~2ms)",
+            ? "CQRS: roteia para o lado de LEITURA — sem passar por regras de escrita"
+            : "CQRS: roteia o comando para o lado de ESCRITA"
+          : "caso de uso orquestra a operação",
         temPadrao("cqrs") ? 1 : 2
       );
     } else if (c.camadaId === "dominio") {
@@ -183,8 +293,8 @@ export function montarSimulacao(
         "dominio",
         def.nome,
         tipo === "escrita" || tipo === "upload"
-          ? "invariantes de negócio validam o comando (~1ms)"
-          : "regras conferem o que pode ser exibido (~1ms)",
+          ? "invariantes de negócio validam o comando"
+          : "regras conferem o que pode ser exibido",
         1
       );
     }
@@ -209,15 +319,15 @@ export function montarSimulacao(
         passo(
           "read-store",
           "Leitura",
-          `${nomeTech(cacheTech)}: HIT — resposta direto da memória (~0.5ms). O banco nem fica sabendo.`,
-          0.5
+          `${nomeTech(cacheTech)}: HIT — resposta direto da memória. O banco nem fica sabendo.`,
+          LATENCIA.memoria.ms
         );
       } else {
         passo(
           "read-store",
           "Leitura",
-          `${nomeTech(cacheTech)}: MISS — a chave não está no cache (~0.5ms)`,
-          0.5
+          `${nomeTech(cacheTech)}: MISS — a chave não está no cache`,
+          LATENCIA.memoria.ms
         );
       }
     }
@@ -234,20 +344,22 @@ export function montarSimulacao(
           passo(
             "read-store",
             "Leitura",
-            `${nomeTech(bancoRead ?? buscaTech)} lê o read model desnormalizado (~8ms)`,
-            8
+            `${nomeTech(bancoRead ?? buscaTech)} lê o read model desnormalizado`,
+            LATENCIA.readModel.ms
           );
         }
       } else if (bancoFundo) {
         if (bancoCaiu) {
+          const custo = custoDaFalha();
           passo(
             noBancoFundo,
             "Banco fora",
-            `${nomeTech(bancoFundo)} não responde — a consulta falha`,
-            30,
+            `${nomeTech(bancoFundo)} não responde — ${custo.nota}`,
+            custo.ms,
             { falha: true }
           );
           resultado = "erro";
+          avisos.push(custo.aviso);
           avisos.push(
             cacheTech
               ? `Banco fora + cache ${cacheCaiu ? "fora" : "frio"} = erro 503. Com o cache QUENTE, essa mesma leitura seria servida da memória — é isso que cache traz de resiliência.`
@@ -257,15 +369,15 @@ export function montarSimulacao(
           passo(
             noBancoFundo,
             "Banco",
-            `${nomeTech(bancoFundo)} resolve a consulta (~10ms)`,
-            10
+            `${nomeTech(bancoFundo)} resolve a consulta`,
+            LATENCIA.bancoIndex.ms
           );
           if (cacheTech && !cacheCaiu) {
             passo(
               "read-store",
               "Cache",
-              `resultado gravado no ${nomeTech(cacheTech)} — a próxima leitura vira HIT (~0.5ms)`,
-              0.5
+              `resultado gravado no ${nomeTech(cacheTech)} — a próxima leitura vira HIT`,
+              LATENCIA.memoria.ms
             );
           }
         }
@@ -286,19 +398,19 @@ export function montarSimulacao(
       passo(
         "read-store",
         "Busca",
-        `${nomeTech(buscaTech)}: índice invertido com relevância, facetas e typo-tolerance (~15ms)`,
+        `${nomeTech(buscaTech)}: índice invertido com relevância, facetas e typo-tolerance`,
         15
       );
     } else if (buscaTech && bancoCaiu) {
-      passo("read-store", "Busca", `${nomeTech(buscaTech)} responde do índice — é uma projeção, sobrevive ao banco fora (~15ms)`, 15);
+      passo("read-store", "Busca", `${nomeTech(buscaTech)} responde do índice — é uma projeção, sobrevive ao banco fora`, LATENCIA.indiceBusca.ms);
       resultado = "degradado";
       avisos.push("O índice de busca é derivado: continua servindo consultas mesmo com o banco fora — mas sem receber atualizações.");
     } else if (bancoFundo && !bancoCaiu) {
       passo(
         noBancoFundo,
         "Banco (LIKE)",
-        `${nomeTech(bancoFundo)} faz LIKE '%termo%' — full table scan, sem relevância nem tolerância a typo (~180ms)`,
-        180,
+        `${nomeTech(bancoFundo)} faz LIKE '%termo%' — full table scan, sem relevância nem tolerância a typo`,
+        LATENCIA.bancoScan.ms,
         { falha: true }
       );
       resultado = "degradado";
@@ -314,18 +426,18 @@ export function montarSimulacao(
       passo(
         "infra",
         "Storage",
-        `${nomeTech(storageTech)}: a API devolve URL assinada e o arquivo vai do cliente DIRETO ao bucket (~40ms de handshake)`,
-        40
+        `${nomeTech(storageTech)}: a API devolve URL assinada e o arquivo vai do cliente DIRETO ao bucket`,
+        LATENCIA.handshakeUpload.ms
       );
       if (bancoFundo) {
-        passo(noBancoFundo, "Metadados", `${nomeTech(bancoFundo)} guarda só o caminho/metadados (~8ms)`, 8);
+        passo(noBancoFundo, "Metadados", `${nomeTech(bancoFundo)} guarda só o caminho/metadados`, LATENCIA.metadados.ms);
       }
     } else if (bancoFundo && !bancoCaiu) {
       passo(
         noBancoFundo,
         "Banco (BLOB)",
-        `arquivo gravado como BLOB no ${nomeTech(bancoFundo)} — infla o banco, encarece backup e satura a conexão (~250ms)`,
-        250,
+        `arquivo gravado como BLOB no ${nomeTech(bancoFundo)} — infla o banco, encarece backup e satura a conexão`,
+        LATENCIA.blobNoBanco.ms,
         { falha: true }
       );
       resultado = "degradado";
@@ -355,10 +467,16 @@ export function montarSimulacao(
           "Este é o valor da fila na resiliência: com o banco fora, a escrita é aceita e processada depois (202) em vez de falhar (503)."
         );
       } else if (noEscrita) {
-        passo(noEscrita, "Escrita falhou", `${nomeTech(bancoFundo)} não responde — 503 para o usuário`, 30, {
-          falha: true,
-        });
+        const custo = custoDaFalha();
+        passo(
+          noEscrita,
+          "Escrita falhou",
+          `${nomeTech(bancoFundo)} não responde — ${custo.nota}`,
+          custo.ms,
+          { falha: true }
+        );
         resultado = "erro";
+        avisos.push(custo.aviso);
         avisos.push(
           "Sem fila para absorver a escrita, a queda do banco vira erro imediato. Uma fila (Kafka/RabbitMQ) transformaria isso em 'aceito, processo depois'."
         );
@@ -368,11 +486,11 @@ export function montarSimulacao(
         noEscrita,
         "Escrita",
         esCamada
-          ? `grava o EVENTO no log${bancoFundo ? ` (${nomeTech(bancoFundo)} append-only)` : ""} — o histórico é a verdade (~12ms)`
+          ? `grava o EVENTO no log${bancoFundo ? ` (${nomeTech(bancoFundo)} append-only)` : ""} — o histórico é a verdade`
           : bancoFundo
-            ? `${nomeTech(bancoFundo)} grava com transação ACID (~12ms)`
-            : "persiste a mudança (nenhum banco concreto definido — veja a paleta) (~10ms)",
-        bancoFundo ? 12 : 10
+            ? `${nomeTech(bancoFundo)} grava com transação ACID`
+            : "persiste a mudança (nenhum banco concreto definido — veja a paleta)",
+        bancoFundo ? LATENCIA.escritaAcid.ms : LATENCIA.bancoIndex.ms
       );
     }
 

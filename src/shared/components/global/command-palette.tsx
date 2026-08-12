@@ -5,7 +5,6 @@ import { Command } from "cmdk";
 import {
   Blocks,
   GitCompareArrows,
-  GraduationCap,
   CircleHelp,
   LayoutGrid,
   Map,
@@ -46,7 +45,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       label="Busca"
-      className="entra-subindo fixed left-1/2 top-24 z-[100] w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-2xl border border-card-border bg-elevated shadow-[var(--shadow-lg)]"
+      className="entra-subindo fixed left-1/2 top-[max(4rem,env(safe-area-inset-top))] z-[100] w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-2xl border border-card-border bg-elevated shadow-[var(--shadow-lg)]"
       overlayClassName="fixed inset-0 z-[99] bg-[#1a0f09]/55 backdrop-blur-sm"
     >
       <div className="flex items-center gap-2 border-b border-card-border px-4">
@@ -56,7 +55,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
           className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted"
         />
       </div>
-      <Command.List className="max-h-80 overflow-y-auto p-2">
+      <Command.List className="max-h-[min(20rem,50dvh)] overflow-y-auto overscroll-contain p-2">
         <Command.Empty className="py-8 text-center text-sm text-muted">
           Nada encontrado.
         </Command.Empty>
@@ -73,15 +72,6 @@ export function CommandPalette({ open, onOpenChange }: Props) {
             <Blocks className="size-4 shrink-0 text-muted" />
             Construtor de Projeto
           </Command.Item>
-          <Command.Item
-            value="estudar revisar progresso trilha memoria espacada"
-            onSelect={() => ir("/estudar")}
-            className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-all duration-150 data-[selected=true]:translate-x-0.5 data-[selected=true]:bg-primary/12 data-[selected=true]:text-primary"
-            >
-              <GraduationCap className="size-4 shrink-0 text-muted" />
-              Estudar
-            </Command.Item>
-
           <Command.Item
             value="quiz armadilhas perguntas teste treinar"
             onSelect={() => ir("/quiz")}

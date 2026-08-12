@@ -224,6 +224,7 @@ export function ConstrutorApp() {
           score={c.score}
           referencia={c.referencia}
           sugestoes={c.sugestoes}
+          ausentes={c.ausentes}
           revisao={c.revisao}
           onAplicarSugestao={c.aplicarSugestao}
           temCamadas={c.estado.camadas.length > 0}

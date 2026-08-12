@@ -79,6 +79,44 @@ export const cqs: Conceito = {
   tags: ["meyer", "efeito-colateral", "design-de-metodos", "clareza"],
   dificuldade: "iniciante",
   tempoLeitura: 5,
+  nasceu: {
+    quando: { rotulo: "1988", ano: 1988, precisao: "exata" },
+    fonte:
+      "Bertrand Meyer — *Object-Oriented Software Construction*, " +
+      "Prentice Hall, 1988",
+  },
+  ondeAparece: [
+    {
+      onde: "GET × POST/PUT/DELETE",
+      explicacao:
+        "O HTTP separa o verbo que só lê (GET, seguro e sem efeito) dos que mudam estado (POST, PUT, DELETE) — comando e query no nível do protocolo.",
+    },
+    {
+      onde: "useState: [leitura, comando]",
+      explicacao:
+        "O par que o hook devolve é a separação em pessoa: o primeiro elemento lê o estado, o segundo é o comando que o muda, nunca as duas coisas juntas.",
+    },
+    {
+      onde: "dispatch × selector no Redux",
+      explicacao:
+        "Selectors leem a store sem tocá-la; o dispatch de uma action muda a store sem devolver dado — as duas metades do princípio, por design.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Comando muta; query só observa.
+salvar(pedido);           // comando
+const t = total(pedido);  // query`,
+  },
+  custo: {
+    indirecoes: 0,
+    cobra: [
+      "Separar comando de query obriga a duas chamadas onde uma só resolveria (agir e depois ler)",
+      "Alguns casos são inerentemente 'pegar e remover', e a separação fica artificial",
+    ],
+    naoValeSe:
+      "a operação é atomicamente 'mude e me diga o resultado', como um pop de fila — separar aí cria uma corrida entre as duas chamadas.",
+  },
   relacionados: ["cqrs"],
   problema: [
     "Métodos que ao mesmo tempo alteram estado e devolvem um valor escondem seus efeitos colaterais. Ler um valor deveria ser inofensivo, mas quando a leitura também muta algo, cada chamada carrega consequências difíceis de prever.",

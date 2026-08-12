@@ -568,11 +568,11 @@ export function FluxoProjeto({ estado }: { estado: EstadoProjeto }) {
   // ——— tela cheia: diagrama grande + narração ao lado ———
   if (expandido) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-background">
+      <div className="fixed inset-0 z-50 flex flex-col bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
         {/* topo fixo: cabeçalho + controles */}
-        <div className="flex shrink-0 flex-col gap-4 p-4 pb-0 lg:p-6 lg:pb-0">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
+        <div className="flex shrink-0 flex-col gap-3 p-3 pb-0 sm:gap-4 sm:p-4 sm:pb-0 lg:p-6 lg:pb-0">
+        <div className="flex items-center justify-between gap-2 sm:gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-card-border bg-primary/10 text-primary">
               <Waypoints className="size-4" />
             </span>
@@ -593,9 +593,18 @@ export function FluxoProjeto({ estado }: { estado: EstadoProjeto }) {
               <kbd className="ml-1.5 rounded border border-card-border px-1.5 py-0.5 font-mono">←→</kbd>
               passos
             </p>
-            <Button variant="outline" size="sm" onClick={() => setExpandido(false)}>
-              <Minimize2 /> Sair da tela cheia
-              <kbd className="ml-1 rounded border border-card-border px-1 text-[10px]">Esc</kbd>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setExpandido(false)}
+              aria-label="Sair da tela cheia"
+            >
+              <Minimize2 />
+              <span className="hidden sm:inline">Sair da tela cheia</span>
+              <span className="sm:hidden">Sair</span>
+              <kbd className="ml-1 hidden rounded border border-card-border px-1 text-[10px] sm:inline">
+                Esc
+              </kbd>
             </Button>
           </div>
         </div>

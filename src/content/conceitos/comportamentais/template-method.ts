@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class ImportadorRelatorio {
@@ -115,6 +116,33 @@ export const templateMethod: Conceito = {
   tags: ["heranca", "esqueleto", "ganchos", "gof"],
   dificuldade: "iniciante",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "beforeEach / it / afterEach",
+      explicacao:
+        "O framework de teste define o esqueleto da execução; você preenche os passos.",
+    },
+    {
+      onde: "Hooks de ciclo de vida",
+      explicacao:
+        "O framework decide quando montar, atualizar e desmontar; você diz o que acontece em cada etapa.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Esqueleto na base; passos nas subclasses.
+class Teste { run() { this.setup(); this.test(); this.teardown(); } }`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "A herança amarra a subclasse ao esqueleto do pai, que não muda sem impacto abaixo",
+      "O fluxo se lê pela metade na superclasse e pela metade nas subclasses",
+    ],
+    naoValeSe:
+      "os passos variáveis não compartilham um esqueleto comum — aí compor com Strategy acopla menos que herdar.",
+  },
   relacionados: ["strategy", "factory-method"],
   problema: [
     "Vários processos seguem a mesma sequência e diferem em poucos pontos: importar CSV e importar XML leem e gravam diferente, mas ambos leem, validam, gravam e notificam — nessa ordem.",

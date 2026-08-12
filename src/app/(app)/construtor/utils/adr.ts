@@ -152,7 +152,7 @@ export function gerarADR({
   if (link) {
     l.push("---");
     l.push("");
-    l.push(`[Abrir este projeto no DevAtlas](${link})`);
+    l.push(`[Abrir este projeto no DevMappa](${link})`);
     l.push("");
   }
 

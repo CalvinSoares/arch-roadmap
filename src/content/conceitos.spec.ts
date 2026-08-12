@@ -44,7 +44,10 @@ describe("catálogo de conceitos", () => {
         "comportamental",
         "principio",
         "arquitetura",
+        "resiliencia",
+        "dados",
         "infra",
+        "seguranca",
       ]).toContain(c.categoria);
     }
   );

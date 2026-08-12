@@ -490,6 +490,95 @@ export const REGRAS: Regra[] = [
     explicacao:
       "Redis está no projeto, mas nenhum banco durável. A persistência do Redis é opcional (AOF/RDB) — se ele é o único store, um restart pode levar seus dados. Adicione PostgreSQL ou MongoDB como fonte da verdade.",
   },
+  /* ——— resiliência: as peças novas só valem se o motor reagir a elas ——— */
+  {
+    id: "retry-sem-timeout",
+    quando: (p) => temPadrao(p, "retry") && !temPadrao(p, "timeout"),
+    nivel: "alerta",
+    titulo: "Retry sem prazo para reagir",
+    explicacao:
+      "Retry precisa de um evento de falha para começar a contar — e sem timeout a chamada não falha, ela pendura. Você configurou a reação sem configurar o que a dispara: na prática, a primeira tentativa espera para sempre e as outras duas nunca acontecem.",
+    conceitos: ["retry", "timeout"],
+  },
+  {
+    id: "circuito-sem-timeout",
+    quando: (p) => temPadrao(p, "circuit-breaker") && !temPadrao(p, "timeout"),
+    nivel: "alerta",
+    titulo: "Disjuntor sem o que contar",
+    explicacao:
+      "O disjuntor abre observando a taxa de falha. Sem prazo, chamadas lentas não contam como falha — elas só ocupam conexão. O circuito fica fechado enquanto o pool esgota, que é justamente o cenário que ele existia para evitar.",
+    conceitos: ["circuit-breaker", "timeout"],
+  },
+  {
+    id: "retry-sem-idempotencia",
+    quando: (p) =>
+      temPadrao(p, "retry") &&
+      !temPadrao(p, "idempotencia") &&
+      (indice(p, "write-store") >= 0 || temBancoDuravel(p)),
+    nivel: "alerta",
+    titulo: "Repetir escrita sem chave de idempotência",
+    explicacao:
+      "Há retry e há escrita durável, mas nenhuma idempotência. Timeout numa escrita é ambíguo: pode ser que ela não tenha chegado, ou que tenha sido executada e só a resposta se perdeu. Repetir nesse caso é cobrar duas vezes porque a tela não carregou.",
+    conceitos: ["retry", "idempotencia"],
+  },
+  {
+    id: "timeout-retry",
+    quando: (p) => temPadrao(p, "timeout") && temPadrao(p, "retry"),
+    nivel: "sinergia",
+    titulo: "Prazo e reação, na ordem certa",
+    explicacao:
+      "Timeout cria o evento de falha; o retry reage a ele com espera crescente e jitter. É o par mínimo de resiliência — e o único em que a ordem de adoção importa: sem prazo, não há o que repetir.",
+    conceitos: ["timeout", "retry"],
+  },
+  {
+    id: "resiliencia-completa",
+    quando: (p) =>
+      temPadrao(p, "timeout") &&
+      temPadrao(p, "retry") &&
+      temPadrao(p, "circuit-breaker"),
+    nivel: "sinergia",
+    titulo: "Os três degraus da borda",
+    explicacao:
+      "Timeout garante que existe um fim, retry aproveita a falha passageira, e o disjuntor para de insistir quando ficou claro que não é passageira. Nenhum substitui o outro — juntos, cobrem a falha rápida, a lenta e a persistente.",
+    conceitos: ["timeout", "retry", "circuit-breaker"],
+  },
+  {
+    id: "bulkhead-com-pool",
+    quando: (p) => temPadrao(p, "bulkhead") && totalTechs(p) >= 2,
+    nivel: "sinergia",
+    titulo: "Compartimento entre dependências",
+    explicacao:
+      "Com mais de uma dependência concreta na pilha, o anteparo passa a ter função real: o teto por compartimento impede que a mais lenta consuma o pool de que as outras dependem. Timeout limita quanto tempo; Bulkhead limita quantas ao mesmo tempo.",
+    conceitos: ["bulkhead", "timeout"],
+  },
+  {
+    id: "fila-sem-dlq",
+    quando: (p) => indice(p, "fila") >= 0 && !temPadrao(p, "dead-letter-queue"),
+    nivel: "alerta",
+    titulo: "Fila sem desvio para o envenenado",
+    explicacao:
+      "Uma mensagem que nunca vai dar certo — JSON inválido, referência apagada, contrato mudado — volta para a fila indefinidamente. Consome capacidade, polui o log e, em fila com ordenação, bloqueia tudo atrás dela. É a *poison message*, e ela não é hipótese: é questão de tempo.",
+    conceitos: ["dead-letter-queue", "retry"],
+  },
+  {
+    id: "saga-sem-outbox",
+    quando: (p) =>
+      temPadrao(p, "saga") && indice(p, "fila") >= 0 && !temPadrao(p, "outbox"),
+    nivel: "alerta",
+    titulo: "Saga que pode perder o evento",
+    explicacao:
+      "A Saga coordena passos publicando eventos, mas gravar no banco e publicar na fila são duas operações sem transação em comum. Se o processo morre entre as duas, o dado mudou e ninguém foi avisado — e a Saga trava num passo que já aconteceu. É o problema que o Outbox resolve.",
+    conceitos: ["outbox", "saga"],
+  },
+  {
+    id: "outbox-com-fila",
+    quando: (p) => temPadrao(p, "outbox") && indice(p, "fila") >= 0,
+    nivel: "sinergia",
+    titulo: "O evento na mesma transação do dado",
+    explicacao:
+      "Com Outbox, o evento é gravado na mesma transação que a mudança de estado e publicado depois por um processo separado. Some a janela em que o dado mudou e a mensagem se perdeu — ao custo de latência de publicação e de uma tabela a expurgar.",
+    conceitos: ["outbox", "garantias-de-entrega"],
+  },
   {
     id: "kafka-saga",
     quando: (p) => temTech(p, "kafka") && temPadrao(p, "saga"),
@@ -735,19 +824,120 @@ export const REGRAS: Regra[] = [
   },
   {
     id: "sem-gestao-de-segredos",
-    quando: (p) => totalTechs(p) >= 4 && !temTech(p, "vault"),
+    quando: (p) => totalTechs(p) >= 4 && !temTech(p, "vault") && !temPadrao(p, "gestao-de-segredos"),
     nivel: "info",
     titulo: "Onde ficam as credenciais?",
     explicacao:
       "Com quatro ou mais tecnologias, são várias credenciais circulando (banco, broker, storage). Um gerenciador de segredos tira isso do .env, permite rotação sem redeploy e deixa o acesso auditável.",
+    conceitos: ["gestao-de-segredos"],
   },
   {
     id: "vault-com-segredos",
-    quando: (p) => temTech(p, "vault"),
+    quando: (p) => temTech(p, "vault") || temPadrao(p, "gestao-de-segredos"),
     nivel: "sinergia",
     titulo: "Segredos fora do código",
     explicacao:
       "Credenciais saem do repositório e do ambiente: acesso por identidade, rotação automática e auditoria. Lembre-se de cachear localmente — o cofre passa a ser dependência do boot.",
+    conceitos: ["gestao-de-segredos"],
+  },
+  {
+    id: "api-sem-autenticacao",
+    quando: (p) => {
+      const api = p.camadas.find((c) => c.camadaId === "api");
+      if (!api) return false;
+      const apiEmUso = api.padroes.length > 0 || api.tecnologias.length > 0;
+      if (!apiEmUso || !tem(p, "ui")) return false;
+      return (
+        !temPadrao(p, "autenticacao") &&
+        !temPadrao(p, "jwt") &&
+        !temTech(p, "api-gateway") &&
+        !temTech(p, "idp")
+      );
+    },
+    nivel: "alerta",
+    titulo: "API sem autenticação",
+    explicacao:
+      "Há uma API pública (com UI na frente), mas nada prova identidade: sem sessão/JWT, sem gateway com auth e sem IdP. Qualquer cliente que alcançar a rota age sem credencial — acrescente autenticação na borda ou nos casos de uso.",
+    conceitos: ["autenticacao", "jwt", "api-gateway"],
+  },
+  {
+    id: "autorizacao-sem-autenticacao",
+    quando: (p) =>
+      temPadrao(p, "autorizacao") &&
+      !temPadrao(p, "autenticacao") &&
+      !temPadrao(p, "jwt") &&
+      !temTech(p, "idp"),
+    nivel: "alerta",
+    titulo: "Autorização sem autenticação",
+    explicacao:
+      "Roles e guards precisam de uma identidade. Sem autenticação (ou JWT/IdP), a autorização não tem em quem colar o papel — é teatro de permissão.",
+    conceitos: ["autorizacao", "autenticacao"],
+  },
+  {
+    id: "autenticacao-sem-rate-limit",
+    quando: (p) =>
+      (temPadrao(p, "autenticacao") || temPadrao(p, "jwt") || temTech(p, "idp")) &&
+      !temPadrao(p, "rate-limiting") &&
+      !temTech(p, "waf") &&
+      !temTech(p, "api-gateway"),
+    nivel: "alerta",
+    titulo: "Login sem rate limit",
+    explicacao:
+      "Há autenticação, mas nada limita tentativas. Força bruta de senha e stuffing de credenciais passam. Rate limiting (ou WAF/gateway com quota) no caminho do login é o corte barato.",
+    conceitos: ["rate-limiting", "autenticacao"],
+  },
+  {
+    id: "mfa-sem-autenticacao",
+    quando: (p) =>
+      temPadrao(p, "mfa") &&
+      !temPadrao(p, "autenticacao") &&
+      !temTech(p, "idp"),
+    nivel: "alerta",
+    titulo: "MFA sem autenticação de base",
+    explicacao:
+      "Segundo fator pressupõe o primeiro. Sem autenticação (ou IdP que já a faça), MFA não tem onde se encaixar no fluxo de login.",
+    conceitos: ["mfa", "autenticacao"],
+  },
+  {
+    id: "jwt-na-ui",
+    quando: (p) => padraoEm(p, "jwt", "ui"),
+    nivel: "info",
+    titulo: "JWT na camada de UI",
+    explicacao:
+      "Token na UI costuma acabar no localStorage — XSS lê. Prefira cookie httpOnly para refresh/sessão e access curto em memória, ou deixe o JWT na API/BFF.",
+    conceitos: ["jwt", "autenticacao"],
+  },
+  {
+    id: "gateway-com-autenticacao",
+    quando: (p) =>
+      temTech(p, "api-gateway") &&
+      (temPadrao(p, "autenticacao") ||
+        temPadrao(p, "jwt") ||
+        temPadrao(p, "rate-limiting") ||
+        temTech(p, "idp")),
+    nivel: "sinergia",
+    titulo: "Auth e quota na borda",
+    explicacao:
+      "Gateway + autenticação/JWT/rate limit é o Decorator na infraestrutura: uma vez na entrada, os serviços não repetem o transversal.",
+    conceitos: ["api-gateway", "autenticacao", "decorator", "rate-limiting"],
+  },
+  {
+    id: "idp-com-oauth",
+    quando: (p) => temTech(p, "idp"),
+    nivel: "sinergia",
+    titulo: "Identidade delegada",
+    explicacao:
+      "O IdP concentra login, MFA e emissão de token. Seus apps viram clients OAuth/OIDC — menos senha no seu código, mais disciplina de redirect e escopos.",
+    conceitos: ["oauth2", "mfa", "jwt"],
+  },
+  {
+    id: "waf-com-allowlist",
+    quando: (p) => temTech(p, "waf") && temPadrao(p, "allowlist"),
+    nivel: "sinergia",
+    titulo: "Allowlist na borda",
+    explicacao:
+      "WAF + allowlist: default deny de origem/IP antes de a requisição tocar a API. Complementa auth — não a substitui.",
+    conceitos: ["allowlist", "rate-limiting"],
   },
   // ——— dinheiro, eventos e repetição ———
   {
@@ -1072,12 +1262,12 @@ export const TEMPLATES: TemplateProjeto[] = [
     estado: {
       camadas: [
         { camadaId: "ui", padroes: ["observer"], tecnologias: ["cdn"] },
-        { camadaId: "api", padroes: ["adapter"], tecnologias: ["nginx"] },
+        { camadaId: "api", padroes: ["adapter"], tecnologias: ["api-gateway"] },
         { camadaId: "aplicacao", padroes: ["cqrs", "saga"], tecnologias: [] },
         { camadaId: "dominio", padroes: ["hexagonal"], tecnologias: [] },
         { camadaId: "write-store", padroes: [], tecnologias: ["postgres"] },
         { camadaId: "read-store", padroes: [], tecnologias: ["redis", "elasticsearch"] },
-        { camadaId: "fila", padroes: [], tecnologias: ["kafka"] },
+        { camadaId: "fila", padroes: ["outbox", "dead-letter-queue"], tecnologias: ["kafka"] },
         { camadaId: "infra", padroes: [], tecnologias: ["prometheus", "s3"] },
       ],
     },
@@ -1098,7 +1288,7 @@ export const TEMPLATES: TemplateProjeto[] = [
         { camadaId: "dominio", padroes: ["hexagonal"], tecnologias: [] },
         { camadaId: "write-store", padroes: ["event-sourcing"], tecnologias: ["postgres"] },
         { camadaId: "read-store", padroes: [], tecnologias: ["mongodb"] },
-        { camadaId: "fila", padroes: ["observer"], tecnologias: ["kafka"] },
+        { camadaId: "fila", padroes: ["observer", "dead-letter-queue"], tecnologias: ["kafka"] },
         { camadaId: "infra", padroes: ["singleton"], tecnologias: ["prometheus", "vault"] },
       ],
     },
@@ -1119,7 +1309,7 @@ export const TEMPLATES: TemplateProjeto[] = [
         { camadaId: "aplicacao", padroes: ["strategy"], tecnologias: ["worker"] },
         { camadaId: "dominio", padroes: ["hexagonal"], tecnologias: [] },
         { camadaId: "write-store", padroes: [], tecnologias: ["postgres"] },
-        { camadaId: "fila", padroes: ["observer"], tecnologias: ["rabbitmq"] },
+        { camadaId: "fila", padroes: ["observer", "dead-letter-queue"], tecnologias: ["rabbitmq"] },
         { camadaId: "infra", padroes: ["adapter"], tecnologias: ["s3", "prometheus", "vault"] },
       ],
     },
@@ -1136,14 +1326,14 @@ export const TEMPLATES: TemplateProjeto[] = [
     estado: {
       camadas: [
         { camadaId: "ui", padroes: ["observer"], tecnologias: ["cdn"] },
-        { camadaId: "api", padroes: ["decorator"], tecnologias: ["nginx"] },
+        { camadaId: "api", padroes: ["decorator"], tecnologias: ["api-gateway"] },
         // Observer fica na UI (tela reage) e na fila (consome o log). Aqui o
         // fan-out é capacidade do Redis (pub/sub), não um terceiro Observer —
         // três camadas com Observer disparariam a cascata de notificações.
         { camadaId: "aplicacao", padroes: ["state"], tecnologias: ["redis"] },
         { camadaId: "dominio", padroes: ["hexagonal"], tecnologias: [] },
         { camadaId: "write-store", padroes: [], tecnologias: ["postgres"] },
-        { camadaId: "fila", padroes: ["observer"], tecnologias: ["kafka"] },
+        { camadaId: "fila", padroes: ["observer", "dead-letter-queue"], tecnologias: ["kafka"] },
         { camadaId: "infra", padroes: [], tecnologias: ["prometheus", "vault"] },
       ],
     },
@@ -1165,7 +1355,7 @@ export const TEMPLATES: TemplateProjeto[] = [
         { camadaId: "aplicacao", padroes: ["saga"], tecnologias: ["worker"] },
         { camadaId: "dominio", padroes: ["ledger", "maquina-de-estados", "hexagonal"], tecnologias: [] },
         { camadaId: "write-store", padroes: ["append-only"], tecnologias: ["postgres"] },
-        { camadaId: "fila", padroes: [], tecnologias: ["rabbitmq"] },
+        { camadaId: "fila", padroes: ["outbox", "dead-letter-queue"], tecnologias: ["rabbitmq"] },
         { camadaId: "infra", padroes: [], tecnologias: ["vault", "prometheus"] },
       ],
     },

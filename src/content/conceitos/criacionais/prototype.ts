@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Clonavel {
@@ -124,6 +125,41 @@ export const prototype: Conceito = {
   tags: ["clonagem", "copia", "modelo", "gof"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: gof(
+    "Self (1987) construiu a linguagem inteira em cima de clonagem de " +
+      "protótipos, sem classe nenhuma — e o JavaScript herdou isso."
+  ),
+  ondeAparece: [
+    {
+      onde: "Object.create",
+      explicacao:
+        "Cria um objeto novo a partir de outro que serve de molde — é o padrão como chamada de linguagem.",
+    },
+    {
+      onde: "structuredClone",
+      explicacao:
+        "Cópia profunda de um objeto existente, sem precisar conhecer a classe dele.",
+    },
+    {
+      onde: "A cadeia de protótipos do JS",
+      explicacao:
+        "Herança em JavaScript é clonagem de protótipo, não instanciação de classe — a classe é açúcar por cima.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Clona em vez de reconfigurar do zero.
+const copia = structuredClone(modelo);`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Cada classe precisa saber se clonar, incluindo a decisão entre cópia rasa e profunda",
+      "Clone mal feito compartilha referências sem querer e vira bug de estado partilhado",
+    ],
+    naoValeSe:
+      "criar do zero é barato e claro — clonar só ganha quando a construção é cara ou o estado a copiar é grande.",
+  },
   relacionados: ["builder", "abstract-factory", "memento"],
   problema: [
     "Alguns objetos custam caro para montar: leem configuração, consultam serviços, aplicam dezenas de ajustes. Repetir esse trabalho a cada instância é desperdício.",

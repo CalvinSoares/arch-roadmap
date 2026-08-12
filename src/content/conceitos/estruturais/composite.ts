@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class No {
@@ -121,6 +122,39 @@ export const composite: Conceito = {
   tags: ["arvore", "recursao", "hierarquia", "gof"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "A árvore do DOM",
+      explicacao:
+        "Um `<div>` e um nó de texto respondem à mesma interface de nó; o container se trata como a folha.",
+    },
+    {
+      onde: "children do JSX",
+      explicacao:
+        "Um componente recebe um filho ou cem sem mudar de código, porque a composição é uniforme.",
+    },
+    {
+      onde: "Sistema de arquivos",
+      explicacao:
+        "Pasta e arquivo compartilham operações; copiar uma pasta é copiar recursivamente os filhos.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Folha e grupo compartilham a mesma interface.
+pasta.adicionar(arquivo);
+pasta.tamanho(); // soma os filhos`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Folha e composto passam a compartilhar uma interface que nem sempre encaixa nos dois",
+      "Operações que só fazem sentido no composto vazam para a folha, ou viram no-op estranho",
+    ],
+    naoValeSe:
+      "a estrutura não é recursiva de verdade — forçar árvore onde há só uma lista plana complica sem ganho.",
+  },
   relacionados: ["decorator", "iterator", "visitor"],
   problema: [
     "Estruturas hierárquicas (pastas, menus, organogramas, grupos de produtos) misturam itens simples e grupos, e o cliente precisa saber com qual está lidando antes de agir.",

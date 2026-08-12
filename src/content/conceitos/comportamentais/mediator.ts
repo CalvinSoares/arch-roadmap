@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Mediador {
@@ -119,6 +120,33 @@ export const mediator: Conceito = {
   tags: ["acoplamento", "coordenacao", "ui", "gof"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "A store do Redux",
+      explicacao:
+        "Componentes não conversam entre si: todos falam com a store, que coordena as consequências.",
+    },
+    {
+      onde: "Um event bus",
+      explicacao:
+        "Publicadores e assinantes se desconhecem; o barramento no meio é quem sabe ligar os dois.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Colegas falam com o mediador, não entre si.
+mediador.notificar(this, "clique");`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "O mediador tende a concentrar lógica e crescer até virar um objeto-deus difícil de manter",
+      "Uma indireção a mais entre colegas que antes se falavam diretamente",
+    ],
+    naoValeSe:
+      "há poucos componentes e a comunicação entre eles é simples — centralizar tudo só cria um gargalo de manutenção.",
+  },
   relacionados: ["observer", "facade", "command"],
   problema: [
     "Componentes que se coordenam acabam se conhecendo: o campo de destino chama o de data, que chama o botão, que consulta os dois. O grafo de dependências vira uma teia, e cada peça só funciona junto com as outras.",

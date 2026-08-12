@@ -1,35 +1,75 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/shared/context/providers";
+import { SITE } from "@/shared/config/site";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://devatlas.vercel.app";
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f1ea" },
+    { media: "(prefers-color-scheme: dark)", color: SITE.backgroundColor },
+  ],
+  colorScheme: "dark light",
+};
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: new URL(SITE.url),
   title: {
-    default: "DevAtlas — estude padrões e arquitetura visualmente",
-    template: "%s · DevAtlas",
+    default: SITE.title,
+    template: `%s · ${SITE.name}`,
   },
-  description:
-    "Roadmaps enxutos e um catálogo visual de design patterns, princípios e arquitetura, com diagramas, camadas navegáveis e demos interativas.",
+  description: SITE.description,
+  applicationName: SITE.name,
+  authors: [{ name: SITE.name, url: SITE.url }],
+  creator: SITE.name,
+  publisher: SITE.name,
+  keywords: [...SITE.keywords],
+  category: "education",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  alternates: {
+    canonical: "/",
+    languages: { "pt-BR": "/" },
+  },
   openGraph: {
     type: "website",
-    siteName: "DevAtlas",
-    locale: "pt_BR",
+    locale: SITE.locale,
+    url: "/",
+    siteName: SITE.name,
+    title: SITE.title,
+    description: SITE.description,
   },
   twitter: {
     card: "summary_large_image",
+    title: SITE.title,
+    description: SITE.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="pt-BR"
+      lang={SITE.language}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >

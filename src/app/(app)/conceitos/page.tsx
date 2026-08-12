@@ -2,9 +2,15 @@ import { LayoutGrid } from "lucide-react";
 import { PageTemplate } from "@/shared/components/templates/page-template";
 import { listConceitos } from "@/shared/lib/content";
 import { slugsNovos } from "@/shared/lib/novidades";
+import { pageMetadata } from "@/shared/lib/seo";
 import { CatalogoConceitos } from "./_components/catalogo-conceitos";
 
-export const metadata = { title: "Conceitos" };
+export const metadata = pageMetadata({
+  title: "Conceitos",
+  description:
+    "Catálogo visual de design patterns, princípios SOLID e arquitetura — com diagramas, demos e código em TypeScript, Python e Java.",
+  path: "/conceitos",
+});
 
 export default function ConceitosPage() {
   const conceitos = listConceitos();

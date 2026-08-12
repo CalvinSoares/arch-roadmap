@@ -88,7 +88,9 @@ export function PageTemplate({
             ))}
         </div>
 
-        {actions && <div className="shrink-0">{actions}</div>}
+        {actions && (
+          <div className="shrink-0 self-start sm:self-auto">{actions}</div>
+        )}
       </header>
       {children}
     </div>

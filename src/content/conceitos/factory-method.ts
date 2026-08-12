@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Criador {
@@ -76,6 +77,25 @@ DialogoWeb().renderizar()  # "<button>"`,
   },
 ];
 
+const ANTI_EXEMPLO = `class FabricaDeRelatorio {
+  static criar(tipo: string): Relatorio {
+    switch (tipo) {
+      case "pdf":   return new RelatorioPdf();
+      case "csv":   return new RelatorioCsv();
+      case "xlsx":  return new RelatorioXlsx();
+      case "html":  return new RelatorioHtml();
+      // ... e mais oito
+      default: throw new Error("tipo desconhecido: " + tipo);
+    }
+  }
+}
+
+// Este arquivo importa TODAS as implementacoes.
+// Consequencias:
+// - formato novo = editar aqui (Aberto/Fechado violado)
+// - o bundle carrega os doze, mesmo usando um
+// - o erro de tipo desconhecido so aparece em runtime`;
+
 export const factoryMethod: Conceito = {
   slug: "factory-method",
   titulo: "Factory Method",
@@ -85,6 +105,38 @@ export const factoryMethod: Conceito = {
   tags: ["polimorfismo", "gof", "desacoplamento"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "document.createElement",
+      explicacao:
+        "Você pede um elemento pelo nome e recebe a subclasse certa de HTMLElement, sem instanciar nenhuma delas.",
+    },
+    {
+      onde: "React.createElement",
+      explicacao:
+        "O JSX compila para uma chamada de fábrica: você descreve o que quer, e o React decide o que construir.",
+    },
+    {
+      onde: "Array.from",
+      explicacao:
+        "Um único ponto de criação que aceita fontes muito diferentes e devolve sempre um array.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Subclasse decide qual produto criar.
+criarBotao(): Botao { return new BotaoMac(); }`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Uma classe e uma hierarquia a mais só para adiar a escolha do tipo concreto",
+      "Cada produto novo tende a exigir uma subclasse de fábrica correspondente",
+    ],
+    naoValeSe:
+      "só existe um tipo concreto e nada indica que vão surgir outros — aí `new` direto é mais honesto que a cerimônia.",
+  },
   relacionados: ["adapter", "strategy"],
   problema: [
     "O código cliente precisa criar objetos, mas não deveria depender das classes concretas — senão cada novo tipo obriga a alterar o cliente (viola Aberto/Fechado).",
@@ -247,6 +299,90 @@ export const factoryMethod: Conceito = {
             "Formatos muito diferentes (streaming linha a linha vs documento inteiro em memória) forçam a interface do parser a nivelar por baixo ou a crescer demais.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A fábrica que conhece todos os produtos",
+      comoSeParece:
+        "Em vez de cada subclasse decidir o que criar, existe uma função estática com um `switch` que conhece todas as implementações. É o mesmo `new` espalhado de antes, agora concentrado num único ponto de acoplamento.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Ao adicionar formato", efeito: "Um arquivo central precisa ser editado sempre, e ele vira ponto de conflito de merge entre times." },
+        { quando: "No bundle", efeito: "Todas as implementações são importadas junto, inclusive as que aquele fluxo nunca vai usar." },
+        { quando: "Com tipo inválido", efeito: "A falha acontece em tempo de execução, com uma string, em vez de em tempo de compilação." },
+      ],
+      correcao:
+        "Factory Method é **polimorfismo**: a subclasse que já sabe o contexto sobrescreve o método de criação. Quando o que se quer é mesmo mapear uma string vinda de fora, isso é um registro (`Map<string, () => Produto>`) preenchido por quem compõe a aplicação — e aí formato novo se registra, não edita.",
+    },
+    {
+      tipo: "refatoracao",
+      cheiro:
+        "O `new` do exportador espalhado por cinco lugares, cada um decidindo o tipo por conta própria.",
+      inicio: { lang: "typescript", code: `// relatorio-controller.ts
+if (formato === "pdf") exportador = new ExportadorPdf(config);
+else if (formato === "csv") exportador = new ExportadorCsv(config);
+
+// agendador.ts — a mesma decisao, de novo
+if (formato === "pdf") exportador = new ExportadorPdf(config);
+else if (formato === "csv") exportador = new ExportadorCsv(config);
+
+// E em outros tres arquivos. Formato novo = cacar todos.` },
+      passos: [
+        {
+          titulo: "Centralizar a criação",
+          motivo:
+            "Primeiro pare a hemorragia: um lugar só decide. Ainda é um `switch`, e ainda viola o Aberto/Fechado — mas agora **em um arquivo**, e não em cinco.",
+          depois: { lang: "typescript", code: `// exportadores.ts
+export function criarExportador(formato: string, config: Config): Exportador {
+  switch (formato) {
+    case "pdf": return new ExportadorPdf(config);
+    case "csv": return new ExportadorCsv(config);
+    default: throw new Error("formato desconhecido: " + formato);
+  }
+}` },
+        },
+        {
+          titulo: "Trocar o switch por registro",
+          motivo:
+            "Um `switch` obriga a **editar** para estender; um registro permite **acrescentar**. E o arquivo central para de importar todas as implementações — cada uma se registra.",
+          depois: { lang: "typescript", code: `// registro.ts — nao conhece nenhuma implementacao
+type Construtor = (config: Config) => Exportador;
+const registro = new Map<string, Construtor>();
+
+export function registrar(formato: string, criar: Construtor) {
+  registro.set(formato, criar);
+}
+
+export function criarExportador(formato: string, config: Config): Exportador {
+  const criar = registro.get(formato);
+  if (!criar) throw new Error("formato desconhecido: " + formato);
+  return criar(config);
+}
+
+// exportador-pdf.ts — a implementacao se anuncia
+registrar("pdf", (config) => new ExportadorPdf(config));` },
+        },
+        {
+          titulo: "Fechar no tipo",
+          motivo:
+            "O registro resolveu a extensão e trouxe um problema novo: formato inválido só falha em execução. Um tipo derivado do próprio registro devolve o erro para o compilador.",
+          depois: { lang: "typescript", code: `// Os formatos validos passam a sair do registro, nao de uma string solta.
+const FABRICAS = {
+  pdf: (c: Config) => new ExportadorPdf(c),
+  csv: (c: Config) => new ExportadorCsv(c),
+} as const;
+
+export type Formato = keyof typeof FABRICAS;
+
+export function criarExportador(formato: Formato, config: Config): Exportador {
+  return FABRICAS[formato](config);  // nenhum default: o tipo garante
+}
+
+// criarExportador("xml", cfg) nao compila mais.` },
+        },
+      ],
+      veredito:
+        "Ganhou-se: um ponto de criação, extensão sem editar quem usa, e formato inválido pego em compilação. Pagou-se: uma indireção entre pedir e receber, e o `as const` obriga o objeto literal a viver no mesmo módulo do tipo. Note que o último passo desfaz parte do penúltimo — o registro dinâmico só vale se as implementações realmente vierem de fora (plugins).",
     },
     {
       tipo: "armadilhas",

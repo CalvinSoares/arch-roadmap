@@ -55,6 +55,46 @@ export const ledger: Conceito = {
   tags: ["pagamentos", "partidas-dobradas", "auditoria", "saldo", "contabilidade"],
   dificuldade: "intermediario",
   tempoLeitura: 8,
+  nasceu: {
+    quando: { rotulo: "1494", ano: 1494, precisao: "exata" },
+    fonte:
+      "Luca Pacioli — *Summa de arithmetica, geometria, proportioni et " +
+      "proportionalità*, Veneza, 1494",
+    precursor:
+      "Mercadores de Gênova e Veneza já escrituravam em partidas dobradas " +
+      "desde o século XIV; Pacioli documentou a prática, não a inventou.",
+  },
+  ondeAparece: [
+    {
+      onde: "extrato bancário",
+      explicacao:
+        "Cada linha é um lançamento que nunca se apaga; o saldo não é um campo editável, e sim a soma de todos os lançamentos até ali.",
+    },
+    {
+      onde: "balance transactions do Stripe",
+      explicacao:
+        "O Stripe expõe o razão como uma lista de movimentos imutáveis, e o saldo disponível é derivado deles — nada é sobrescrito.",
+    },
+    {
+      onde: "blockchain",
+      explicacao:
+        "Um livro-razão distribuído em que blocos só são anexados e cada um referencia o anterior, tornando a reescrita do passado detectável.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Partidas dobradas: débito e crédito se equilibram.
+lancar({ debita: caixa, credita: receita, valor });`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "O saldo deixa de ser uma coluna e passa a ser derivado da soma dos lançamentos, o que pede cache ou snapshot para ler rápido",
+      "Corrigir um erro vira um lançamento de estorno, nunca um UPDATE — o modelo mental muda",
+    ],
+    naoValeSe:
+      "não há exigência de auditoria nem histórico de movimentações — uma coluna de saldo é mais simples de ler e manter.",
+  },
   relacionados: ["append-only", "event-sourcing", "race-condition"],
   problema: [
     "UPDATE saldo = saldo - 100 destrói a história: depois de mil operações, ninguém explica de onde veio o número que está lá. Quando um bug, um estorno mal feito ou uma corrida deixa o saldo errado, não há trilha para achar o momento em que divergiu.",

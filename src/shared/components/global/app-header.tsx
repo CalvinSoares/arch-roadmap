@@ -1,12 +1,27 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Menu, Search, PanelLeft } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Bell, Menu, Search, PanelLeft } from "lucide-react";
 import { ThemeToggle } from "@/shared/components/global/theme-toggle";
 import { useSidebar } from "@/shared/context/sidebar-context";
 import { useSearchPalette } from "@/shared/context/search-context";
+import { temNovidadeRecente } from "@/shared/lib/novidades";
 import { cn } from "@/shared/utils/cn";
+
+/**
+ * `false` no servidor, valor real no cliente — “recente” depende do relógio
+ * de quem visita; resolver só no cliente evita divergência de hidratação.
+ */
+const semInscricao = () => () => {};
+function useNovidadeRecente() {
+  return useSyncExternalStore(
+    semInscricao,
+    () => temNovidadeRecente(),
+    () => false
+  );
+}
 
 /**
  * Header sticky colapsável: recolhe ao rolar para baixo e reaparece ao subir.
@@ -17,8 +32,12 @@ export function AppHeader() {
   const [oculto, setOculto] = useState(false);
   const [noTopo, setNoTopo] = useState(true);
   const ultimoY = useRef(0);
+  const pathname = usePathname();
   const { setMobileOpen, collapsed, toggleCollapsed } = useSidebar();
   const { setOpen } = useSearchPalette();
+  const temNovidade = useNovidadeRecente();
+  const emNovidades = pathname.startsWith("/novidades");
+  const avisar = temNovidade && !emNovidades;
 
   useEffect(() => {
     const aoRolar = () => {
@@ -79,7 +98,7 @@ export function AppHeader() {
             <span className="absolute size-4 rounded-full border-[1.5px] border-primary-foreground/70" />
             <span className="absolute h-4 w-2 rounded-full border-[1.5px] border-primary-foreground/70" />
           </span>
-          <span className="font-semibold tracking-tight">DevAtlas</span>
+          <span className="font-semibold tracking-tight">DevMappa</span>
         </Link>
       </div>
 
@@ -107,6 +126,23 @@ export function AppHeader() {
         >
           <Search className="size-[18px]" />
         </button>
+        <Link
+          href="/novidades"
+          aria-label={avisar ? "Novidades — há entregas recentes" : "Novidades"}
+          title="Novidades"
+          className={cn(
+            "relative rounded-lg p-2 text-muted transition-all duration-200 hover:bg-foreground/5 hover:text-primary active:scale-90",
+            emNovidades && "bg-foreground/5 text-primary"
+          )}
+        >
+          <Bell className="size-[18px]" />
+          {avisar && (
+            <span
+              aria-hidden
+              className="absolute right-1.5 top-1.5 size-2 rounded-full border-2 border-canvas bg-primary"
+            />
+          )}
+        </Link>
         <ThemeToggle />
       </div>
     </header>

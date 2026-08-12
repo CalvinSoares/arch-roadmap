@@ -19,6 +19,7 @@ import { Reveal, RevealItem } from "@/shared/components/global/ui/reveal";
 import { SpotlightCard } from "@/shared/components/global/ui/spotlight-card";
 import { SeloNovo } from "@/shared/components/global/ui/selo-novo";
 import { Contador } from "@/shared/components/global/ui/contador";
+import { JsonLd } from "@/shared/components/seo/json-ld";
 import { CATEGORIAS } from "@/shared/config/categorias";
 import { listConceitos, listRoadmaps } from "@/shared/lib/content";
 import {
@@ -27,7 +28,9 @@ import {
   formatarData,
   slugsNovos,
 } from "@/shared/lib/novidades";
+import { organizationJsonLd, websiteJsonLd } from "@/shared/lib/seo";
 import type { Categoria } from "@/shared/types/conceito";
+
 
 /* ------------------------------------------------------------------ */
 
@@ -83,6 +86,11 @@ const FAMILIAS: { id: Categoria; pergunta: string; desc: string }[] = [
     id: "infra",
     pergunta: "Onde isso roda?",
     desc: "Containers, orquestração e servidores — o caminho do código até produção.",
+  },
+  {
+    id: "seguranca",
+    pergunta: "Quem pode fazer o quê?",
+    desc: "Identidade, permissão e abuso — provar quem é e limitar o dano quando alguém mente.",
   },
 ];
 
@@ -153,6 +161,8 @@ export default function HomePage() {
 
   return (
     <div className="page-shell">
+      <JsonLd data={[websiteJsonLd(), organizationJsonLd()]} />
+
       {/* ================================================================ */}
       {/* Hero                                                             */}
       {/* ================================================================ */}

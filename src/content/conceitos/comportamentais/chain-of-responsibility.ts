@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Manipulador {
@@ -127,6 +128,27 @@ print(auth.tratar({"usuario": "ana", "rota": "/pedidos"}))`,
   },
 ];
 
+const ANTI_EXEMPLO = `abstract class Elo {
+  private proximo?: Elo;
+  encadear(e: Elo) { this.proximo = e; return e; }
+
+  tratar(p: Pedido): void {
+    if (this.aceita(p)) return this.processar(p);
+    this.proximo?.tratar(p);   // <- se nao houver proximo, some em silencio
+  }
+
+  protected abstract aceita(p: Pedido): boolean;
+  protected abstract processar(p: Pedido): void;
+}
+
+const corrente = new EloBoleto();
+corrente.encadear(new EloPix()).encadear(new EloCartao());
+
+// Chega um pedido de pagamento em cripto.
+// Nenhum elo aceita. O '?.' engole. A funcao retorna void.
+// Do lado de fora, parece que deu certo.
+corrente.tratar(pedidoCripto);`;
+
 export const chainOfResponsibility: Conceito = {
   slug: "chain-of-responsibility",
   titulo: "Chain of Responsibility",
@@ -136,6 +158,33 @@ export const chainOfResponsibility: Conceito = {
   tags: ["middleware", "pipeline", "desacoplamento", "gof"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "A cadeia de middleware",
+      explicacao:
+        "Cada elo decide se trata, se passa adiante com `next()`, ou se encerra a requisição ali.",
+    },
+    {
+      onde: "Bubbling de evento do DOM",
+      explicacao:
+        "O clique sobe do alvo até a raiz, e qualquer nó no caminho pode tratar ou parar a propagação.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Cada elo trata ou passa adiante.
+auth.proximo(rateLimit).proximo(handler);`,
+  },
+  custo: {
+    indirecoes: 2,
+    cobra: [
+      "A cadeia adiciona saltos entre a requisição e o handler que de fato a trata",
+      "Uma requisição que ninguém trata some em silêncio se não houver um handler final",
+    ],
+    naoValeSe:
+      "sempre se sabe de antemão quem trata a requisição — sem essa incerteza, chamar o handler certo direto é mais claro.",
+  },
   relacionados: ["decorator", "command", "facade"],
   problema: [
     "Uma requisição precisa passar por várias verificações — autenticação, permissão, rate limit, validação, log — e cada uma pode interrompê-la. Colocar tudo num método produz uma escada de `if` que ninguém consegue reordenar com segurança.",
@@ -318,6 +367,20 @@ export const chainOfResponsibility: Conceito = {
             "A corrente para no primeiro bloqueio, então o autor recebe um motivo de cada vez e pode precisar de várias tentativas para publicar — bom para custo, ruim para experiência. Coletar todos os motivos exige abrir mão da interrupção.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A corrente em que ninguém trata",
+      comoSeParece:
+        "Cada elo verifica se é o dono do pedido e, se não for, passa adiante. O último também passa adiante. O pedido chega ao fim da corrente e simplesmente desaparece — sem erro, sem log, sem resposta.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Com entrada inesperada", efeito: "O pedido é descartado silenciosamente e quem chamou acredita que foi processado." },
+        { quando: "No suporte", efeito: "Aparece como 'o pagamento sumiu': não há erro, não há log, não há registro de que passou por ali." },
+        { quando: "Na refatoração", efeito: "Remover um elo que era o único a aceitar certo caso não quebra nenhum teste — só para de funcionar em produção." },
+      ],
+      correcao:
+        "A corrente precisa de um fim explícito: ou um elo terminal que trata o que ninguém quis (e registra), ou `tratar` devolve um resultado que distingue 'tratado' de 'ninguém tratou'. Silêncio nunca pode ser um caminho válido de saída.",
     },
     {
       tipo: "armadilhas",

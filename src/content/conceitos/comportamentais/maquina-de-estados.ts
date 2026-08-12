@@ -63,6 +63,44 @@ export const maquinaDeEstados: Conceito = {
   tags: ["fsm", "ciclo-de-vida", "transicoes", "status", "invariantes"],
   dificuldade: "iniciante",
   tempoLeitura: 6,
+  nasceu: {
+    quando: { rotulo: "1955", ano: 1955, precisao: "aproximada" },
+    fonte:
+      "A teoria de autômatos finitos dos anos 1940-50 — os modelos de Mealy (1955) e Moore (1956), com raízes em McCulloch & Pitts (1943)",
+    precursor:
+      "Máquinas de estado são anteriores ao software: relés telefônicos e controladores eletromecânicos já eram máquinas de estado físicas décadas antes.",
+  },
+  ondeAparece: [
+    {
+      onde: "XState",
+      explicacao:
+        "A biblioteca de máquinas de estado do front: você declara estados e transições, e o que não está na tabela simplesmente não acontece.",
+    },
+    {
+      onde: "PaymentIntent do Stripe",
+      explicacao:
+        "O status de uma cobrança (requires_payment_method, processing, succeeded) é uma máquina: cada webhook é um evento que só move para os estados permitidos.",
+    },
+    {
+      onde: "useReducer do React",
+      explicacao:
+        "A assinatura (estado, ação) => próximoEstado é exatamente uma função de transição — o reducer é a tabela da máquina escrita em código.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Transições nomeadas; estados ilegais viram erro.
+pedido.transicionar("pago"); // só de 'aguardando'`,
+  },
+  custo: {
+    indirecoes: 0,
+    cobra: [
+      "A tabela de transições precisa ser mantida em dia conforme o fluxo ganha estados e eventos",
+      "Estados e transições demais tornam a tabela grande e difícil de abarcar de uma vez",
+    ],
+    naoValeSe:
+      "o fluxo tem um ou dois estados sem transições inválidas plausíveis — aí a máquina explícita é só cerimônia.",
+  },
   relacionados: ["state", "race-condition", "idempotencia"],
   problema: [
     "Quando o status é uma string livre e cada canto do código faz o próprio UPDATE, as regras de ordem vivem espalhadas em ifs — e um dia uma cobrança paga é cancelada, um pedido entregue volta para 'separação', e ninguém sabe qual caminho o levou até ali.",

@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Cliente
@@ -81,6 +82,33 @@ export const adapter: Conceito = {
   tags: ["gof", "integracao", "wrapper", "compatibilidade"],
   dificuldade: "iniciante",
   tempoLeitura: 5,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "Wrappers de driver",
+      explicacao:
+        "A camada fina que traduz a API de um serviço externo para a interface que o seu domínio espera.",
+    },
+    {
+      onde: "Array.from(arguments)",
+      explicacao:
+        "Converte um objeto parecido com array para um array de verdade, sem mudar a origem.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Traduz a interface de la para a que voce espera.
+const repo = { salvar: (p) => sdkExterno.persist(paraDto(p)) };`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Uma tradução a manter sempre que qualquer um dos dois lados muda",
+      "Erros do sistema externo precisam ser traduzidos também, senão o acoplamento volta pelo `catch`",
+    ],
+    naoValeSe:
+      "você controla os dois lados. Aí é mais barato mudar um deles do que manter um tradutor para sempre.",
+  },
   relacionados: ["factory-method", "hexagonal"],
   problema: [
     "Você tem uma classe/biblioteca útil, mas a interface dela não bate com a que o seu código espera.",

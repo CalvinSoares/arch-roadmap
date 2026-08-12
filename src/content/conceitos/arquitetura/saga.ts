@@ -85,6 +85,23 @@ reservar_estoque = Passo(
   },
 ];
 
+const ANTI_EXEMPLO = `async function compensarReserva(pedidoId: string) {
+  const reserva = await repo.buscar(pedidoId);
+  // Devolve ao estoque. Sem verificar se ja devolveu.
+  await estoque.incrementar(reserva.sku, reserva.quantidade);
+}
+
+async function compensarCobranca(pedidoId: string) {
+  const cobranca = await repo.buscarCobranca(pedidoId);
+  // Estorna. Sem chave de idempotencia.
+  await gateway.estornar(cobranca.transacaoId, cobranca.valor);
+}
+
+// A saga executa a compensacao, o ACK se perde na rede,
+// o orquestrador reexecuta por seguranca.
+// Resultado: 2 unidades voltaram ao estoque onde so 1 saiu,
+// e o cliente foi estornado duas vezes.`;
+
 export const saga: Conceito = {
   slug: "saga",
   titulo: "Saga",
@@ -94,6 +111,44 @@ export const saga: Conceito = {
   tags: ["transacao-distribuida", "microsservicos", "compensacao", "consistencia-eventual"],
   dificuldade: "avancado",
   tempoLeitura: 10,
+  nasceu: {
+    quando: { rotulo: "1987", ano: 1987, precisao: "aproximada" },
+    fonte:
+      "Hector Garcia-Molina & Kenneth Salem, 'Sagas', ACM SIGMOD, 1987 — originalmente para transações longas dentro de um único banco",
+    precursor:
+      "O paper de 1987 tratava de transações longas num só banco; a releitura para microsserviços, com um passo por serviço, veio com a arquitetura distribuída dos anos 2010.",
+  },
+  ondeAparece: [
+    {
+      onde: "Step Functions / Temporal",
+      explicacao:
+        "Orquestradores de fluxo de trabalho encadeiam passos entre serviços e disparam compensações quando um deles falha no meio.",
+    },
+    {
+      onde: "checkout de e-commerce",
+      explicacao:
+        "Reservar estoque, cobrar e despachar são passos em serviços distintos; se a cobrança falha, a reserva é desfeita por uma ação compensatória.",
+    },
+    {
+      onde: "reserva de viagem (voo + hotel)",
+      explicacao:
+        "Sem transação global entre companhias, cada reserva confirmada é cancelada por compensação quando a etapa seguinte não fecha.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Passos + compensações; sem 2PC entre serviços.
+await reserva; try { await cobra; } catch { await libera; }`,
+  },
+  custo: {
+    indirecoes: 2,
+    cobra: [
+      "Cada passo precisa de uma ação de compensação que desfaça o que ele fez",
+      "Existe uma janela em que o sistema está parcialmente aplicado, visível a quem observa",
+    ],
+    naoValeSe:
+      "os passos cabem numa transação local do mesmo banco — aí uma transação ACID resolve sem inventar compensações.",
+  },
   relacionados: ["cqrs"],
   problema: [
     "Em microsserviços, uma operação de negócio costuma atravessar vários serviços com bancos próprios — reservar estoque, cobrar pagamento, agendar entrega. Não existe uma transação ACID única que abranja todos eles, então não dá para simplesmente dar commit ou rollback no conjunto.",
@@ -251,6 +306,20 @@ export const saga: Conceito = {
             "Compensação com custo real: fornecedores cobram taxa de cancelamento ou têm janelas de gratuidade — a ordem dos passos vira decisão financeira (reserve por último o mais caro de desfazer).",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A compensação que não é idempotente",
+      comoSeParece:
+        "O caminho feliz foi pensado com cuidado. A compensação foi escrita depois, às pressas, e assume que roda exatamente uma vez — que é justamente o que um sistema distribuído não garante.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Com ACK perdido", efeito: "O orquestrador reexecuta a compensação e o efeito é aplicado duas vezes — estoque inflado, estorno duplicado." },
+        { quando: "Na conciliação", efeito: "O saldo diverge de um jeito que não bate com nenhum evento registrado, e ninguém consegue explicar de onde veio." },
+        { quando: "No incidente", efeito: "Reprocessar a fila de compensações para 'garantir' amplifica o dano em vez de corrigi-lo." },
+      ],
+      correcao:
+        "Compensação é o passo que **mais** precisa ser idempotente, porque ela roda justamente quando o sistema já está instável. Toda compensação carrega chave de idempotência e verifica o estado antes de agir — 'já compensei este pedido?' vem antes de 'compensar'.",
     },
     {
       tipo: "armadilhas",

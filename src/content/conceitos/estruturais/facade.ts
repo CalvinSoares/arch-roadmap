@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class CheckoutFacade {
@@ -105,6 +106,26 @@ CheckoutFacade().finalizar_pedido(["sku-1"], 150, "Rua A, 10", "ana@ex.com")`,
   },
 ];
 
+const ANTI_EXEMPLO = `import type { PgResult, PgError } from "pg";
+import type { S3Object } from "@aws-sdk/client-s3";
+
+class FachadaDePedido {
+  // Parece simples... e devolve o tipo do driver do banco.
+  async buscar(id: string): Promise<PgResult> { /* ... */ }
+
+  // ... e aceita o tipo do SDK da AWS.
+  async anexar(id: string, obj: S3Object): Promise<void> { /* ... */ }
+
+  // ... e deixa escapar o erro do driver.
+  async pagar(id: string): Promise<void> {
+    try { /* ... */ } catch (e) { throw e as PgError; }
+  }
+}
+
+// Quem usa a fachada agora importa 'pg' e o SDK da AWS.
+// Trocar Postgres por outro banco continua tocando a aplicacao inteira —
+// exatamente o que a fachada prometia evitar.`;
+
 export const facade: Conceito = {
   slug: "facade",
   titulo: "Facade",
@@ -114,6 +135,33 @@ export const facade: Conceito = {
   tags: ["simplificacao", "subsistema", "ponto-de-entrada", "gof"],
   dificuldade: "iniciante",
   tempoLeitura: 5,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "fetch",
+      explicacao:
+        "Uma função esconde DNS, TLS, connection pooling, redirecionamento e parsing de resposta.",
+    },
+    {
+      onde: "Um ORM",
+      explicacao:
+        "`user.save()` no lugar de montar transação, SQL, binding de parâmetro e tratamento de erro.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Uma chamada no lugar de seis, com os tipos que sao seus.
+await pedidos.confirmar(pedidoId);`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Cada operação nova do subsistema precisa ser exposta de novo",
+      "Recursos legítimos ficam inacessíveis até alguém adicioná-los à fachada",
+    ],
+    naoValeSe:
+      "o subsistema já tem uma interface pequena e estável. Fachada sobre fachada só adiciona um salto.",
+  },
   relacionados: ["adapter", "decorator"],
   problema: [
     "Para completar uma operação de negócio o cliente precisa conhecer meia dúzia de classes do subsistema, a ordem certa de chamada e os detalhes de cada uma — e esse conhecimento se repete em todo lugar que dispara a operação.",
@@ -259,6 +307,20 @@ export const facade: Conceito = {
             "Fluxos longos e parcialmente assíncronos (KYC pode levar horas) não cabem numa chamada síncrona — a facade precisa devolver estados intermediários, e a 'interface simples' fica menos simples.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A fachada que vaza o que deveria esconder",
+      comoSeParece:
+        "A fachada simplifica a chamada, mas devolve — ou aceita — os tipos do subsistema que ela existia para esconder. Quem usa continua acoplado ao que estava atrás; só o caminho ficou mais curto.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Ao trocar a dependência", efeito: "A migração toca todos os chamadores, porque os tipos do subsistema entraram na assinatura pública." },
+        { quando: "No teste", efeito: "Simular a fachada exige construir objetos do driver real, o que é quase tão trabalhoso quanto usar o driver." },
+        { quando: "No `package.json`", efeito: "A dependência que deveria ser interna aparece como dependência direta de módulos que nunca deveriam conhecê-la." },
+      ],
+      correcao:
+        "A fronteira da fachada é a assinatura, não a quantidade de linhas economizadas. Tipos de entrada, de saída **e de erro** precisam ser seus. Se traduzir tudo parecer caro demais, o problema pode ser que ali não cabia uma fachada.",
     },
     {
       tipo: "armadilhas",

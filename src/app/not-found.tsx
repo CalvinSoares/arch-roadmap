@@ -1,6 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Compass } from "lucide-react";
 import { Button } from "@/shared/components/global/ui/button";
+
+export const metadata: Metadata = {
+  title: "Página não encontrada",
+  description: "Este caminho não existe no DevMappa.",
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (

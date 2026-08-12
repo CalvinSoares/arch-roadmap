@@ -1,5 +1,6 @@
 import { Check, X } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { TextoRico } from "@/shared/components/conteudo/texto-rico";
 
 interface Props {
   quandoUsar: string[];
@@ -44,7 +45,7 @@ function Painel({
               aria-hidden
               className="mt-[7px] size-1.5 shrink-0 rounded-full bg-[var(--sinal)]"
             />
-            {item}
+            <TextoRico>{item}</TextoRico>
           </li>
         ))}
       </ul>

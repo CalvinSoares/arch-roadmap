@@ -1,12 +1,24 @@
 import { describe, it, expect } from "vitest";
 import type { EstadoProjeto } from "@/shared/types/construtor";
-import { sugerir, revisarProjeto, type Sugestao } from "./sugestoes";
+import {
+  sugerir,
+  porQueNaoSugeriu,
+  revisarProjeto,
+  type Sugestao,
+} from "./sugestoes";
 import { avaliarRegras, TEMPLATES } from "./regras";
 import { camadaDef, padraoDef, posicaoCanonica } from "./blocos";
 import { tecnologiaDef, TECNOLOGIAS_DEF } from "./tecnologias";
 import { listConceitos } from "@/shared/lib/content";
 
 const VAZIO: EstadoProjeto = { camadas: [] };
+
+/** Atalho para montar camada nos testes desta suíte. */
+const camada = (
+  camadaId: EstadoProjeto["camadas"][number]["camadaId"],
+  padroes: string[] = [],
+  tecnologias: string[] = []
+) => ({ camadaId, padroes, tecnologias });
 
 /** Espelha `aplicarSugestao` do hook, sem React. */
 function aplicar(p: EstadoProjeto, s: Sugestao): EstadoProjeto {
@@ -148,6 +160,13 @@ describe("revisão sob demanda", () => {
 });
 
 describe("integridade do catálogo do construtor", () => {
+  it("toda tecnologia de categoria cache aponta para o conceito cache", () => {
+    const falhas = TECNOLOGIAS_DEF.filter(
+      (t) => t.categoria === "cache" && !(t.conceitos ?? []).includes("cache")
+    ).map((t) => t.id);
+    expect(falhas).toEqual([]);
+  });
+
   it("todo slug de conceito citado por uma tecnologia existe", () => {
     const validos = new Set(listConceitos().map((c) => c.slug));
     const quebrados: string[] = [];
@@ -164,5 +183,90 @@ describe("integridade do catálogo do construtor", () => {
       expect(tech.viveEm.length, tech.id).toBeGreaterThan(0);
       for (const c of tech.viveEm) expect(camadaDef(c), `${tech.id} → ${c}`).toBeDefined();
     }
+  });
+});
+
+/**
+ * O outro lado do motor: por que uma sugestão **não** apareceu.
+ *
+ * O valor de derivar isso da mesma fonte que `sugerir()` é não haver duas
+ * cópias da condição. Estes testes existem para garantir que a partição
+ * continue exata — toda sugestão está de um lado ou do outro, nunca nos dois
+ * nem em nenhum.
+ */
+describe("por que não sugeriu", () => {
+  const ESTADOS: { nome: string; estado: EstadoProjeto }[] = [
+    { nome: "vazio", estado: { camadas: [] } },
+    {
+      nome: "crud mínimo",
+      estado: {
+        camadas: [
+          camada("api", [], ["nginx"]),
+          camada("dominio"),
+          camada("infra", [], ["postgres"]),
+        ],
+      },
+    },
+    ...TEMPLATES.map((t) => ({ nome: t.id, estado: t.estado })),
+  ];
+
+  it.each(ESTADOS.map((e) => [e.nome, e.estado] as const))(
+    "%s: sugerido e não-sugerido formam uma partição exata",
+    (_nome, estado) => {
+      const feitas = new Set(sugerir(estado).map((s) => s.id));
+      const ausentes = porQueNaoSugeriu(estado).map((s) => s.id);
+
+      // nenhuma sugestão dos dois lados
+      expect(ausentes.filter((id) => feitas.has(id))).toEqual([]);
+      // nenhuma repetida
+      expect(new Set(ausentes).size).toBe(ausentes.length);
+    }
+  );
+
+  it("toda ausência traz uma explicação substantiva", () => {
+    for (const { nome, estado } of ESTADOS) {
+      for (const a of porQueNaoSugeriu(estado)) {
+        expect(a.porQueNao.trim().length, `${nome} → ${a.id}`).toBeGreaterThan(15);
+        expect(a.titulo.trim().length, `${nome} → ${a.id}`).toBeGreaterThan(4);
+        // a frase completa "não foi sugerido porque…", então não repete o "porque"
+        expect(a.porQueNao.trim(), `${nome} → ${a.id}`).not.toMatch(/^porque/i);
+      }
+    }
+  });
+
+  it("num projeto completo, quase tudo já foi feito — e o motor sabe dizer por quê", () => {
+    const completo = TEMPLATES.find((t) => t.id === "ecommerce-cqrs")!.estado;
+    const ausentes = porQueNaoSugeriu(completo);
+    expect(ausentes.length).toBeGreaterThan(0);
+    // pelo menos uma ausência é do tipo "já está lá", não "falta pré-requisito"
+    expect(ausentes.some((a) => /já /.test(a.porQueNao))).toBe(true);
+  });
+
+  it("aplicar uma sugestão a move para o lado das ausentes", () => {
+    const semDominio: EstadoProjeto = {
+      camadas: [camada("api", [], ["nginx"]), camada("infra", [], ["postgres"])],
+    };
+    expect(sugerir(semDominio).map((s) => s.id)).toContain("add-dominio");
+
+    const comDominio: EstadoProjeto = {
+      camadas: [...semDominio.camadas, camada("dominio")],
+    };
+    expect(sugerir(comDominio).map((s) => s.id)).not.toContain("add-dominio");
+    const ausente = porQueNaoSugeriu(comDominio).find((a) => a.id === "add-dominio");
+    expect(ausente?.porQueNao).toMatch(/já está/i);
+  });
+
+  it("distingue 'já feito' de 'falta pré-requisito'", () => {
+    // sem fila: a DLQ não é sugerida por falta de pré-requisito
+    const semFila: EstadoProjeto = { camadas: [camada("dominio")] };
+    const semFilaDlq = porQueNaoSugeriu(semFila).find((a) => a.id === "add-dlq");
+    expect(semFilaDlq?.porQueNao).toMatch(/não há fila/i);
+
+    // com fila e com DLQ: não é sugerida porque já está lá
+    const comTudo: EstadoProjeto = {
+      camadas: [camada("dominio"), camada("fila", ["dead-letter-queue"], ["kafka"])],
+    };
+    const comTudoDlq = porQueNaoSugeriu(comTudo).find((a) => a.id === "add-dlq");
+    expect(comTudoDlq?.porQueNao).toMatch(/já tem/i);
   });
 });

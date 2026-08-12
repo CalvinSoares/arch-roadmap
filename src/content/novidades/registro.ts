@@ -2,33 +2,21 @@ import type { ItemPlanejado, Novidade } from "@/shared/types/novidade";
 
 /**
  * O que está planejado e ainda não saiu — aparece como "A seguir" na página
- * de novidades. Plano detalhado em PLANEJAMENTO-PRODUTOS.md. Quando uma
- * feature for entregue, remova daqui e registre na entrega.
+ * de novidades. Plano detalhado em PLANEJAMENTO.md. Quando uma feature for
+ * entregue, remova daqui e registre na entrega.
  */
 export const A_SEGUIR: ItemPlanejado[] = [
   {
     id: "mais-duelos",
     titulo: "Mais comparações",
     descricao:
-      "O comparador nasceu com sete duelos. A lista cresce conforme as dúvidas aparecem — Command × Memento e Builder × Abstract Factory são as próximas da fila.",
+      "O comparador cresce sob demanda. Próximo candidato natural: Event Sourcing × arquitetura orientada a eventos — quando (e se) EDA virar página própria.",
   },
   {
-    id: "quiz-modos",
-    titulo: "Quiz com mais formatos",
+    id: "explique-erro-mais",
+    titulo: "Mais perguntas de explique o erro",
     descricao:
-      "Hoje toda pergunta é 'de qual padrão é esta armadilha?'. Cabem outros: identificar o padrão pelo diagrama, ou escolher entre dois candidatos num cenário real.",
-  },
-  {
-    id: "quiz-placar",
-    titulo: "Histórico do quiz",
-    descricao:
-      "Guardar o desempenho por assunto pra mostrar onde você erra mais — e sugerir o próximo quiz a partir disso, em vez de sortear no escuro.",
-  },
-  {
-    id: "testes-ui",
-    titulo: "Testes de interface",
-    descricao:
-      "Os 427 testes cobrem regras, conteúdo e cálculos — tudo que é função pura. Os componentes ainda são conferidos no olho; falta uma rede pra eles também.",
+      "Segurança já entrou no formato. Vale expandir ainda para dados e incidentes de produção — sempre à mão, nunca gerado.",
   },
 ];
 
@@ -40,6 +28,268 @@ export const A_SEGUIR: ItemPlanejado[] = [
  * sozinho e some quando a entrega envelhece.
  */
 export const NOVIDADES: Novidade[] = [
+  {
+    versao: "0.10.0",
+    data: "2026-08-11",
+    titulo: "Prática: código errado, entrevista e lab de falha",
+    resumo:
+      "O plano de profundidade fecha com superfícies onde se erra de propósito: trechos tortos para diagnosticar, entrevista de código ao lado do system design, lab de falha com baseline e proteções, e postmortems jogáveis.",
+    mudancas: [
+      {
+        tipo: "novo",
+        texto:
+          "Código errado (/clinica): trechos reais com o conceito mal aplicado — você escolhe qual, vê o que quebra e a correção.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Construtor/entrevista ganha aba de código (explique o erro + duelos cronometrados) ao lado do system design.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Lab de falha nos conceitos de Cache e Timeout: injeta a falha, liga proteções e compara o delta com a baseline.",
+      },
+      {
+        tipo: "melhoria",
+        texto:
+          "Postmortems jogáveis, escala de latência reescrita em torno de “quantas vezes cabe?”, e Novidades mais legível no mobile.",
+      },
+    ],
+  },
+  {
+    versao: "0.9.0",
+    data: "2026-08-11",
+    titulo: "Segurança de aplicação: catálogo, Construtor e trilhas",
+    resumo:
+      "Família nova no mesmo espírito da resiliência: autenticação, JWT, OAuth, MFA, autorização, allowlist e gestão de segredos — ligados ao Backend, ao fluxo do Construtor, a duelos e ao quiz.",
+    conceitos: [
+      "autenticacao",
+      "jwt",
+      "oauth2",
+      "mfa",
+      "autorizacao",
+      "allowlist",
+      "gestao-de-segredos",
+    ],
+    mudancas: [
+      {
+        tipo: "novo",
+        texto:
+          "Categoria Segurança com sete conceitos: sessão/httpOnly, JWT, OAuth2, MFA, RBAC/guards, allowlist e gestão de segredos.",
+      },
+      {
+        tipo: "conteudo",
+        texto:
+          "Roadmap Backend: auth e segurança deixam de ser só links OWASP — nós com conceito, pré-requisitos e essenciais. Frontend ganha cookie httpOnly e allowlist CORS.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Construtor: padrões e techs (IdP, WAF), regras (API aberta, login sem rate limit, roles sem identidade), simulador narrando auth/quota, três desafios Quebre isto.",
+      },
+      {
+        tipo: "conteudo",
+        texto:
+          "Quatro duelos (auth×JWT, auth×authz, auth×OAuth, allowlist×rate limit) e cinco explique-o-erro de segurança.",
+      },
+    ],
+  },
+  {
+    versao: "0.8.0",
+    data: "2026-08-11",
+    titulo: "Explique o erro, uma linha em tudo, duelos e testes de UI",
+    resumo:
+      "O último ciclo do A seguir: quiz com código quebrado, emUmaLinha em 100% do catálogo, três duelos novos e a suíte de componentes com Testing Library.",
+    mudancas: [
+      {
+        tipo: "novo",
+        texto:
+          "Quiz: formato Explique o erro — oito perguntas à mão (SOLID, CQS, Deméter, composição). O código aparece no card; a resposta é o princípio violado.",
+      },
+      {
+        tipo: "conteudo",
+        texto:
+          "emUmaLinha em todo o catálogo — o snippet mínimo deixou de ser privilégio de dezesseis conceitos. Spec impede regressão.",
+      },
+      {
+        tipo: "conteudo",
+        texto:
+          "Três duelos novos: CQRS × Event Sourcing, API Gateway × BFF, Repository × Unit of Work.",
+      },
+      {
+        tipo: "melhoria",
+        texto:
+          "Testes de UI com Vitest + happy-dom + Testing Library. O Quiz tem smoke test de resposta e de estado vazio; a suíte unitária segue em node.",
+      },
+    ],
+  },
+  {
+    versao: "0.7.0",
+    data: "2026-08-11",
+    titulo: "Cache, grafo nas trilhas e quiz que já era inteligente",
+    resumo:
+      "Fecha a inconsistência Redis↔catálogo, declara pré-requisitos reais nas roadmaps e registra o que o quiz já fazia em silêncio: cinco formatos e placar de desempenho.",
+    conceitos: ["cache"],
+    mudancas: [
+      {
+        tipo: "conteudo",
+        texto:
+          "Conceito novo: Cache e invalidação — cache-aside, TTL, stampede e a diferença entre Redis, CDN, réplica e índice. Redis, Memcached e CDN no Construtor passam a apontar para ele; o nó do roadmap de Backend também.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Roadmaps como grafo: itens declaram `prerequisitos` e `essencial`. Na trilha de resiliência as curvas ligam Timeout → Retry → Idempotência → Circuit Breaker e a cadeia de entrega; o painel mostra 'O que preciso antes' e o toggle 'Só o essencial' enxuga a trilha.",
+      },
+      {
+        tipo: "melhoria",
+        texto:
+          "Quiz: cinco formatos (armadilha, onde aparece, duelo, jeito errado, incidente) e placar de desempenho por assunto já estavam no ar — saíram do 'A seguir' e entram no histórico. Novo duelo: Command × Memento.",
+      },
+      {
+        tipo: "melhoria",
+        texto:
+          "Profundidade fechada de verdade: ondeAparece e custo em 100% do catálogo; os testes de fila viraram regressão.",
+      },
+    ],
+  },
+  {
+    versao: "0.6.0",
+    data: "2026-08-10",
+    titulo: "O catálogo aprende a sobreviver",
+    resumo:
+      "Faltava no DevMappa a família inteira que o dia a dia de produção exige: o catálogo ensinava a construir, não a continuar de pé quando a dependência cai. Entram seis conceitos de resiliência e uma trilha nova — e todo padrão GoF agora mostra onde você já o usa sem saber.",
+    mudancas: [
+      {
+        tipo: "conteudo",
+        texto:
+          "Seis conceitos novos de resiliência: Timeout, Retry com backoff e jitter, Circuit Breaker, Bulkhead, Rate limiting e Dead Letter Queue — cada um com as armadilhas de configuração que definem a família (o retry sem jitter que sincroniza a manada, o disjuntor que abre por ruído estatístico).",
+      },
+      {
+        tipo: "conteudo",
+        texto:
+          "Trilha nova: Sistemas que aguentam produção. Ela liga os seis conceitos novos a Idempotência, Saga, Webhooks e Event Sourcing, que já estavam no catálogo esperando esse contexto.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Todo padrão GoF ganhou a seção 'Onde isto aparece de verdade'. O objeto Proxy do JS é o padrão virado palavra-chave; o objeto que os plugins do Babel exportam se chama literalmente `visitor`; as strategies do Passport também.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Conceitos agora têm data de nascimento — e ela conta a verdade: os 23 GoF são de 1994 por convenção, porque o livro catalogou o que já existia. O Observer já estava no MVC do Smalltalk em 1979, e o Iterator no CLU da Barbara Liskov em 1975.",
+      },
+      {
+        tipo: "melhoria",
+        texto:
+          "Categoria nova no catálogo (Resiliência) com filtro próprio, em vez de empurrar os seis conceitos para dentro de Arquitetura.",
+      },
+      {
+        tipo: "conteudo",
+        texto:
+          "Três conceitos que fechavam ciclos abertos: Repository (a fronteira entre domínio e persistência), Transactional Outbox (sem ele a Saga perde evento e trava no meio) e Garantias de entrega — que explica por que 'exactly-once' entre sistemas distintos é impossível, e o que os brokers realmente vendem com esse nome.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "O Construtor agora diz por que NÃO sugeriu algo. Cada sugestão carrega a própria condição, então as duas respostas saem da mesma fonte: 'Dead Letter Queue não foi sugerido porque não há fila na pilha' é diferente de 'porque a fila já tem uma' — e o painel distingue as duas.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Comparar arquiteturas: duas pilhas lado a lado, com o diff das cinco métricas, das peças e dos alertas que a variante resolve ou introduz. Em complexidade e custo o sinal é invertido, porque menor é melhor — e o resumo se recusa a fingir que existe lado certo.",
+      },
+      {
+        tipo: "melhoria",
+        texto:
+          "O simulador passou a reagir às peças de resiliência. A mesma dependência quebrada custa 30 segundos sem timeout, 2 segundos com prazo, 6 com retry, e microssegundos com o disjuntor aberto — quatro tempos separados por ordens de grandeza, que é a lição que texto não consegue dar.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Os conceitos de resiliência entraram no Construtor: Timeout, Retry, Circuit Breaker, Bulkhead, Outbox e Dead Letter Queue agora são peças arrastáveis, com nove regras novas. Arraste Retry sozinho e o motor avisa que sem prazo não existe falha para ele reagir — some o alerta ao adicionar Timeout, e a sinergia aparece no lugar.",
+      },
+      {
+        tipo: "correcao",
+        texto:
+          "As regras novas revelaram que os modelos curados estavam incompletos: cinco tinham fila sem Dead Letter Queue e dois tinham Saga sem Outbox. A barra que exige 'template nasce sem alerta' pegou — e o conteúdo foi corrigido, não a regra.",
+      },
+      {
+        tipo: "conteudo",
+        texto:
+          "Dois desafios novos no Quebre isto, que era a família que faltava: o retry adicionado sozinho (que esgota o pool e cobra em duplicidade) e a Saga com fila sem rede de segurança (poison message de um lado, evento perdido do outro).",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Escala de latência: vinte pontos numa régua só, do ciclo de CPU à travessia São Paulo ↔ Singapura. O botão de 'escala real' é a lição — em logarítmica os sete pontos sub-milissegundo se espalham pela tela; em linear, cinco deles caem no mesmo pixel. RAM contra ida e volta de região dá 1,2 milhões de vezes.",
+      },
+      {
+        tipo: "correcao",
+        texto:
+          "O simulador do Construtor repetia a latência de cada passo em dois lugares — no argumento e na narração ('…(~15ms)', 15) — sem nada garantindo que continuassem iguais. Eram 23 menções, e a interface já mostrava o número na mesma tela. A narração agora explica só o que acontece, e os valores vivem numa tabela única, que também alimenta a escala.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Laboratório de concorrência: duas transações lado a lado, você escolhe o nível de isolamento e vê a anomalia acontecer passo a passo. No roteiro de lost update, o saldo final dá 50 onde deveria dar 20 — e nenhuma das duas transações recebe erro. Em SERIALIZABLE, o banco aborta uma com 40001 em vez de perder o débito.",
+      },
+      {
+        tipo: "conteudo",
+        texto:
+          "Categoria nova: Dados. Estreia com níveis de isolamento (as cinco anomalias, e por que subir o nível raramente é a saída) e lock otimista × pessimista — mais uma seção na trilha de resiliência ligando os dois à condição de corrida.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Cinco conceitos ganharam 'do cheiro ao padrão': a refatoração passo a passo, com o motivo de cada passo e o saldo no fim — o que se ganhou e o que se pagou. No Observer, o segundo passo existe só porque o primeiro cria um vazamento de memória.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Quebre isto: o Construtor ao contrário. Você recebe uma arquitetura pronta e aponta o que está errado — e quem corrige é o mesmo motor de regras que analisa o que você monta, então o gabarito nunca fica desatualizado.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Postmortems anotados: quatro incidentes públicos (AWS S3 2017, Cloudflare 2019, GitLab 2017, Knight Capital 2012) ligados aos conceitos que eles provam. Em todos, a causa raiz não é o erro que disparou — é o sistema que permitiu que ele tivesse aquele tamanho. E cada conceito agora mostra onde ele já custou caro.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Conceitos ganharam 'o padrão em uma linha' (o snippet mínimo, sem cerimônia) e o custo declarado: quantas indireções ele adiciona, o que fica mais difícil depois, e quando ele não vale a pena. O catálogo só mostrava o benefício, o que é propaganda.",
+      },
+      {
+        tipo: "conteudo",
+        texto:
+          "Dois duelos novos no comparador: Factory Method × Abstract Factory (a confusão nº1 do GoF — e a resposta é que um não substitui o outro, a Abstract Factory costuma ser implementada com Factory Methods) e CQS × CQRS, onde uma letra a mais custa um sistema distribuído.",
+      },
+      {
+        tipo: "correcao",
+        texto:
+          "O `**negrito**` e o `código` escritos na prosa dos conceitos apareciam como asterisco e crase literais na tela — em 139 trechos, espalhados por 25 arquivos. Agora renderizam de verdade, em toda prosa escrita à mão.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Nove conceitos ganharam a seção 'O jeito errado': o padrão mal implementado, com o código, o que quebra e sob qual condição. O Singleton que virou variável global e derruba a suíte de testes, o Observer que vaza porque ninguém desinscreve, a Strategy que continua sendo um switch, a compensação de Saga que não é idempotente e estorna duas vezes.",
+      },
+    ],
+    conceitos: [
+      "timeout",
+      "repository",
+      "outbox",
+      "garantias-de-entrega",
+      "retry",
+      "circuit-breaker",
+      "bulkhead",
+      "rate-limiting",
+      "dead-letter-queue",
+    ],
+    roadmaps: ["resiliencia"],
+  },
   {
     versao: "0.5.1",
     data: "2026-08-10",
@@ -154,7 +404,7 @@ export const NOVIDADES: Novidade[] = [
       {
         tipo: "melhoria",
         texto:
-          "Ícone próprio do DevAtlas no lugar do padrão do Next, e a imagem de compartilhamento passou a usar as cores da marca.",
+          "Ícone próprio do DevMappa no lugar do padrão do Next, e a imagem de compartilhamento passou a usar as cores da marca.",
       },
     ],
   },

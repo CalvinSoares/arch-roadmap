@@ -51,6 +51,44 @@ export const kubernetes: Conceito = {
   tags: ["orquestracao", "pods", "k8s", "deploy", "escala"],
   dificuldade: "avancado",
   tempoLeitura: 8,
+  nasceu: {
+    quando: { rotulo: "2014", ano: 2014, precisao: "exata" },
+    fonte: "Google — anúncio público do Kubernetes, junho de 2014",
+    precursor:
+      "O Borg, escalonador interno do Google desde ~2003, é o avô direto: " +
+      "o Kubernetes é a terceira tentativa de contar o que o Borg aprendeu.",
+  },
+  ondeAparece: [
+    {
+      onde: "GKE, EKS, AKS",
+      explicacao:
+        "Os Kubernetes gerenciados de Google, AWS e Azure: você declara o estado desejado e o cluster cuida de manter os contêineres de pé.",
+    },
+    {
+      onde: "kubectl apply",
+      explicacao:
+        "Você entrega um manifesto do que quer e o controlador reconcilia a realidade até bater com ele, reiniciando o que cair pelo caminho.",
+    },
+    {
+      onde: "Deployments que reescalam sozinhos",
+      explicacao:
+        "Sob carga, o autoscaler sobe réplicas novas e as distribui pelos nós; quando a carga cai, ele as remove sem intervenção manual.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Declara o desejado; o control loop converge.
+// replicas: 3  →  o cluster mantém 3 pods`,
+  },
+  custo: {
+    indirecoes: 3,
+    cobra: [
+      "Um plano de controle inteiro a operar, atualizar e entender antes de rodar qualquer coisa",
+      "A curva e a superfície de configuração são enormes, e o custo fixo não compensa em escala pequena",
+    ],
+    naoValeSe:
+      "você tem poucos serviços e um tráfego que um par de máquinas aguenta — a complexidade do orquestrador supera o que ela resolve.",
+  },
   relacionados: ["docker", "vps"],
   problema: [
     "Containers resolvem o pacote, não a operação: com 30 serviços em 5 máquinas, quem reinicia o que caiu às 3h? Quem espalha as réplicas para uma máquina não levar tudo junto? Quem troca a versão sem derrubar tráfego? Scripts artesanais viram um orquestrador caseiro pior.",
