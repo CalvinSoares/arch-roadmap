@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Notificacao {
@@ -120,6 +121,34 @@ export const bridge: Conceito = {
   tags: ["composicao", "duas-dimensoes", "desacoplamento", "gof"],
   dificuldade: "avancado",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "React: reconciler × renderers",
+      explicacao:
+        "O mesmo reconciler dirige react-dom, React Native e three.js — abstração e implementação evoluem separadas.",
+    },
+    {
+      onde: "Drivers de banco de dados",
+      explicacao:
+        "O SQL que você escreve não muda quando o driver por baixo troca de protocolo.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Abstração × implementação variam independente.
+const remoto = new Controle(new TvSony());
+remoto.ligar();`,
+  },
+  custo: {
+    indirecoes: 2,
+    cobra: [
+      "Duas hierarquias separadas a manter, com a ponte entre elas explícita no código",
+      "A indireção entre abstração e implementação dificulta seguir a chamada até o efeito",
+    ],
+    naoValeSe:
+      "abstração e implementação não variam de forma independente — sem esses dois eixos, uma herança simples basta.",
+  },
   relacionados: ["adapter", "strategy", "abstract-factory"],
   problema: [
     "Quando um conceito varia em duas dimensões ao mesmo tempo — tipo de notificação × canal de entrega, forma × renderizador — resolver por herança cria uma classe para cada combinação.",

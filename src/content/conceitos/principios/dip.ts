@@ -121,6 +121,44 @@ export const dip: Conceito = {
   tags: ["solid", "abstracao", "inversao", "arquitetura"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: {
+    quando: { rotulo: "1996", ano: 1996, precisao: "aproximada" },
+    fonte:
+      "Robert C. Martin, 'The Dependency Inversion Principle', C++ Report, 1996",
+    precursor:
+      "A inversão do fluxo de dependência já era o coração do 'Hollywood Principle' dos frameworks ('não nos chame, nós chamamos você') e de padrões como o Observer.",
+  },
+  ondeAparece: [
+    {
+      onde: "injeção de dependência (NestJS)",
+      explicacao:
+        "O container injeta implementações via construtor, e suas classes dependem de interfaces — o detalhe concreto é escolhido de fora, não lá dentro.",
+    },
+    {
+      onde: "React Context",
+      explicacao:
+        "O componente consome um contrato exposto pelo Provider sem saber quem o fornece; a implementação é injetada acima na árvore.",
+    },
+    {
+      onde: "ports do Hexagonal",
+      explicacao:
+        "O domínio declara a interface do repositório e o adaptador de banco a implementa: a dependência aponta para a abstração, não para o Postgres.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Alto nível depende de abstração, não de SmtpClient.
+constructor(private mail: PortaEmail) {}`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Uma abstração a mais entre o cliente e a implementação, com a injeção a conectar os dois",
+      "A indireção dificulta seguir do uso até o código concreto que roda de fato",
+    ],
+    naoValeSe:
+      "a implementação é única e estável e não precisa ser trocada nem testada isoladamente — depender dela direto é mais simples.",
+  },
   relacionados: ["hexagonal", "ocp", "adapter"],
   problema: [
     "A regra de negócio instancia diretamente o banco, o cliente HTTP e o serviço de e-mail. Para testá-la é preciso subir infraestrutura, e trocar qualquer detalhe implica mexer no domínio.",

@@ -46,6 +46,47 @@ export const docker: Conceito = {
   tags: ["containers", "imagens", "deploy", "isolamento", "dockerfile"],
   dificuldade: "iniciante",
   tempoLeitura: 7,
+  nasceu: {
+    quando: { rotulo: "2013", ano: 2013, precisao: "exata" },
+    fonte:
+      "Solomon Hykes — demo pública do Docker na PyCon US, março de 2013; " +
+      "código aberto no mesmo mês",
+    precursor:
+      "Os `cgroups` e `namespaces` do Linux já existiam há anos, e o LXC " +
+      "empacotava os dois. O Docker não inventou o isolamento — inventou a " +
+      "imagem em camadas e o jeito de compartilhá-la.",
+  },
+  ondeAparece: [
+    {
+      onde: "Dockerfile e Docker Hub",
+      explicacao:
+        "A receita da imagem e o registro de onde ela é baixada: você empacota app e dependências uma vez e roda igual em qualquer máquina.",
+    },
+    {
+      onde: "runners de CI",
+      explicacao:
+        "Cada job do GitHub Actions ou GitLab CI roda dentro de um contêiner limpo, garantindo o mesmo ambiente a cada execução do pipeline.",
+    },
+    {
+      onde: "docker compose no dev local",
+      explicacao:
+        "Subir banco, cache e app juntos com um comando dá a todo o time o mesmo ambiente, sem instalar serviço por serviço na máquina.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Mesma imagem do laptop ao cluster.
+// docker build -t api:1 . && docker run api:1`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Uma imagem a construir, versionar e manter, mais um registro de onde ela vive",
+      "A camada de contêiner adiciona um degrau entre o processo e a máquina para depurar",
+    ],
+    naoValeSe:
+      "o ambiente é único, estável e já reproduzível sem esforço — empacotar aí adiciona um passo de build sem ganho de portabilidade.",
+  },
   relacionados: ["kubernetes", "vps"],
   problema: [
     "'Na minha máquina funciona' é a versão do Node, a lib do sistema, a variável que só existe no notebook de quem configurou. Cada servidor é um ambiente ligeiramente diferente, e o deploy é a arte de descobrir a diferença em produção.",

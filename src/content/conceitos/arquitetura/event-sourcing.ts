@@ -115,6 +115,26 @@ conta.sacar(100)   # saldo derivado: 200`,
   },
 ];
 
+const ANTI_EXEMPLO = `// Isto NAO e um evento. E uma foto do estado, com data.
+await eventos.inserir({
+  tipo: "PedidoAtualizado",
+  pedidoId,
+  payload: { status: "cancelado", total: 340.0, itens: [...] },
+});
+
+// Perguntas que este registro NAO responde:
+// - por que foi cancelado? (cliente desistiu? fraude? falta de estoque?)
+// - quem cancelou?
+// - o total mudou junto ou ja estava assim?
+// - qual item saiu, se algum saiu?
+
+// O evento de verdade nomeia o FATO e carrega so o que mudou:
+await eventos.inserir({
+  tipo: "PedidoCanceladoPorFaltaDeEstoque",
+  pedidoId,
+  payload: { skuIndisponivel: "ABC-123", canceladoPor: "sistema" },
+});`;
+
 export const eventSourcing: Conceito = {
   slug: "event-sourcing",
   titulo: "Event Sourcing",
@@ -124,6 +144,44 @@ export const eventSourcing: Conceito = {
   tags: ["eventos", "event-store", "replay", "projecoes", "auditoria"],
   dificuldade: "avancado",
   tempoLeitura: 9,
+  nasceu: {
+    quando: { rotulo: "2005", ano: 2005, precisao: "aproximada" },
+    fonte:
+      "Martin Fowler, artigo 'Event Sourcing', 2005; desenvolvido por Greg Young no contexto de CQRS ao longo dos anos seguintes",
+    precursor:
+      "A ideia é tão velha quanto a contabilidade de partidas dobradas e o log de transações do banco (WAL): guardar o que aconteceu e derivar o estado depois.",
+  },
+  ondeAparece: [
+    {
+      onde: "git",
+      explicacao:
+        "O histórico de commits é o log imutável de eventos; a árvore de trabalho é só a projeção do estado atual, reconstruível a partir do log.",
+    },
+    {
+      onde: "Redux: estado = fold de ações",
+      explicacao:
+        "O estado da store é o resultado de reduzir a sequência de actions despachadas — as ações são a verdade, o estado é derivado delas.",
+    },
+    {
+      onde: "Kafka como event store",
+      explicacao:
+        "O tópico guarda os eventos em ordem e os consumidores montam suas próprias visões relendo o log desde o começo quando precisam.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Estado = redução dos eventos.
+const conta = eventos.reduce(aplicar, Conta.vazia());`,
+  },
+  custo: {
+    indirecoes: 2,
+    cobra: [
+      "Reconstruir o estado exige reprocessar eventos, o que pede snapshots quando o log cresce",
+      "Mudar o formato de um evento antigo é caro: o passado é imutável e precisa de versionamento",
+    ],
+    naoValeSe:
+      "não há valor no histórico completo nem em auditoria — guardar só o estado atual é muito mais simples de operar.",
+  },
   relacionados: ["cqrs", "saga", "observer"],
   problema: [
     "Bancos tradicionais guardam só o estado atual: cada UPDATE sobrescreve o anterior e joga fora o COMO se chegou ali. Quando a auditoria pergunta 'por que este saldo é 200?', a resposta já foi destruída.",
@@ -289,6 +347,20 @@ export const eventSourcing: Conceito = {
             "Eventos nascem em dispositivos offline e chegam fora de ordem — o modelo precisa separar o tempo do fato do tempo da gravação, e as projeções, tolerar eventos atrasados.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "Guardar o estado em vez do evento",
+      comoSeParece:
+        "Existe uma tabela de eventos, o vocabulário está lá, mas o que se grava é uma fotografia do objeto depois da mudança. Você tem o histórico do **que ficou**, e não do **que aconteceu** — que é a única coisa que o padrão existia para dar.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Ao investigar", efeito: "O histórico mostra que o status virou 'cancelado' e não diz por quê — a informação que motivou a mudança nunca foi gravada." },
+        { quando: "Numa projeção nova", efeito: "Uma pergunta de negócio que surgiu depois não pode ser respondida sobre o passado, porque o dado necessário não está lá." },
+        { quando: "Na auditoria", efeito: "Dois eventos consecutivos com o objeto inteiro obrigam a comparar campo a campo para descobrir o que mudou." },
+      ],
+      correcao:
+        "O evento nomeia um fato do negócio no passado (`PedidoCanceladoPorFaltaDeEstoque`), não uma transição genérica (`PedidoAtualizado`), e carrega o que mudou mais o motivo. Se o nome do evento pudesse ser usado para qualquer alteração daquela entidade, ele ainda é estado disfarçado.",
     },
     {
       tipo: "armadilhas",

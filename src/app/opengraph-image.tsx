@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "DevAtlas — estude padrões e arquitetura visualmente";
+export const alt = "DevMappa — estude padrões e arquitetura visualmente";
 
 export default function Image() {
   return new ImageResponse(
@@ -55,7 +55,7 @@ export default function Image() {
               />
             </div>
           </div>
-          <span style={{ fontSize: 64, fontWeight: 700 }}>DevAtlas</span>
+          <span style={{ fontSize: 64, fontWeight: 700 }}>DevMappa</span>
         </div>
         <span style={{ fontSize: 40, color: "#f2ece4", textAlign: "center" }}>
           Estude padrões e arquitetura visualmente

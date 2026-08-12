@@ -41,11 +41,29 @@ export const CATEGORIAS: Record<Categoria, CategoriaMeta> = {
     badge: "bg-cat-arquitetura/12 text-cat-arquitetura",
     cssVar: "var(--cat-arquitetura)",
   },
+  resiliencia: {
+    label: "Resiliência",
+    text: "text-cat-resiliencia",
+    badge: "bg-cat-resiliencia/12 text-cat-resiliencia",
+    cssVar: "var(--cat-resiliencia)",
+  },
+  dados: {
+    label: "Dados",
+    text: "text-cat-dados",
+    badge: "bg-cat-dados/12 text-cat-dados",
+    cssVar: "var(--cat-dados)",
+  },
   infra: {
     label: "Infra",
     text: "text-cat-infra",
     badge: "bg-cat-infra/12 text-cat-infra",
     cssVar: "var(--cat-infra)",
+  },
+  seguranca: {
+    label: "Segurança",
+    text: "text-cat-seguranca",
+    badge: "bg-cat-seguranca/12 text-cat-seguranca",
+    cssVar: "var(--cat-seguranca)",
   },
 };
 

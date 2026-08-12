@@ -4,11 +4,14 @@ import { listNovidades, formatarData } from "@/shared/lib/novidades";
 import { LinhaDoTempo } from "./_components/linha-do-tempo";
 import { ASeguir } from "./_components/a-seguir";
 
-export const metadata = {
+import { pageMetadata } from "@/shared/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Novidades",
   description:
-    "Histórico de entregas do DevAtlas: conteúdo novo, melhorias e correções.",
-};
+    "Histórico de entregas do DevMappa: conteúdo novo, melhorias e correções.",
+  path: "/novidades",
+});
 
 export default function NovidadesPage() {
   const entradas = listNovidades();
@@ -18,11 +21,11 @@ export default function NovidadesPage() {
     <PageTemplate
       icon={Sparkles}
       title="Novidades"
-      subtitle="Tudo que entrou no DevAtlas, da entrega mais recente para a mais antiga."
+      subtitle="Tudo que entrou no DevMappa, da entrega mais recente para a mais antiga."
       breadcrumb={[{ label: "Novidades" }]}
       actions={
         ultima && (
-          <div className="text-right">
+          <div className="flex items-baseline gap-2 sm:flex-col sm:items-end sm:gap-0 sm:text-right">
             <p className="font-mono text-sm font-semibold text-primary">
               v{ultima.versao}
             </p>

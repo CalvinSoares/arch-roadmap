@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Imagem {
@@ -104,6 +105,39 @@ export const proxy: Conceito = {
   tags: ["acesso", "lazy", "cache", "gof"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "O objeto Proxy do JS",
+      explicacao:
+        "O padrão virou palavra-chave: você intercepta leitura, escrita e chamada sem tocar no alvo.",
+    },
+    {
+      onde: "Reatividade do Vue 3",
+      explicacao:
+        "O objeto reativo é um Proxy que avisa o framework a cada acesso e a cada escrita.",
+    },
+    {
+      onde: "Lazy loading de ORM",
+      explicacao:
+        "`pedido.cliente` parece um objeto e só vai ao banco quando alguém realmente lê um campo.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Controla o acesso ao real (lazy, cache, auth).
+const imagem = new ProxyImagem("foto.png");
+imagem.desenhar(); // carrega sob demanda`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Uma indireção a mais entre o cliente e o objeto real, que o leitor precisa atravessar",
+      "Comportamento escondido no proxy (cache, lazy, log) surpreende quem espera a chamada direta",
+    ],
+    naoValeSe:
+      "não há nada a interceptar — sem controle de acesso, cache ou carga tardia, o proxy é só uma casca vazia.",
+  },
   relacionados: ["decorator", "adapter", "facade"],
   problema: [
     "Um objeto é caro (lê disco, abre conexão, ocupa memória) ou sensível (exige permissão, precisa de auditoria), mas o cliente só quer chamar seus métodos sem se preocupar com nada disso.",

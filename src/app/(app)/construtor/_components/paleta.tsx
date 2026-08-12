@@ -78,7 +78,7 @@ function ItemPaleta({
       title={desabilitado ? `${nome} já está no projeto` : descricao}
       aria-disabled={desabilitado}
       className={cn(
-        "flex items-center gap-1.5 rounded-lg border bg-card px-1.5 py-1 text-[13px] transition-colors",
+        "flex min-h-11 items-center gap-1.5 rounded-lg border bg-card px-1.5 py-1.5 text-[13px] transition-colors",
         desabilitado
           ? "border-dashed border-card-border"
           : "border-card-border hover:border-primary/60",
@@ -112,7 +112,7 @@ function ItemPaleta({
         aria-label={`Adicionar ${nome}`}
         onClick={onAdd}
         disabled={desabilitado}
-        className="rounded p-0.5 text-muted transition-colors hover:bg-primary/12 hover:text-primary disabled:cursor-default"
+        className="flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-primary/12 hover:text-primary disabled:cursor-default"
       >
         <Plus className="size-3.5" />
       </button>

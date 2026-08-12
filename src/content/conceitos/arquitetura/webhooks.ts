@@ -53,6 +53,44 @@ export const webhooks: Conceito = {
   tags: ["integracao", "eventos", "http", "notificacao", "polling"],
   dificuldade: "iniciante",
   tempoLeitura: 6,
+  nasceu: {
+    quando: { rotulo: "2007", ano: 2007, precisao: "aproximada" },
+    fonte:
+      "O termo 'webhook' foi cunhado por Jeff Lindsay em 2007, propondo 'hooks' HTTP como cola entre aplicações da web",
+    precursor:
+      "É o Observer levado à fronteira entre sistemas: em vez de um objeto notificar outro no mesmo processo, um servidor faz um POST no outro pela rede.",
+  },
+  ondeAparece: [
+    {
+      onde: "webhooks do Stripe",
+      explicacao:
+        "Em vez de você ficar perguntando, o Stripe faz um POST no seu endpoint quando a cobrança muda de estado — a notificação chega sozinha.",
+    },
+    {
+      onde: "webhooks do GitHub",
+      explicacao:
+        "Um push no repositório dispara uma chamada HTTP para o serviço de CI, que começa o build sem ninguém consultar o GitHub em loop.",
+    },
+    {
+      onde: "callback de gateway de pagamento",
+      explicacao:
+        "O provedor avisa a sua loja de forma assíncrona quando o Pix cai, fechando o pedido sem polling do lado de cá.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Eles chamam você quando o fato acontece.
+app.post("/hooks/stripe", verificarAssinatura, handler);`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Você passa a manter um endpoint público, com verificação de assinatura e proteção contra reenvio",
+      "A entrega é do provedor e pode falhar, repetir ou chegar fora de ordem — o consumidor precisa ser idempotente",
+    ],
+    naoValeSe:
+      "você controla os dois lados no mesmo processo — aí uma chamada direta ou um evento interno dispensa a rede.",
+  },
   relacionados: ["observer", "idempotencia", "append-only"],
   problema: [
     "Para saber se o pagamento foi confirmado, seu sistema pergunta à API do provedor a cada 30 segundos — 99% das respostas são 'ainda não', o rate limit chega antes da resposta útil, e a notícia ainda atrasa até meio minuto.",

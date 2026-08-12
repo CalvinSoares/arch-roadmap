@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class FabricaDeMoveis {
@@ -142,6 +143,34 @@ export const abstractFactory: Conceito = {
   tags: ["gof", "familias-de-objetos", "consistencia", "variantes"],
   dificuldade: "intermediario",
   tempoLeitura: 7,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "Componentes do React Native",
+      explicacao:
+        "O mesmo `<Text>` vira UILabel no iOS e TextView no Android — uma família inteira trocada de uma vez.",
+    },
+    {
+      onde: "Drivers de banco",
+      explicacao:
+        "O driver entrega conexão, cursor e transação combinando entre si; trocar de banco troca a família toda.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Família de produtos relacionados, sem new concreto.
+const ui = temaEscuro ? new DarkFactory() : new LightFactory();
+const botao = ui.criarBotao();`,
+  },
+  custo: {
+    indirecoes: 2,
+    cobra: [
+      "Uma interface de fábrica por família, mais as implementações concretas de cada uma",
+      "Adicionar um produto novo à família obriga a mexer em todas as fábricas existentes",
+    ],
+    naoValeSe:
+      "os produtos não formam famílias que precisam ser trocadas juntas — sem essa restrição, é estrutura sem propósito.",
+  },
   relacionados: ["factory-method", "builder"],
   problema: [
     "Alguns objetos só fazem sentido juntos: um botão do tema escuro ao lado de um checkbox do tema claro denuncia o bug na primeira tela. Quando o código cria cada produto isoladamente com new, nada impede a mistura de variantes incompatíveis.",

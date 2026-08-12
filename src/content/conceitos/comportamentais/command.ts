@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Comando {
@@ -138,6 +139,39 @@ export const command: Conceito = {
   tags: ["undo", "fila", "acao-como-objeto", "gof"],
   dificuldade: "intermediario",
   tempoLeitura: 7,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "Ações do Redux",
+      explicacao:
+        "Um objeto que descreve o que fazer, sem executar nada — logável, serializável e reexecutável.",
+    },
+    {
+      onde: "Filas de job",
+      explicacao:
+        "O trabalho vira dado, atravessa a fila e é executado por outro processo em outro momento.",
+    },
+    {
+      onde: "Undo do editor",
+      explicacao:
+        "Cada operação sabe se desfazer, e a pilha de comandos é o histórico.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Ação vira objeto: executar e desfazer.
+historico.push(new ApagarTexto(sel));
+historico.at(-1).executar();`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Cada ação vira um objeto com ciclo de vida próprio, em vez de uma chamada direta",
+      "Suportar undo exige guardar estado suficiente para reverter, o que nem toda ação torna simples",
+    ],
+    naoValeSe:
+      "a ação não precisa ser enfileirada, desfeita nem registrada — sem isso, chamar o método direto é mais simples.",
+  },
   relacionados: ["memento", "observer", "saga"],
   problema: [
     "Botões, atalhos e menus disparam ações, e cada um acaba conhecendo o objeto que faz o trabalho e como chamá-lo — o mesmo comportamento reimplementado em três lugares.",

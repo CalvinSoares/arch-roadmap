@@ -111,6 +111,44 @@ export const lsp: Conceito = {
   tags: ["solid", "heranca", "contrato", "polimorfismo"],
   dificuldade: "avancado",
   tempoLeitura: 7,
+  nasceu: {
+    quando: { rotulo: "1987", ano: 1987, precisao: "aproximada" },
+    fonte:
+      "Barbara Liskov, keynote 'Data Abstraction and Hierarchy', OOPSLA 1987; formalizado com Jeannette Wing em 'A Behavioral Notion of Subtyping', 1994",
+    precursor:
+      "A noção de subtipo compatível já rondava a teoria de tipos, mas foi Liskov quem a amarrou ao comportamento observável, e não só à assinatura.",
+  },
+  ondeAparece: [
+    {
+      onde: "List: ArrayList × LinkedList",
+      explicacao:
+        "Qualquer implementação de List entra onde List é esperado; trocar ArrayList por LinkedList não quebra quem só depende do contrato.",
+    },
+    {
+      onde: "Arrays.asList que quebra no add()",
+      explicacao:
+        "A List de tamanho fixo devolvida por Arrays.asList lança em .add(): o subtipo que promete menos que o supertipo, a violação clássica do JDK.",
+    },
+    {
+      onde: "drivers atrás de uma interface",
+      explicacao:
+        "Postgres ou MySQL por trás da mesma interface de banco só são substituíveis se cada driver cumprir o contrato inteiro, sem surpresas.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Subtipo substitui o base sem surpresa.
+function migrar(aves: Ave[]) { for (const a of aves) a.voar(); }`,
+  },
+  custo: {
+    indirecoes: 0,
+    cobra: [
+      "Manter o contrato do supertipo honesto limita o que cada subtipo pode fazer diferente",
+      "Verificar a substituibilidade de verdade exige testes sobre o contrato, não só sobre a classe",
+    ],
+    naoValeSe:
+      "não há herança nem polimorfismo em jogo — sem subtipos substituindo um supertipo, a regra não tem sobre o que valer.",
+  },
   relacionados: ["ocp", "isp", "dip"],
   problema: [
     "Herança que parece correta pela linguagem produz erros em tempo de execução: o subtipo compila, encaixa no tipo, e quebra a expectativa de quem programou contra o supertipo.",

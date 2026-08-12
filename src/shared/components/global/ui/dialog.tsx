@@ -15,7 +15,7 @@ const SIZES = {
   md: "max-w-[600px]",
   lg: "max-w-[800px]",
   xl: "max-w-[1000px]",
-  full: "max-w-[calc(100vw-2rem)]",
+  full: "max-w-[min(100%,72rem)]",
 } as const;
 
 export type DialogSize = keyof typeof SIZES;
@@ -35,8 +35,11 @@ export function DialogContent({
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=open]:fade-in" />
       <DialogPrimitive.Content
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2",
-          "rounded-2xl border border-card-border bg-card shadow-xl outline-none",
+          // 100% (não 100vw) evita 1px de overflow horizontal com scrollbar
+          "fixed left-1/2 top-1/2 z-50 w-[calc(100%-1.5rem)] -translate-x-1/2 -translate-y-1/2",
+          "max-h-[min(90dvh,calc(100dvh-1.5rem-env(safe-area-inset-top)-env(safe-area-inset-bottom)))]",
+          "overflow-y-auto overscroll-contain rounded-2xl border border-card-border bg-card shadow-xl outline-none",
+          "pt-[max(0px,env(safe-area-inset-top))] pb-[max(0px,env(safe-area-inset-bottom))]",
           SIZES[size],
           className
         )}
@@ -44,8 +47,15 @@ export function DialogContent({
       >
         {children}
         {showClose && (
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-md p-1 text-muted transition-colors hover:bg-muted/10 focus-visible:ring-2 focus-visible:ring-ring">
-            <X className="size-4" />
+          <DialogPrimitive.Close
+            className={cn(
+              "absolute right-2 z-20 flex size-10 items-center justify-center rounded-xl",
+              "top-[max(0.5rem,env(safe-area-inset-top))]",
+              "text-muted transition-colors hover:bg-muted/10 hover:text-foreground",
+              "focus-visible:ring-2 focus-visible:ring-ring"
+            )}
+          >
+            <X className="size-5" />
             <span className="sr-only">Fechar</span>
           </DialogPrimitive.Close>
         )}

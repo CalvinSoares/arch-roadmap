@@ -1,101 +1,82 @@
-# DevAtlas
+# DevMappa
 
 Sistema de **estudo e visualização** (front-only) de design patterns, princípios
-e arquitetura. Três frentes:
+e arquitetura. Hoje: **79 conceitos**, **5 trilhas**, **16 duelos**, **4
+postmortems**.
 
-- **`/conceitos`** — 33 conceitos: os **23 padrões GoF completos**, os 5
-  princípios **SOLID**, CQS e 4 de arquitetura (Hexagonal, CQRS, Saga, Event
-  Sourcing). Todos com TL;DR, seções curto/extenso, ilustração, camadas
-  navegáveis, casos de uso reais e armadilhas; alguns com demo interativa.
-- **`/roadmaps`** — 4 trilhas marcáveis (Padrões de Projeto, Backend,
-  Frontend, Arquitetura) com conectores bezier medidos, estilo roadmap.sh.
-- **`/construtor`** — playground de arquitetura: monte a pilha arrastando
-  camadas, padrões e tecnologias; o motor explica o que cada escolha muda,
-  sugere o próximo passo, **simula a requisição** (incluindo cenários de falha)
-  e exporta o resultado como **ADR em Markdown**.
-- **`/estudar`** — modo estudo sobre o progresso das trilhas: continue de onde
-  parou, próximos conceitos sugeridos e **revisão espaçada**.
-- **`/quiz`** — as armadilhas viram perguntas com o nome do padrão mascarado,
-  filtráveis **por categoria ou por trilha**. Cada conceito também tem o quiz
-  das próprias armadilhas no fim da página.
-- **`/comparar`** — os duelos que mais confundem, critério a critério.
+## Frentes
+
+- **`/conceitos`** — os **23 GoF**, **SOLID**, resiliência, mensageria, dados
+  distribuídos, estilos de arquitetura e DDD tático. Em **todos**: TL;DR,
+  `ondeAparece`, `custo`, `emUmaLinha`, casos e armadilhas. Vários têm
+  anti-exemplo e refatoração passo a passo.
+- **`/roadmaps`** — Padrões, Backend, Frontend, Arquitetura e *Sistemas que
+  aguentam produção*, com conectores, **pré-requisitos** (grafo) e filtro
+  **só o essencial**.
+- **`/construtor`** — monte a pilha; o motor critica, explica por que não
+  sugeriu X, simula a requisição e exporta ADR. Também:
+  **`/construtor/desafios`**, **`/construtor/comparar`**,
+  **`/construtor/escala`**, **`/construtor/entrevista`**.
+- **`/quiz`** — seis formatos (armadilha, onde aparece, duelo, jeito errado,
+  incidente, explique o erro) + placar de desempenho.
+- **`/comparar`** — duelos critério a critério.
+- **`/postmortems`** — incidentes públicos anotados com conceitos do catálogo.
+- **`/novidades`** — histórico de entregas e “A seguir”.
 
 ## Onde fica o quê
 
-- **O que já entrou** — a página `/novidades`, alimentada por
-  `content/novidades/registro.ts`. É a fonte única: dela saem o histórico de
-  entregas, o badge "novo" no catálogo e a seção "A seguir".
-- **O que vem depois** — [PLANEJAMENTO-PRODUTOS.md](./PLANEJAMENTO-PRODUTOS.md):
-  plano das próximas quatro features (export ADR, comparador de conceitos,
-  modo estudo e quiz), com modelo de dados, testes e ordem recomendada.
+- **O que já entrou** — `/novidades` ← `content/novidades/registro.ts`
+  (histórico, badge “novo”, A seguir).
+- **O que vem depois** — [PLANEJAMENTO.md](./PLANEJAMENTO.md). Tese: crescer
+  **por dentro**. O plano de conteúdo está em grande parte entregue; o resto é
+  expansão sob demanda (mais duelos, mais explique-erro).
 
 ## Stack
 
 Next.js 16 (App Router, SSG) · TypeScript · Tailwind v4 · React Flow ·
 Mermaid · Shiki · dnd-kit · next-themes · Sonner · Radix.
 
-Sem backend — todo conteúdo é **TypeScript tipado** no repositório (sem MDX, sem
-CMS), validado pelo compilador. Persistência do usuário em `localStorage` e
-compartilhamento por URL (`?p=<base64>`).
+Sem backend — conteúdo **TypeScript tipado** no repo (sem MDX/CMS). Persistência
+do usuário em `localStorage`; compartilhamento por URL (`?p=<base64>`).
 
 ## Desenvolvimento
 
 ```bash
 pnpm install
-```
-
-```bash
-pnpm dev
-```
-
-```bash
+cp .env.example .env.local   # opcional — ajuste NEXT_PUBLIC_SITE_URL
+pnpm dev                     # http://localhost:3000
 pnpm build
-```
-
-```bash
 pnpm test
 ```
 
-`pnpm dev` sobe em http://localhost:3000. `pnpm build` gera o site 100%
-estático (81 rotas). `pnpm test` roda a suíte com Vitest.
+`pnpm test` = Vitest unitário (`node`) + UI (`happy-dom` + Testing Library).
 
 ### Testes
 
-350 testes em ambiente `node`, sem jsdom — o motor do construtor e o conteúdo
-são funções puras e dados tipados, nada importa React. A suíte cobre:
+- **unit** (`*.spec.ts`) — motor do construtor, conteúdo, quiz, pré-requisitos
+- **ui** (`*.spec.tsx`) — smoke do Quiz
 
-- **motor do construtor** — que toda regra é alcançável e nenhuma dispara
-  sempre, limites e monotonicidade do score, os cenários de falha do
-  simulador, convergência das sugestões;
-- **regressão dos templates** — os 6 modelos curados precisam nascer sem
-  nenhum alerta (falha que já reapareceu três vezes);
-- **barra de qualidade do conteúdo** — todo conceito com TL;DR, ≥2 casos de
-  uso, ≥2 armadilhas, ilustração estruturalmente válida, e nenhum link
-  quebrado entre conceitos, regras e roadmaps.
+Barra de qualidade: TL;DR, casos, armadilhas, `ondeAparece`, `custo`,
+`emUmaLinha`, links íntegros, tecnologias do Construtor com slugs válidos.
 
 ## Estrutura
 
 ```
 src/
-├── app/(app)/            # rotas — page.tsx = só composição
-│   ├── conceitos/        # catálogo + [slug]
-│   ├── roadmaps/         # catálogo + [slug]
-│   └── construtor/       # _components/ · hook/ · utils/ (simulador)
-├── content/              # conteúdo tipado (+ specs ao lado)
-│   ├── conceitos/        # 33 conceitos agrupados por categoria
-│   ├── roadmaps/         # padroes · backend · frontend · arquitetura
-│   └── construtor/       # blocos · tecnologias · regras · sugestoes
+├── app/(app)/
+│   ├── conceitos/ · roadmaps/ · construtor/
+│   ├── quiz/ · comparar/ · postmortems/ · novidades/
+├── content/
+│   ├── conceitos/ · roadmaps/ · construtor/
+│   ├── comparacoes/ · postmortems/ · quiz/ · entrevistas/ · novidades/
 └── shared/
-    ├── components/       # global/ui (shadcn), templates, diagramas, conteudo
-    ├── context/          # providers, modal-context, theme
-    ├── hook/ · lib/ · config/ · types/ · utils/
+    ├── components/ · context/ · hook/ · lib/ · config/ · types/ · utils/
 ```
 
-O motor do construtor (`content/construtor/`) é composto de **funções puras** —
-`avaliarRegras`, `calcularScore`, `sugerir`, `revisarProjeto` — e o simulador
-(`construtor/utils/simulador.ts`) também. Nenhum deles importa React.
+Motor do construtor e simulador são **funções puras** (não importam React).
 
 ## Deploy (Vercel)
 
-Push para o GitHub e importar na Vercel. Sem env vars, sem serviços externos —
-`next build` gera tudo estático.
+Importar o repo. Copie `.env.example` → variáveis do projeto se quiser canônico
+/ OG corretos (`NEXT_PUBLIC_SITE_URL`, sem barra no final). `next build` gera
+tudo estático.

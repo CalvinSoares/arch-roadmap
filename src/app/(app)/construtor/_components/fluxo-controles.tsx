@@ -122,7 +122,7 @@ export function FluxoControles({
               aria-label="Passo anterior"
               onClick={() => onPasso(-1)}
               disabled={passoAtual <= 0}
-              className="rounded-l-lg p-1.5 text-muted hover:bg-muted/10 hover:text-foreground disabled:opacity-30"
+              className="flex size-10 items-center justify-center rounded-l-lg text-muted hover:bg-muted/10 hover:text-foreground disabled:opacity-30"
             >
               <ChevronLeft className="size-4" />
             </button>
@@ -134,7 +134,7 @@ export function FluxoControles({
               aria-label="Próximo passo"
               onClick={() => onPasso(1)}
               disabled={passoAtual >= totalPassos - 1}
-              className="rounded-r-lg p-1.5 text-muted hover:bg-muted/10 hover:text-foreground disabled:opacity-30"
+              className="flex size-10 items-center justify-center rounded-r-lg text-muted hover:bg-muted/10 hover:text-foreground disabled:opacity-30"
             >
               <ChevronRight className="size-4" />
             </button>
@@ -142,14 +142,14 @@ export function FluxoControles({
         )}
 
         <div className="flex items-center gap-1 text-muted" title="Velocidade da animação">
-          <Gauge className="size-3.5" />
+          <Gauge className="size-3.5 shrink-0" />
           {VELOCIDADES.map((v) => (
             <button
               key={v}
               type="button"
               onClick={() => onVelocidade(v)}
               className={cn(
-                "rounded px-1.5 py-0.5 text-[11px] font-medium transition-colors",
+                "min-h-9 min-w-9 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-colors",
                 velocidade === v ? "bg-primary/12 text-primary" : "hover:text-foreground"
               )}
             >
@@ -164,7 +164,7 @@ export function FluxoControles({
           onClick={() => setAberto((v) => !v)}
           aria-expanded={aberto}
           className={cn(
-            "ml-auto flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors",
+            "flex min-h-10 w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors sm:ml-auto sm:w-auto",
             aberto
               ? "border-primary/50 bg-primary/8 text-primary"
               : "border-card-border text-muted hover:text-foreground"

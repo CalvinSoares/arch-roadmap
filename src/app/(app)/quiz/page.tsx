@@ -2,18 +2,21 @@ import { CircleHelp } from "lucide-react";
 import { PageTemplate } from "@/shared/components/templates/page-template";
 import { SeletorQuiz } from "./_components/seletor-quiz";
 
-export const metadata = {
+import { pageMetadata } from "@/shared/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Quiz",
   description:
-    "Leia uma armadilha real de arquitetura, com o nome do padrão escondido, e descubra se sabe de quem ela é. Escolha por categoria ou por trilha.",
-};
+    "Seis formatos tirados do catálogo: armadilha, onde aparece, duelo, jeito errado, incidente e explique o erro — código quebrado, qual princípio foi violado.",
+  path: "/quiz",
+});
 
 export default function QuizPage() {
   return (
     <PageTemplate
       icon={CircleHelp}
-      title="Quiz das armadilhas"
-      subtitle="Um erro clássico por vez, com o nome do padrão escondido. Escolha o assunto e veja se reconhece de quem é."
+      title="Quiz"
+      subtitle="Seis formatos na mesma rodada: armadilha, biblioteca que você já usa, duelo, jeito errado, incidente real e código que viola um princípio."
       breadcrumb={[{ label: "Quiz" }]}
     >
       <SeletorQuiz />

@@ -18,7 +18,7 @@ const SidebarContext = React.createContext<SidebarContextValue | null>(null);
  * boolean; trocar a chave descarta a preferência uma única vez, o que para um
  * menu recolhido é inofensivo.
  */
-const CHAVE = "devatlas:sidebar-collapsed:v2";
+const CHAVE = "DevMappa:sidebar-collapsed:v2";
 const PADRAO = false;
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {

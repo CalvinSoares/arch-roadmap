@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
@@ -8,19 +8,20 @@ import {
   Compass,
   LayoutGrid,
   Map,
-  Search,
   X,
   Blocks,
-  Sparkles,
-  GraduationCap,
   GitCompareArrows,
   CircleHelp,
+  Bug,
+  Siren,
+  Scale,
+  PencilRuler,
+  Ruler,
+  ChevronDown,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useSidebar } from "@/shared/context/sidebar-context";
-import { useSearchPalette } from "@/shared/context/search-context";
-import { temNovidadeRecente } from "@/shared/lib/novidades";
 
 interface NavItem {
   href: string;
@@ -29,8 +30,8 @@ interface NavItem {
   exact?: boolean;
   /** Cor de acento do item (token CSS) — pinta ícone e realce ativos. */
   cor: string;
-  /** Mostra um ponto de aviso quando há entrega recente. */
-  avisoNovidade?: boolean;
+  /** Sub-itens: transformam este item num acordeão (ex.: Construtor). */
+  filhos?: NavItem[];
 }
 
 interface Grupo {
@@ -42,61 +43,117 @@ const GRUPOS: Grupo[] = [
   {
     titulo: "Explorar",
     itens: [
-      { href: "/", label: "Início", icon: Compass, exact: true, cor: "var(--primary)" },
-      { href: "/roadmaps", label: "Roadmaps", icon: Map, cor: "var(--cat-estrutural)" },
-      { href: "/conceitos", label: "Conceitos", icon: LayoutGrid, cor: "var(--cat-criacional)" },
+      {
+        href: "/",
+        label: "Início",
+        icon: Compass,
+        exact: true,
+        cor: "var(--primary)",
+      },
+      {
+        href: "/roadmaps",
+        label: "Roadmaps",
+        icon: Map,
+        cor: "var(--cat-estrutural)",
+      },
+      {
+        href: "/conceitos",
+        label: "Conceitos",
+        icon: LayoutGrid,
+        cor: "var(--cat-criacional)",
+      },
     ],
   },
   {
     titulo: "Ferramentas",
     itens: [
-      { href: "/construtor", label: "Construtor", icon: Blocks, cor: "var(--cat-comportamental)" },
-      { href: "/estudar", label: "Estudar", icon: GraduationCap, cor: "var(--cat-arquitetura)" },
-      { href: "/comparar", label: "Comparar", icon: GitCompareArrows, cor: "var(--cat-estrutural)" },
-      { href: "/quiz", label: "Quiz", icon: CircleHelp, cor: "var(--cat-principio)" },
-    ],
-  },
-  {
-    titulo: "Projeto",
-    itens: [
+      // Construtor vira um acordeão: o pai leva ao Construtor e os modos
+      // (quebre isto, comparar, entrevista, escala) moram dentro, recolhidos
+      // por padrão — assim os quatro deixam de dominar o rail.
       {
-        href: "/novidades",
-        label: "Novidades",
-        icon: Sparkles,
+        href: "/construtor",
+        label: "Construtor",
+        icon: Blocks,
+        cor: "var(--cat-comportamental)",
+        filhos: [
+          {
+            href: "/construtor/desafios",
+            label: "Quebre isto",
+            icon: Bug,
+            cor: "var(--cat-resiliencia)",
+          },
+          {
+            href: "/construtor/comparar",
+            label: "Comparar pilhas",
+            icon: Scale,
+            cor: "var(--cat-arquitetura)",
+          },
+          {
+            href: "/construtor/entrevista",
+            label: "Modo entrevista",
+            icon: PencilRuler,
+            cor: "var(--cat-dados)",
+          },
+          {
+            href: "/construtor/escala",
+            label: "Escala de latência",
+            icon: Ruler,
+            cor: "var(--cat-infra)",
+          },
+        ],
+      },
+      {
+        href: "/comparar",
+        label: "Duelos",
+        icon: GitCompareArrows,
+        cor: "var(--cat-estrutural)",
+      },
+      {
+        href: "/clinica",
+        label: "Código errado",
+        icon: Bug,
         cor: "var(--cat-principio)",
-        avisoNovidade: true,
+      },
+      {
+        href: "/postmortems",
+        label: "Postmortems",
+        icon: Siren,
+        cor: "var(--perigo)",
+      },
+      {
+        href: "/quiz",
+        label: "Quiz",
+        icon: CircleHelp,
+        cor: "var(--cat-principio)",
       },
     ],
   },
 ];
 
-const MOLA = { type: "spring" as const, stiffness: 420, damping: 34, mass: 0.7 };
-
-/**
- * `false` no servidor, valor real no cliente. O HTML é gerado no build e o
- * "recente" depende do relógio de quem visita — resolver só no cliente evita
- * divergência de hidratação.
- */
-const semInscricao = () => () => {};
-function useNovidadeRecente() {
-  return useSyncExternalStore(
-    semInscricao,
-    () => temNovidadeRecente(),
-    () => false
-  );
-}
+const MOLA = {
+  type: "spring" as const,
+  stiffness: 420,
+  damping: 34,
+  mass: 0.7,
+};
 
 /* ------------------------------------------------------------------ */
 
-function Marca({ colapsada, onNavigate }: { colapsada: boolean; onNavigate: () => void }) {
+function Marca({
+  colapsada,
+  onNavigate,
+}: {
+  colapsada: boolean;
+  onNavigate: () => void;
+}) {
   return (
     <Link
       href="/"
-      aria-label="DevAtlas — início"
+      aria-label="DevMappa — início"
       onClick={onNavigate}
       className={cn(
         "group/marca flex items-center gap-2.5 rounded-xl px-1 py-1",
-        colapsada && "justify-center px-0"
+        colapsada && "justify-center px-0",
       )}
     >
       <span className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-[0.7rem] bg-gradient-to-br from-primary to-[var(--glow-c)] shadow-[var(--shadow-md)] transition-transform duration-500 group-hover/marca:rotate-[8deg] group-hover/marca:scale-105">
@@ -107,7 +164,9 @@ function Marca({ colapsada, onNavigate }: { colapsada: boolean; onNavigate: () =
       </span>
       {!colapsada && (
         <span className="flex min-w-0 flex-col leading-none">
-          <span className="text-[15px] font-semibold tracking-tight">DevAtlas</span>
+          <span className="text-[15px] font-semibold tracking-tight">
+            DevMappa
+          </span>
           <span className="mt-1 text-[10px] uppercase tracking-[0.16em] text-muted">
             padrões &amp; arquitetura
           </span>
@@ -117,49 +176,21 @@ function Marca({ colapsada, onNavigate }: { colapsada: boolean; onNavigate: () =
   );
 }
 
-function BotaoBusca({ colapsada }: { colapsada: boolean }) {
-  const { setOpen } = useSearchPalette();
-
-  return (
-    <button
-      type="button"
-      onClick={() => setOpen(true)}
-      aria-label="Buscar"
-      title={colapsada ? "Buscar" : undefined}
-      className={cn(
-        "group/busca relative flex items-center gap-2.5 rounded-xl border border-card-border bg-card/70 px-3.5 py-2.5 text-sm text-muted",
-        "transition-all duration-300 hover:border-primary/45 hover:bg-card hover:text-foreground hover:shadow-[var(--shadow-md)]",
-        colapsada && "justify-center px-0"
-      )}
-    >
-      <Search className="size-4 shrink-0 transition-transform duration-300 group-hover/busca:scale-110 group-hover/busca:text-primary" />
-      {!colapsada && (
-        <>
-          <span className="flex-1 text-left">Buscar…</span>
-          <kbd className="rounded-md border border-card-border bg-background px-1.5 py-0.5 text-[10px] font-semibold text-muted transition-colors group-hover/busca:border-primary/40 group-hover/busca:text-primary">
-            Ctrl + K
-          </kbd>
-        </>
-      )}
-    </button>
-  );
-}
-
 function ItemNav({
   item,
   ativo,
   colapsada,
   onNavigate,
+  ocultarPonto = false,
 }: {
   item: NavItem;
   ativo: boolean;
   colapsada: boolean;
   onNavigate: () => void;
+  /** Esconde o ponto de status do fim da linha (o acordeão põe o chevron ali). */
+  ocultarPonto?: boolean;
 }) {
   const { icon: Icon, href, label, cor } = item;
-  const recente = useNovidadeRecente();
-  // já estando na página, o aviso perdeu a função
-  const avisar = Boolean(item.avisoNovidade) && recente && !ativo;
 
   return (
     <Link
@@ -171,7 +202,9 @@ function ItemNav({
         "group/item relative flex items-center gap-2.5 rounded-xl p-1.5 text-sm font-medium outline-none",
         "transition-transform duration-200 ease-out focus-visible:ring-2 focus-visible:ring-ring",
         colapsada && "justify-center",
-        ativo ? "text-foreground" : "text-muted hover:translate-x-0.5 hover:text-foreground"
+        ativo
+          ? "text-foreground"
+          : "text-muted hover:translate-x-0.5 hover:text-foreground",
       )}
     >
       {/* superfície levantada do item ativo — desliza entre os itens */}
@@ -181,7 +214,9 @@ function ItemNav({
           transition={MOLA}
           aria-hidden
           className="absolute inset-0 rounded-xl bg-card"
-          style={{ boxShadow: "inset 0 0 0 1px var(--card-border), var(--shadow-sm)" }}
+          style={{
+            boxShadow: "inset 0 0 0 1px var(--card-border), var(--shadow-sm)",
+          }}
         />
       )}
       {/* hover fantasma (só quando não está ativo) */}
@@ -199,7 +234,7 @@ function ItemNav({
           "relative z-10 grid size-8 shrink-0 place-items-center rounded-[0.6rem]",
           "transition-all duration-300 ease-out",
           !ativo &&
-            "bg-foreground/[0.06] group-hover/item:scale-105 group-hover/item:bg-[color-mix(in_srgb,var(--acento)_16%,transparent)] group-hover/item:text-[var(--acento)]"
+            "bg-foreground/[0.06] group-hover/item:scale-105 group-hover/item:bg-[color-mix(in_srgb,var(--acento)_16%,transparent)] group-hover/item:text-[var(--acento)]",
         )}
         style={
           ativo
@@ -213,31 +248,12 @@ function ItemNav({
         }
       >
         <Icon className="size-[17px]" />
-        {/* colapsada: o aviso mora no canto do ladrilho */}
-        {colapsada && avisar && (
-          <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border-2 border-background bg-primary" />
-        )}
       </span>
 
-      {!colapsada && (
-        <span className="relative z-10 truncate">
-          {label}
-          <span className="sr-only">{avisar ? " — há novidades" : ""}</span>
-        </span>
-      )}
-
-      {/* aviso de entrega recente */}
-      {!colapsada && avisar && (
-        <span
-          aria-hidden
-          className="relative z-10 ml-auto mr-1 rounded-full bg-primary/14 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-primary"
-        >
-          Novo
-        </span>
-      )}
+      {!colapsada && <span className="relative z-10 truncate">{label}</span>}
 
       {/* ponto de status no fim da linha */}
-      {!colapsada && ativo && (
+      {!colapsada && ativo && !ocultarPonto && (
         <motion.span
           layoutId="nav-ponto"
           transition={MOLA}
@@ -260,6 +276,121 @@ function ItemNav({
   );
 }
 
+/* ——— Acordeão: um item-pai (Construtor) com os modos dentro ——— */
+
+/** Filho do acordeão: linha compacta e indentada, sob o trilho de árvore. */
+function ItemFilho({
+  item,
+  ativo,
+  onNavigate,
+}: {
+  item: NavItem;
+  ativo: boolean;
+  onNavigate: () => void;
+}) {
+  const { icon: Icon, href, label, cor } = item;
+  return (
+    <li>
+      <Link
+        href={href}
+        onClick={onNavigate}
+        aria-current={ativo ? "page" : undefined}
+        style={{ ["--acento" as string]: cor }}
+        className={cn(
+          "group/f relative flex items-center gap-2.5 rounded-lg py-1.5 pl-3 pr-2 text-[13px] font-medium outline-none",
+          "transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+          ativo
+            ? "bg-card text-foreground"
+            : "text-muted hover:bg-foreground/[0.045] hover:text-foreground",
+        )}
+      >
+        <Icon
+          className={cn(
+            "size-4 shrink-0 transition-colors",
+            ativo
+              ? "text-[var(--acento)]"
+              : "text-muted group-hover/f:text-[var(--acento)]",
+          )}
+        />
+        <span className="truncate">{label}</span>
+      </Link>
+    </li>
+  );
+}
+
+/** Acordeão expandido: o pai leva ao Construtor; o chevron abre os modos. */
+function ItemAccordion({
+  item,
+  pathname,
+  onNavigate,
+}: {
+  item: NavItem;
+  pathname: string;
+  onNavigate: () => void;
+}) {
+  const dentro = pathname.startsWith(item.href);
+  const [aberto, setAberto] = useState(dentro);
+  // Ajuste de estado durante o render (em vez de um efeito): ao ENTRAR no
+  // Construtor por navegação de cliente, reabre os modos. É o padrão que o
+  // React recomenda para "ajustar estado quando um prop muda".
+  const [dentroAntes, setDentroAntes] = useState(dentro);
+  if (dentro !== dentroAntes) {
+    setDentroAntes(dentro);
+    if (dentro) setAberto(true);
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <div className="relative">
+        <ItemNav
+          item={item}
+          colapsada={false}
+          onNavigate={onNavigate}
+          ativo={dentro}
+          ocultarPonto
+        />
+        <button
+          type="button"
+          onClick={() => setAberto((a) => !a)}
+          aria-expanded={aberto}
+          aria-label={
+            aberto ? `Recolher ${item.label}` : `Expandir ${item.label}`
+          }
+          className="absolute right-1.5 top-1/2 z-20 -translate-y-1/2 rounded-md p-1 text-muted transition-colors hover:bg-foreground/10 hover:text-foreground"
+        >
+          <ChevronDown
+            className={cn(
+              "size-4 transition-transform duration-200",
+              aberto && "rotate-180",
+            )}
+          />
+        </button>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {aberto && (
+          <motion.ul
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="ml-5 flex flex-col gap-0.5 overflow-hidden border-l border-card-border pl-2"
+          >
+            {(item.filhos ?? []).map((f) => (
+              <ItemFilho
+                key={f.href}
+                item={f}
+                ativo={pathname === f.href || pathname.startsWith(f.href)}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function Conteudo({ colapsada }: { colapsada: boolean }) {
   const pathname = usePathname();
   const { setMobileOpen } = useSidebar();
@@ -268,30 +399,66 @@ function Conteudo({ colapsada }: { colapsada: boolean }) {
   return (
     <div className="flex h-full flex-col gap-4 p-3">
       <Marca colapsada={colapsada} onNavigate={fechar} />
-      <BotaoBusca colapsada={colapsada} />
 
+      {/* min-h-0 + overflow-y-auto: só a nav rola, e só quando passa da tela —
+          a marca fica pinada no topo. Sem isto, o acordeão aberto voltaria a
+          ser cortado quando a lista cresce. */}
       <LayoutGroup id="sidebar-nav">
-        <nav aria-label="Menu principal" className="flex flex-1 flex-col gap-5">
+        <nav
+          aria-label="Menu principal"
+          className={cn(
+            "flex min-h-0 flex-1 flex-col gap-5",
+            // só rola quando expandida — no rail de ícones o overflow cortaria
+            // os tooltips (label) que saem para a direita
+            !colapsada && "-mr-1 overflow-y-auto overflow-x-hidden pr-1",
+          )}
+        >
           {GRUPOS.map((grupo) => (
             <div key={grupo.titulo} className="flex flex-col gap-1">
               {colapsada ? (
-                <span aria-hidden className="mx-auto mb-1 h-px w-6 bg-card-border" />
+                <span
+                  aria-hidden
+                  className="mx-auto mb-1 h-px w-6 bg-card-border"
+                />
               ) : (
                 <span className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/80">
                   {grupo.titulo}
                 </span>
               )}
-              {grupo.itens.map((item) => (
-                <ItemNav
-                  key={item.href}
-                  item={item}
-                  colapsada={colapsada}
-                  onNavigate={fechar}
-                  ativo={
-                    item.exact ? pathname === item.href : pathname.startsWith(item.href)
-                  }
-                />
-              ))}
+              {grupo.itens.map((item) =>
+                item.filhos ? (
+                  colapsada ? (
+                    // rail de ícones: só o pai (leva ao Construtor); os modos
+                    // aparecem ao expandir a barra
+                    <ItemNav
+                      key={item.href}
+                      item={item}
+                      colapsada
+                      onNavigate={fechar}
+                      ativo={pathname.startsWith(item.href)}
+                    />
+                  ) : (
+                    <ItemAccordion
+                      key={item.href}
+                      item={item}
+                      pathname={pathname}
+                      onNavigate={fechar}
+                    />
+                  )
+                ) : (
+                  <ItemNav
+                    key={item.href}
+                    item={item}
+                    colapsada={colapsada}
+                    onNavigate={fechar}
+                    ativo={
+                      item.exact
+                        ? pathname === item.href
+                        : pathname.startsWith(item.href)
+                    }
+                  />
+                ),
+              )}
             </div>
           ))}
         </nav>
@@ -312,7 +479,7 @@ export function Sidebar() {
         aria-label="Navegação principal"
         className={cn(
           "relative hidden shrink-0 overflow-hidden bg-background transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:block",
-          collapsed ? "w-[4.5rem]" : "w-64"
+          collapsed ? "w-[4.5rem]" : "w-64",
         )}
       >
         {/* borda direita em degradê, em vez de linha chapada */}
@@ -343,13 +510,13 @@ export function Sidebar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 34 }}
-              className="absolute left-0 top-0 h-full w-72 border-r border-card-border bg-background shadow-[var(--shadow-lg)]"
+              className="absolute left-0 top-0 h-full w-[min(18rem,100%)] border-r border-card-border bg-background pt-[env(safe-area-inset-top)] shadow-[var(--shadow-lg)]"
             >
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Fechar menu"
-                className="absolute right-2 top-3 z-10 rounded-lg p-1.5 text-muted transition-colors hover:bg-foreground/5 hover:text-foreground"
+                className="absolute right-2 top-[max(0.75rem,env(safe-area-inset-top))] z-10 flex size-10 items-center justify-center rounded-xl text-muted transition-colors hover:bg-foreground/5 hover:text-foreground"
               >
                 <X className="size-4" />
               </button>

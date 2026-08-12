@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class PedidoBuilder {
@@ -132,6 +133,38 @@ export const builder: Conceito = {
   tags: ["gof", "fluent-interface", "imutabilidade", "telescoping-constructor"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "Query builders (Knex, Prisma)",
+      explicacao:
+        "`.where().orderBy().limit()` monta a consulta por partes e só no `.then()` produz o SQL final.",
+    },
+    {
+      onde: "URLSearchParams",
+      explicacao:
+        "Você acrescenta parâmetro a parâmetro e o `toString()` no fim entrega a query string pronta.",
+    },
+    {
+      onde: "Request do fetch",
+      explicacao:
+        "Método, headers, body e sinal vão sendo compostos até virar um objeto imutável de requisição.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Monta objeto complexo passo a passo.
+const url = new URLSearchParams().set("q", termo).set("page", "1");`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Um objeto builder a manter em paralelo ao objeto que ele constrói",
+      "A construção passa a ser uma sequência de chamadas em vez de um construtor só",
+    ],
+    naoValeSe:
+      "o objeto tem poucos campos e um construtor legível já resolve — o builder só compensa quando a montagem é complexa ou muito opcional.",
+  },
   relacionados: ["factory-method", "abstract-factory"],
   problema: [
     "Objetos com muitos parâmetros opcionais empurram o código para o telescoping constructor: uma escada de construtores sobrecarregados ou chamadas como new Pedido(itens, null, true, null, false), em que ninguém sabe o que cada posição significa.",

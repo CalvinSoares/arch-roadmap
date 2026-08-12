@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class BancoCentral {
@@ -85,6 +86,31 @@ print(b.taxa_selic)     # 12.25 — mudou "para todo mundo"
   },
 ];
 
+const ANTI_EXEMPLO = `class Config {
+  private static instancia: Config;
+  private valores = new Map<string, string>();
+
+  static obter(): Config {
+    if (!Config.instancia) Config.instancia = new Config();
+    return Config.instancia;
+  }
+
+  set(k: string, v: string) { this.valores.set(k, v); }  // <- estado mutavel
+  get(k: string) { return this.valores.get(k); }
+}
+
+// Nenhuma assinatura revela esta dependencia.
+class Cobranca {
+  cobrar(valor: number) {
+    const moeda = Config.obter().get("moeda"); // acoplamento invisivel
+    // ...
+  }
+}
+
+// E aqui mora o problema: o teste precisa mexer no estado global
+// para preparar o cenario — e nao tem como desfazer depois.
+Config.obter().set("moeda", "BRL");`;
+
 export const singleton: Conceito = {
   slug: "singleton",
   titulo: "Singleton",
@@ -94,6 +120,33 @@ export const singleton: Conceito = {
   tags: ["gof", "instancia-unica", "estado-global", "injecao-de-dependencia"],
   dificuldade: "iniciante",
   tempoLeitura: 6,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "Qualquer módulo ES",
+      explicacao:
+        "Um módulo importado dez vezes é avaliado uma só; o `export` já é uma instância única do processo.",
+    },
+    {
+      onde: "Pools de conexão",
+      explicacao:
+        "Abrir um pool por requisição derruba o banco — por isso ele é sempre único e compartilhado.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Um modulo ES ja e um singleton. Nao precisa de classe.
+export const pool = criarPool();`,
+  },
+  custo: {
+    indirecoes: 0,
+    cobra: [
+      "A dependência some das assinaturas e vira invisível",
+      "Testes deixam de poder rodar em paralelo se houver estado mutável",
+    ],
+    naoValeSe:
+      "o objeto guarda estado que muda. Aí o que você quer é uma instância injetada, não uma global.",
+  },
   relacionados: ["factory-method"],
   problema: [
     "Alguns objetos precisam existir uma única vez por processo: o pool de conexões com o banco, a configuração carregada do disco, o logger que escreve no mesmo arquivo. Duas cópias significam recursos desperdiçados ou, pior, dados inconsistentes entre elas.",
@@ -247,6 +300,20 @@ export const singleton: Conceito = {
             "Testes que verificam logs precisam resetar o singleton entre casos, ou um teste enxerga as linhas do outro. Loggers modernos atenuam criando filhos injetáveis (child loggers) por módulo ou requisição.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "Quando o Singleton vira variável global",
+      comoSeParece:
+        "A instância única virou um depósito de estado mutável que qualquer parte do sistema lê e escreve. Ninguém declara que depende dela — a dependência entra por dentro, invisível na assinatura de todo mundo.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "No teste", efeito: "Dois testes que precisam de configurações diferentes não podem rodar na mesma suíte, e a ordem de execução passa a mudar o resultado." },
+        { quando: "Em produção", efeito: "A dependência não aparece em nenhum construtor, então ninguém descobre quem usa o quê sem ler todo o código." },
+        { quando: "Ao paralelizar", efeito: "O estado compartilhado vira uma condição de corrida silenciosa entre requisições concorrentes." },
+      ],
+      correcao:
+        "Singleton controla o **ciclo de vida** (uma instância só), não o **acesso**. Mantenha a instância única na composição da aplicação e injete-a por parâmetro: quem depende, declara. E se o objeto guarda estado mutável, provavelmente ele não deveria ser único.",
     },
     {
       tipo: "armadilhas",

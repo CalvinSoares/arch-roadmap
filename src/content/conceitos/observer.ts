@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Sujeito {
@@ -63,6 +64,30 @@ cancelar()`,
   },
 ];
 
+const ANTI_EXEMPLO = `class Sujeito {
+  private observadores: ((v: number) => void)[] = [];
+
+  inscrever(o: (v: number) => void) {
+    this.observadores.push(o);   // <- e para sair, como?
+  }
+
+  notificar(v: number) {
+    this.observadores.forEach((o) => o(v));
+  }
+}
+
+class Painel {
+  constructor(private sujeito: Sujeito) {
+    // A closure captura 'this'. Enquanto o sujeito viver,
+    // este Painel inteiro fica vivo junto.
+    sujeito.inscrever((v) => this.desenhar(v));
+  }
+  desenhar(v: number) { /* ... */ }
+}
+
+// Cada navegacao cria um Painel. Nenhum e coletado.
+// Depois de 200 telas, sao 200 Paineis recebendo notificacao.`;
+
 export const observer: Conceito = {
   slug: "observer",
   titulo: "Observer",
@@ -72,6 +97,47 @@ export const observer: Conceito = {
   tags: ["eventos", "gof", "pub-sub", "reatividade"],
   dificuldade: "intermediario",
   tempoLeitura: 7,
+  nasceu: gof(
+    "O MVC do Smalltalk-80 (1979) já fazia a view se inscrever no model para " +
+      "ser notificada — o padrão tinha quinze anos quando ganhou nome."
+  ),
+  ondeAparece: [
+    {
+      onde: "addEventListener",
+      explicacao:
+        "Você registra interesse e é chamado quando acontece — sem perguntar de tempos em tempos.",
+    },
+    {
+      onde: "EventEmitter do Node",
+      explicacao:
+        "`on` e `emit` são inscrição e notificação, com a lista de ouvintes por dentro.",
+    },
+    {
+      onde: "RxJS",
+      explicacao:
+        "Observable e subscriber levam o padrão ao extremo, com composição de fluxos por cima.",
+    },
+    {
+      onde: "Signals de Vue e Solid",
+      explicacao:
+        "A dependência é registrada na leitura, e a escrita notifica quem leu.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Inscrever devolve o cancelamento. Sem isso, vaza.
+const cancelar = sujeito.inscrever((estado) => reagir(estado));`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "A ordem de notificação deixa de ser garantida",
+      "O rastro de execução some: quem disparou o efeito não aparece na pilha",
+      "Todo inscrito precisa lembrar de cancelar",
+    ],
+    naoValeSe:
+      "há um único interessado e ele é conhecido em tempo de compilação. Aí é uma chamada de função.",
+  },
   relacionados: ["strategy", "factory-method"],
   problema: [
     "Vários objetos precisam reagir a mudanças em outro objeto, mas checar por mudança em loop (polling) é caro e acopla todos ao sujeito.",
@@ -241,6 +307,117 @@ export const observer: Conceito = {
             "O mapeamento evento→chaves é manual e frágil: invalidar demais derruba o hit rate, invalidar de menos serve dado desatualizado.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O Observer que vaza memória",
+      comoSeParece:
+        "Todo mundo lembra de se inscrever; quase ninguém lembra de sair. Como o sujeito guarda uma referência forte para cada observador, o objeto que deveria morrer continua vivo — e continua sendo notificado.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Depois de horas", efeito: "A memória cresce sem teto e o processo é reiniciado pelo orquestrador — sem nenhum erro no log que aponte a causa." },
+        { quando: "Na navegação", efeito: "Componentes já removidos da tela continuam reagindo e escrevendo em estado que não existe mais." },
+        { quando: "Ao notificar", efeito: "O custo de cada evento cresce com o tempo, porque a lista só aumenta." },
+      ],
+      correcao:
+        "`inscrever` devolve a função de cancelamento, e quem se inscreve é obrigado a chamá-la ao morrer — é o `return () => ...` do exemplo correto acima, e o `cleanup` do `useEffect`. Onde a linguagem permitir, referência fraca ajuda; disciplina de cancelamento resolve.",
+    },
+    {
+      tipo: "refatoracao",
+      cheiro:
+        "A classe que muda o preço chamando, pelo nome, cada um dos quatro lugares que precisam reagir.",
+      inicio: { lang: "typescript", code: `class Precos {
+  constructor(
+    private readonly vitrine: Vitrine,
+    private readonly cache: Cache,
+    private readonly auditoria: Auditoria,
+    private readonly emails: Emails,
+  ) {}
+
+  atualizar(sku: string, preco: number) {
+    this.salvar(sku, preco);
+
+    // Toda reacao nova = editar esta classe e este metodo.
+    this.vitrine.redesenhar(sku);
+    this.cache.invalidar(sku);
+    this.auditoria.registrar(sku, preco);
+    this.emails.avisarInteressados(sku, preco);
+  }
+}` },
+      passos: [
+        {
+          titulo: "Inverter a dependência",
+          motivo:
+            "`Precos` deixa de conhecer os quatro e passa a conhecer uma assinatura. Isto é o DIP: quem muda não sabe mais quem reage.",
+          depois: { lang: "typescript", code: `type Ouvinte = (sku: string, preco: number) => void;
+
+class Precos {
+  private ouvintes: Ouvinte[] = [];
+
+  inscrever(o: Ouvinte) {
+    this.ouvintes.push(o);
+  }
+
+  atualizar(sku: string, preco: number) {
+    this.salvar(sku, preco);
+    this.ouvintes.forEach((o) => o(sku, preco));
+  }
+}` },
+        },
+        {
+          titulo: "Devolver o cancelamento",
+          motivo:
+            "O passo anterior criou um vazamento: nada nunca sai da lista, e cada inscrito fica vivo enquanto `Precos` viver. **Inscrever tem que devolver como sair** — sem isso, o padrão trocou acoplamento por vazamento de memória.",
+          depois: { lang: "typescript", code: `class Precos {
+  private ouvintes = new Set<Ouvinte>();
+
+  // Devolve o cancelamento. E o unico jeito de o inscrito poder morrer.
+  inscrever(o: Ouvinte): () => void {
+    this.ouvintes.add(o);
+    return () => this.ouvintes.delete(o);
+  }
+
+  atualizar(sku: string, preco: number) {
+    this.salvar(sku, preco);
+    // copia a lista: um ouvinte pode se desinscrever durante a notificacao
+    [...this.ouvintes].forEach((o) => o(sku, preco));
+  }
+}
+
+const cancelar = precos.inscrever((sku) => cache.invalidar(sku));
+// ao destruir o componente / encerrar o escopo:
+cancelar();` },
+        },
+        {
+          titulo: "Isolar a falha do ouvinte",
+          motivo:
+            "Falta o último detalhe, e ele é o que quebra em produção: um ouvinte que lança impede os seguintes de rodar. O e-mail falhando não pode cancelar a invalidação do cache.",
+          depois: { lang: "typescript", code: `class Precos {
+  private ouvintes = new Set<Ouvinte>();
+
+  inscrever(o: Ouvinte): () => void {
+    this.ouvintes.add(o);
+    return () => this.ouvintes.delete(o);
+  }
+
+  atualizar(sku: string, preco: number) {
+    this.salvar(sku, preco);
+
+    for (const o of [...this.ouvintes]) {
+      try {
+        o(sku, preco);
+      } catch (erro) {
+        // Um ouvinte quebrado nao pode calar os outros. Mas engolir
+        // em silencio esconde bug: registrar e obrigatorio.
+        reportar("ouvinte de preco falhou", erro);
+      }
+    }
+  }
+}` },
+        },
+      ],
+      veredito:
+        "Ganhou-se: reação nova sem tocar em `Precos`, e cada ouvinte testável sozinho. Pagou-se: a ordem de notificação deixou de ser garantida, o rastro de execução ficou indireto (quem disparou não aparece na pilha), e todo inscrito passou a ter a obrigação de cancelar. Com um único interessado, conhecido em tempo de compilação, a chamada direta era mais clara.",
     },
     {
       tipo: "armadilhas",

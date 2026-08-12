@@ -6,7 +6,7 @@ import { useArmazenamentoLocal } from "@/shared/hook/use-armazenamento-local";
 
 type Mapa = Record<string, ProgressoNo>;
 
-const chave = (slug: string) => `devatlas:progress:${slug}`;
+const chave = (slug: string) => `DevMappa:progress:${slug}`;
 /** Constante de módulo: o padrão precisa ser referencialmente estável. */
 const VAZIO: Mapa = {};
 

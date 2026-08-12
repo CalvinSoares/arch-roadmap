@@ -3,6 +3,7 @@ import type { Roadmap } from "@/shared/types/roadmap";
 import type { Comparacao } from "@/shared/types/comparacao";
 import { slugComparacao } from "@/shared/types/comparacao";
 import { COMPARACOES } from "@/content/comparacoes/registro";
+import { POSTMORTEMS } from "@/content/postmortems/registro";
 import { factoryMethod } from "@/content/conceitos/factory-method";
 import { observer } from "@/content/conceitos/observer";
 import { adapter } from "@/content/conceitos/adapter";
@@ -14,6 +15,11 @@ import { ocp } from "@/content/conceitos/principios/ocp";
 import { lsp } from "@/content/conceitos/principios/lsp";
 import { isp } from "@/content/conceitos/principios/isp";
 import { dip } from "@/content/conceitos/principios/dip";
+import { composicaoSobreHeranca } from "@/content/conceitos/principios/composicao-sobre-heranca";
+import { dryKissYagni } from "@/content/conceitos/principios/dry-kiss-yagni";
+import { leiDeDemeter } from "@/content/conceitos/principios/lei-de-demeter";
+import { leiDeConway } from "@/content/conceitos/principios/lei-de-conway";
+import { falaciasSistemasDistribuidos } from "@/content/conceitos/principios/falacias-sistemas-distribuidos";
 import { cqrs } from "@/content/conceitos/arquitetura/cqrs";
 import { saga } from "@/content/conceitos/arquitetura/saga";
 import { abstractFactory } from "@/content/conceitos/criacionais/abstract-factory";
@@ -45,10 +51,50 @@ import { webhooks } from "@/content/conceitos/arquitetura/webhooks";
 import { docker } from "@/content/conceitos/infra/docker";
 import { kubernetes } from "@/content/conceitos/infra/kubernetes";
 import { vps } from "@/content/conceitos/infra/vps";
+import { timeout } from "@/content/conceitos/resiliencia/timeout";
+import { retry } from "@/content/conceitos/resiliencia/retry";
+import { circuitBreaker } from "@/content/conceitos/resiliencia/circuit-breaker";
+import { bulkhead } from "@/content/conceitos/resiliencia/bulkhead";
+import { rateLimiting } from "@/content/conceitos/resiliencia/rate-limiting";
+import { deadLetterQueue } from "@/content/conceitos/resiliencia/dead-letter-queue";
+import { garantiasDeEntrega } from "@/content/conceitos/resiliencia/garantias-de-entrega";
+import { outbox } from "@/content/conceitos/resiliencia/outbox";
+import { repository } from "@/content/conceitos/arquitetura/repository";
+import { niveisDeIsolamento } from "@/content/conceitos/dados/niveis-de-isolamento";
+import { lockOtimistaPessimista } from "@/content/conceitos/dados/lock-otimista-pessimista";
+import { cap } from "@/content/conceitos/dados/cap";
+import { consistenciaEventual } from "@/content/conceitos/dados/consistencia-eventual";
+import { replicaDeLeitura } from "@/content/conceitos/dados/replica-de-leitura";
+import { sharding } from "@/content/conceitos/dados/sharding";
+import { twoPhaseCommit } from "@/content/conceitos/dados/two-phase-commit";
+import { indice } from "@/content/conceitos/dados/indice";
+import { cache } from "@/content/conceitos/dados/cache";
+import { filaVsPubsub } from "@/content/conceitos/arquitetura/fila-vs-pubsub";
+import { inboxDeduplicacao } from "@/content/conceitos/resiliencia/inbox-deduplicacao";
+import { chaveDeParticao } from "@/content/conceitos/arquitetura/chave-de-particao";
+import { backpressure } from "@/content/conceitos/resiliencia/backpressure";
+import { agregado } from "@/content/conceitos/arquitetura/agregado";
+import { valueObject } from "@/content/conceitos/arquitetura/value-object";
+import { unitOfWork } from "@/content/conceitos/arquitetura/unit-of-work";
+import { antiCorruptionLayer } from "@/content/conceitos/arquitetura/anti-corruption-layer";
+import { microsservicos } from "@/content/conceitos/arquitetura/microsservicos";
+import { monolitoModular } from "@/content/conceitos/arquitetura/monolito-modular";
+import { cleanArchitecture } from "@/content/conceitos/arquitetura/clean-architecture";
+import { bff } from "@/content/conceitos/arquitetura/bff";
+import { apiGateway } from "@/content/conceitos/arquitetura/api-gateway";
+import { stranglerFig } from "@/content/conceitos/arquitetura/strangler-fig";
+import { autenticacao } from "@/content/conceitos/seguranca/autenticacao";
+import { jwt } from "@/content/conceitos/seguranca/jwt";
+import { oauth2 } from "@/content/conceitos/seguranca/oauth2";
+import { mfa } from "@/content/conceitos/seguranca/mfa";
+import { autorizacao } from "@/content/conceitos/seguranca/autorizacao";
+import { allowlist } from "@/content/conceitos/seguranca/allowlist";
+import { gestaoDeSegredos } from "@/content/conceitos/seguranca/gestao-de-segredos";
 import { roadmapPadroes } from "@/content/roadmaps/padroes";
 import { roadmapBackend } from "@/content/roadmaps/backend";
 import { roadmapFrontend } from "@/content/roadmaps/frontend";
 import { roadmapArquitetura } from "@/content/roadmaps/arquitetura";
+import { roadmapResiliencia } from "@/content/roadmaps/resiliencia";
 
 /**
  * Camada de conteúdo (substitui a camada tRPC do PaaS).
@@ -85,6 +131,11 @@ const CONCEITOS: Conceito[] = [
   lsp,
   isp,
   dip,
+  composicaoSobreHeranca,
+  dryKissYagni,
+  leiDeDemeter,
+  leiDeConway,
+  falaciasSistemasDistribuidos,
   cqrs,
   saga,
   eventSourcing,
@@ -97,12 +148,52 @@ const CONCEITOS: Conceito[] = [
   docker,
   kubernetes,
   vps,
+  timeout,
+  retry,
+  circuitBreaker,
+  bulkhead,
+  rateLimiting,
+  deadLetterQueue,
+  garantiasDeEntrega,
+  outbox,
+  repository,
+  niveisDeIsolamento,
+  lockOtimistaPessimista,
+  cap,
+  consistenciaEventual,
+  replicaDeLeitura,
+  sharding,
+  twoPhaseCommit,
+  indice,
+  cache,
+  filaVsPubsub,
+  inboxDeduplicacao,
+  chaveDeParticao,
+  backpressure,
+  agregado,
+  valueObject,
+  unitOfWork,
+  antiCorruptionLayer,
+  microsservicos,
+  monolitoModular,
+  cleanArchitecture,
+  bff,
+  apiGateway,
+  stranglerFig,
+  autenticacao,
+  jwt,
+  oauth2,
+  mfa,
+  autorizacao,
+  allowlist,
+  gestaoDeSegredos,
 ];
 const ROADMAPS: Roadmap[] = [
   roadmapPadroes,
   roadmapBackend,
   roadmapFrontend,
   roadmapArquitetura,
+  roadmapResiliencia,
 ];
 
 export function listConceitos(): Conceito[] {
@@ -179,6 +270,31 @@ export function roadmapsDoConceito(slug: string): OcorrenciaEmRoadmap[] {
     }
   }
   return achados;
+}
+
+/**
+ * Em que incidentes reais este conceito aparece.
+ *
+ * **Derivado** do registro de postmortems, como `roadmapsDoConceito` — o
+ * conceito não guarda lista de postmortems, senão haveria duas fontes de
+ * verdade e uma delas envelheceria errada.
+ */
+export function postmortemsDoConceito(
+  slug: string
+): { slug: string; titulo: string; organizacao: string; porque: string }[] {
+  return POSTMORTEMS.flatMap((p) => {
+    const citacao = p.conceitos.find((c) => c.slug === slug);
+    return citacao
+      ? [
+          {
+            slug: p.slug,
+            titulo: p.titulo,
+            organizacao: p.organizacao,
+            porque: citacao.porque,
+          },
+        ]
+      : [];
+  });
 }
 
 export function getRoadmap(slug: string): Roadmap | undefined {

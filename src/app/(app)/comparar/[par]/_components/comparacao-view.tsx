@@ -3,28 +3,13 @@ import { ArrowUpRight, Lightbulb, TriangleAlert } from "lucide-react";
 import { CATEGORIAS } from "@/shared/config/categorias";
 import type { Comparacao } from "@/shared/types/comparacao";
 import type { Conceito } from "@/shared/types/conceito";
+import { TextoRico } from "@/shared/components/conteudo/texto-rico";
 
 /**
  * Ênfase leve: `**assim**` vira negrito. O conteúdo das comparações precisa
  * destacar a palavra que decide o duelo, e trazer um renderizador de Markdown
  * inteiro para isso seria desproporcional.
  */
-function ComEnfase({ texto }: { texto: string }) {
-  return (
-    <>
-      {texto.split(/(\*\*[^*]+\*\*)/g).map((parte, i) =>
-        parte.startsWith("**") && parte.endsWith("**") ? (
-          <strong key={i} className="font-semibold text-foreground">
-            {parte.slice(2, -2)}
-          </strong>
-        ) : (
-          <span key={i}>{parte}</span>
-        )
-      )}
-    </>
-  );
-}
-
 function Cabecalho({ c, lado }: { c: Conceito; lado: "A" | "B" }) {
   const cat = CATEGORIAS[c.categoria];
   return (
@@ -63,7 +48,7 @@ export function ComparacaoView({
           Em uma frase
         </h2>
         <p className="mt-2.5 text-[15px] leading-relaxed text-muted">
-          <ComEnfase texto={comparacao.vereditoRapido} />
+          <TextoRico>{comparacao.vereditoRapido}</TextoRico>
         </p>
       </section>
 
@@ -104,10 +89,10 @@ export function ComparacaoView({
                     {cr.pergunta}
                   </th>
                   <td className="p-3.5 align-top leading-relaxed text-muted">
-                    {cr.ladoA}
+                    <TextoRico>{cr.ladoA}</TextoRico>
                   </td>
                   <td className="p-3.5 align-top leading-relaxed text-muted">
-                    {cr.ladoB}
+                    <TextoRico>{cr.ladoB}</TextoRico>
                   </td>
                 </tr>
               ))}
@@ -131,7 +116,7 @@ export function ComparacaoView({
                     {a.titulo}
                   </dt>
                   <dd className="mt-0.5 text-[13px] leading-relaxed">
-                    {cr.ladoA}
+                    <TextoRico>{cr.ladoA}</TextoRico>
                   </dd>
                 </div>
                 <div>
@@ -139,7 +124,7 @@ export function ComparacaoView({
                     {b.titulo}
                   </dt>
                   <dd className="mt-0.5 text-[13px] leading-relaxed">
-                    {cr.ladoB}
+                    <TextoRico>{cr.ladoB}</TextoRico>
                   </dd>
                 </div>
               </dl>
@@ -192,7 +177,7 @@ export function ComparacaoView({
           Por que confundem
         </h2>
         <p className="mt-2.5 text-[15px] leading-relaxed">
-          <ComEnfase texto={comparacao.confusaoComum} />
+          <TextoRico>{comparacao.confusaoComum}</TextoRico>
         </p>
       </section>
     </div>

@@ -49,6 +49,44 @@ export const vps: Conceito = {
   tags: ["servidor", "deploy", "linux", "ssh", "hospedagem"],
   dificuldade: "iniciante",
   tempoLeitura: 6,
+  nasceu: {
+    quando: { rotulo: "anos 2000", ano: 2001, precisao: "aproximada" },
+    fonte:
+      "O VPS como produto de hospedagem surgiu no início dos anos 2000, sobre a virtualização x86 que a VMware tornou prática (1999) e o Xen/KVM difundiram depois",
+    precursor:
+      "Fatiar uma máquina em várias 'máquinas' isoladas é dos mainframes IBM dos anos 1970 (CP/CMS), muito antes de a nuvem revender fatias por hora.",
+  },
+  ondeAparece: [
+    {
+      onde: "Droplets da DigitalOcean",
+      explicacao:
+        "Uma máquina virtual que é só sua: você escolhe o tamanho, recebe o IP e entra por SSH para administrar o sistema inteiro.",
+    },
+    {
+      onde: "instâncias EC2 da AWS",
+      explicacao:
+        "O servidor virtual clássico da nuvem — você controla o SO, instala o que quiser e paga pelo tempo em que a instância fica ligada.",
+    },
+    {
+      onde: "servidor acessado por SSH",
+      explicacao:
+        "O modelo mais cru: um host remoto onde você mesmo instala runtime, banco e proxy, sem camada de orquestração entre você e o Linux.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Uma máquina sua; você opera o resto.
+// ssh + systemd — sem orquestrador.`,
+  },
+  custo: {
+    indirecoes: 0,
+    cobra: [
+      "Você administra o sistema inteiro: patches, segurança, backup e monitoramento são seus",
+      "Escalar é manual — subir, dimensionar e balancear máquinas fica por sua conta",
+    ],
+    naoValeSe:
+      "a carga é irregular ou você não quer operar servidor — aí uma plataforma gerenciada ou serverless tira esse trabalho de você.",
+  },
   relacionados: ["docker", "kubernetes"],
   problema: [
     "Em PaaS e serverless, o servidor existe mas é invisível — até o dia em que o preço, um limite da plataforma ou um requisito de rede te encurrala. Sem entender o que a plataforma faz por você, não dá para decidir quando vale pagar por ela nem operar o que vive fora dela.",

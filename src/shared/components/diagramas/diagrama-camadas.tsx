@@ -13,14 +13,32 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import type { Camada } from "@/shared/types/conceito";
+import { Expandivel } from "@/shared/components/conteudo/expandivel";
+import { cn } from "@/shared/utils/cn";
 
-const NODE_W = 320;
+const NODE_W = 280;
 const NODE_H = 64;
 
 /** Handles pré-definidos (topo=target, base=source) — dispensa medição de DOM. */
 const HANDLES = [
-  { id: null, type: "target" as const, position: Position.Top, x: NODE_W / 2, y: 0, width: 1, height: 1 },
-  { id: null, type: "source" as const, position: Position.Bottom, x: NODE_W / 2, y: NODE_H, width: 1, height: 1 },
+  {
+    id: null,
+    type: "target" as const,
+    position: Position.Top,
+    x: NODE_W / 2,
+    y: 0,
+    width: 1,
+    height: 1,
+  },
+  {
+    id: null,
+    type: "source" as const,
+    position: Position.Bottom,
+    x: NODE_W / 2,
+    y: NODE_H,
+    width: 1,
+    height: 1,
+  },
 ];
 
 /**
@@ -28,6 +46,24 @@ const HANDLES = [
  * conceito atua em destaque. React Flow em modo estático (não-controlado).
  */
 export function DiagramaCamadas({ camadas }: { camadas: Camada[] }) {
+  return (
+    <Expandivel
+      titulo="Camadas"
+      descricao="Onde o conceito se encaixa na pilha — role ou pinçe no diagrama."
+      expandido={<CamadasCanvas camadas={camadas} expandido />}
+    >
+      <CamadasCanvas camadas={camadas} />
+    </Expandivel>
+  );
+}
+
+function CamadasCanvas({
+  camadas,
+  expandido = false,
+}: {
+  camadas: Camada[];
+  expandido?: boolean;
+}) {
   const { resolvedTheme } = useTheme();
   const mounted = useMontado();
 
@@ -39,7 +75,6 @@ export function DiagramaCamadas({ camadas }: { camadas: Camada[] }) {
       draggable: false,
       width: NODE_W,
       height: NODE_H,
-      // Nós pré-medidos + handles explícitos: arestas renderizam sem ResizeObserver.
       measured: { width: NODE_W, height: NODE_H },
       handles: HANDLES,
       style: {
@@ -69,12 +104,17 @@ export function DiagramaCamadas({ camadas }: { camadas: Camada[] }) {
     return { nodes, edges };
   }, [camadas]);
 
+  const shell = cn(
+    "overflow-hidden rounded-xl border border-card-border",
+    expandido ? "h-[min(70dvh,560px)]" : "h-[min(55dvh,360px)] sm:h-[440px]"
+  );
+
   if (!mounted) {
-    return <div className="h-[440px] rounded-xl border border-card-border bg-canvas" />;
+    return <div className={cn(shell, "bg-canvas")} />;
   }
 
   return (
-    <div className="h-[440px] overflow-hidden rounded-xl border border-card-border">
+    <div className={shell}>
       <ReactFlow
         defaultNodes={nodes}
         defaultEdges={edges}

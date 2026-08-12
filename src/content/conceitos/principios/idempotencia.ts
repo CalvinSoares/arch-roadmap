@@ -63,6 +63,44 @@ export const idempotencia: Conceito = {
   tags: ["retry", "idempotency-key", "pagamentos", "http", "distribuidos"],
   dificuldade: "intermediario",
   tempoLeitura: 7,
+  nasceu: {
+    quando: { rotulo: "1999", ano: 1999, precisao: "aproximada" },
+    fonte:
+      "O termo matemático é de Benjamin Peirce (1870); como contrato de método HTTP, foi fixado na especificação do HTTP/1.1 (RFC 2616, 1999)",
+    precursor:
+      "Idempotente vem da álgebra de Peirce, em 1870 — 'a operação aplicada de novo dá o mesmo resultado' —, muito antes de virar regra de retry em sistemas distribuídos.",
+  },
+  ondeAparece: [
+    {
+      onde: "Idempotency-Key do Stripe",
+      explicacao:
+        "Repetir a mesma cobrança com a mesma chave devolve o primeiro resultado em vez de cobrar de novo — a rede pode reenviar sem medo.",
+    },
+    {
+      onde: "PUT e DELETE do HTTP",
+      explicacao:
+        "Por especificação, aplicar o mesmo PUT dez vezes deixa o recurso no estado que uma deixaria; é o que torna o retry seguro nesses verbos.",
+    },
+    {
+      onde: "kubectl apply",
+      explicacao:
+        "Aplicar o mesmo manifesto repetidas vezes reconcilia para o estado desejado sem criar cópias — o comando descreve o fim, não o passo.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Mesma chave → mesmo efeito, mesmo se repetir.
+await cobrar({ idempotencyKey: key, valor });`,
+  },
+  custo: {
+    indirecoes: 0,
+    cobra: [
+      "Guardar a chave de idempotência e o resultado de cada operação já processada custa armazenamento e limpeza",
+      "Definir o que conta como 'a mesma' operação é mais sutil do que parece",
+    ],
+    naoValeSe:
+      "a operação já é naturalmente idempotente, como um PUT que sobrescreve — aí adicionar controle de chave é redundante.",
+  },
   relacionados: ["webhooks", "race-condition", "saga"],
   problema: [
     "Toda chamada de rede tem três desfechos: funcionou, falhou, ou deu timeout — e no timeout você não sabe se o servidor processou. Reenviar às cegas duplica o efeito; não reenviar pode perder a operação.",

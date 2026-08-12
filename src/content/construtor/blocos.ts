@@ -160,11 +160,98 @@ export const PADROES_DEF: PadraoDef[] = [
     descricao: "Só se escreve no fim: histórico imutável, correção é registro novo.",
     aplicaEm: ["write-store", "fila"],
   },
+  /* ——— resiliência ———
+   * Entram na paleta porque já existem no catálogo, e o canvas sem elas
+   * repetia ao contrário a inconsistência que a suíte pega: tecnologia sem
+   * conceito. Aqui era conceito sem peça.
+   *
+   * `aplicaEm` é onde a peça **atua**, não onde ela é configurada: timeout e
+   * disjuntor moram na borda de saída (API para fora, infra, fila), não no
+   * domínio — regra de negócio não conhece prazo de rede.
+   */
+  {
+    id: "timeout",
+    nome: "Timeout",
+    descricao: "Todo pedido que sai do processo tem prazo máximo.",
+    aplicaEm: ["api", "infra", "fila", "read-store", "write-store"],
+  },
+  {
+    id: "retry",
+    nome: "Retry com backoff",
+    descricao: "Repete o que pode melhorar sozinho, com espera e jitter.",
+    aplicaEm: ["api", "infra", "fila"],
+  },
+  {
+    id: "circuit-breaker",
+    nome: "Circuit Breaker",
+    descricao: "Para de chamar a dependência que já está claramente fora.",
+    aplicaEm: ["api", "infra"],
+  },
+  {
+    id: "bulkhead",
+    nome: "Bulkhead",
+    descricao: "Compartimenta o pool para uma dependência não tomar tudo.",
+    aplicaEm: ["api", "aplicacao", "infra"],
+  },
+  {
+    id: "outbox",
+    nome: "Transactional Outbox",
+    descricao: "Grava o evento na mesma transação do dado, e publica depois.",
+    aplicaEm: ["write-store", "infra", "fila"],
+  },
+  {
+    id: "dead-letter-queue",
+    nome: "Dead Letter Queue",
+    descricao: "Desvia a mensagem que nunca vai dar certo, com contexto.",
+    aplicaEm: ["fila"],
+  },
   {
     id: "webhooks",
     nome: "Webhooks",
     descricao: "Receber eventos de terceiros: assinatura, dedupe e 200 rápido.",
     aplicaEm: ["api"],
+  },
+  {
+    id: "autenticacao",
+    nome: "Autenticação",
+    descricao: "Provar identidade — sessão/cookie httpOnly ou equivalente.",
+    aplicaEm: ["api", "aplicacao"],
+  },
+  {
+    id: "jwt",
+    nome: "JWT",
+    descricao: "Credencial assinada com claims e prazo curto.",
+    aplicaEm: ["api", "aplicacao"],
+  },
+  {
+    id: "autorizacao",
+    nome: "Autorização",
+    descricao: "RBAC/guards: o que a identidade autenticada pode fazer.",
+    aplicaEm: ["api", "aplicacao", "dominio"],
+  },
+  {
+    id: "mfa",
+    nome: "MFA / 2FA",
+    descricao: "Segundo fator depois da senha (TOTP, WebAuthn).",
+    aplicaEm: ["api", "aplicacao"],
+  },
+  {
+    id: "allowlist",
+    nome: "Allowlist",
+    descricao: "Default deny: só passa o que está na lista (origem, IP, URI).",
+    aplicaEm: ["api", "infra"],
+  },
+  {
+    id: "rate-limiting",
+    nome: "Rate limiting",
+    descricao: "Cortar por volume — protege login e APIs públicas.",
+    aplicaEm: ["api", "infra"],
+  },
+  {
+    id: "gestao-de-segredos",
+    nome: "Gestão de segredos",
+    descricao: "Cofre, rotação e auditoria — nada de segredo no Git.",
+    aplicaEm: ["infra"],
   },
 ];
 

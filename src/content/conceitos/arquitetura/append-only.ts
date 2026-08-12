@@ -47,6 +47,44 @@ export const appendOnly: Conceito = {
   tags: ["log", "imutabilidade", "auditoria", "wal", "event-log"],
   dificuldade: "intermediario",
   tempoLeitura: 6,
+  nasceu: {
+    quando: { rotulo: "anos 1980", ano: 1985, precisao: "aproximada" },
+    fonte:
+      "A gravação só por acréscimo é padrão nos logs de transação (write-ahead logging) desde os anos 1980; o Log-Structured File System de Rosenblum & Ousterhout (1991) levou a ideia ao extremo",
+    precursor:
+      "Antes do software, o diário contábil já era append-only por lei: um lançamento errado se corrige com outro lançamento, nunca apagando o anterior.",
+  },
+  ondeAparece: [
+    {
+      onde: "WAL do Postgres",
+      explicacao:
+        "O write-ahead log registra cada mudança em sequência antes de aplicá-la; é acréscimo puro, e a recuperação relê o log do ponto seguro.",
+    },
+    {
+      onde: "tópicos do Kafka",
+      explicacao:
+        "Mensagens são anexadas ao fim da partição e nunca alteradas; os consumidores avançam um offset em vez de o produtor apagar o que passou.",
+    },
+    {
+      onde: "objetos do git",
+      explicacao:
+        "Commits e blobs são endereçados pelo hash do conteúdo, então gravar é sempre acrescentar um objeto novo — o antigo continua lá, imutável.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Só append — nunca UPDATE no fato passado.
+await log.append({ tipo: "SaldoCreditado", valor: 10 });`,
+  },
+  custo: {
+    indirecoes: 0,
+    cobra: [
+      "O armazenamento só cresce, o que exige compactação, retenção ou arquivamento com o tempo",
+      "Ler o estado atual pode precisar percorrer ou reduzir o log inteiro sem uma projeção",
+    ],
+    naoValeSe:
+      "o dado é naturalmente mutável e sem valor histórico — guardar todas as versões de algo descartável só ocupa espaço.",
+  },
   relacionados: ["ledger", "event-sourcing", "webhooks"],
   problema: [
     "UPDATE in place destrói a versão anterior no exato momento em que grava a nova. Com ela vão embora o debug ('o que estava aqui ontem?'), a auditoria ('quem mudou?') e a replicação barata ('o que mudou desde a posição X?').",

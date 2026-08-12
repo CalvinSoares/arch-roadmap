@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, RotateCcw, X, Check } from "lucide-react";
+import { ArrowUpRight, RotateCcw, Check } from "lucide-react";
 import { Button } from "@/shared/components/global/ui/button";
 import { Badge } from "@/shared/components/global/ui/badge";
+import { DrawerPanel } from "@/shared/components/global/ui/drawer-panel";
 import { cn } from "@/shared/utils/cn";
 import { CATEGORIAS, DIFICULDADES } from "@/shared/config/categorias";
 import { getConceito } from "@/shared/lib/content";
@@ -13,7 +14,11 @@ import {
   useConnectorLayout,
   type ConnectorLink,
 } from "@/shared/hook/use-connector-layout";
-import type { Roadmap, RoadmapItem } from "@/shared/types/roadmap";
+import type {
+  Roadmap,
+  RoadmapItem,
+  RecursoRoadmap,
+} from "@/shared/types/roadmap";
 import { StatusCheck, statusClasses } from "./roadmap-node-box";
 
 interface Selecionado {
@@ -22,7 +27,18 @@ interface Selecionado {
   conceito?: string;
   descricao?: string;
   contexto?: string;
+  recursos?: RecursoRoadmap[];
+  prerequisitos?: { id: string; titulo: string }[];
 }
+
+const ROTULO_RECURSO: Record<RecursoRoadmap["tipo"], string> = {
+  doc: "doc",
+  artigo: "artigo",
+  spec: "spec",
+  video: "vídeo",
+  curso: "curso",
+  ferramenta: "ferramenta",
+};
 
 const LEGENDA = [
   { cor: "bg-cat-criacional", label: "Concluído" },
@@ -35,11 +51,31 @@ const ESTILO_CONECTOR = {
   espinha: { stroke: "var(--card-border)", strokeWidth: 2.5, dash: undefined, opacity: 1 },
   ramo: { stroke: "var(--muted)", strokeWidth: 1.5, dash: "5 5", opacity: 0.55 },
   "ramo-opcional": { stroke: "var(--muted)", strokeWidth: 1.5, dash: "3 5", opacity: 0.35 },
+  prereq: {
+    stroke: "var(--acento, var(--primary))",
+    strokeWidth: 1.75,
+    dash: "2 6",
+    opacity: 0.7,
+  },
 } as const;
 
 export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
   const router = useRouter();
   const [sel, setSel] = useState<Selecionado | null>(null);
+  const [soEssencial, setSoEssencial] = useState(false);
+
+  const porId = useMemo(() => {
+    const m = new Map<string, RoadmapItem>();
+    for (const s of roadmap.sections) {
+      for (const it of s.items) m.set(it.id, it);
+    }
+    return m;
+  }, [roadmap.sections]);
+
+  const temEssencial = useMemo(
+    () => roadmap.sections.some((s) => s.items.some((it) => it.essencial)),
+    [roadmap.sections]
+  );
 
   const total = useMemo(
     () => roadmap.sections.reduce((acc, s) => acc + 1 + s.items.length, 0),
@@ -50,9 +86,10 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
     total
   );
 
-  // Links: espinha entre tópicos consecutivos + um ramo por item
   const links = useMemo<ConnectorLink[]>(() => {
     const l: ConnectorLink[] = [];
+    const visivel = (it: RoadmapItem) => !soEssencial || it.essencial === true;
+
     roadmap.sections.forEach((s, i) => {
       if (i > 0) {
         l.push({
@@ -62,17 +99,27 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
           tipo: "espinha",
         });
       }
-      s.items.forEach((it) =>
+      s.items.filter(visivel).forEach((it) => {
         l.push({
           id: `ramo-${it.id}`,
           de: s.id,
           para: it.id,
           tipo: it.opcional ? "ramo-opcional" : "ramo",
-        })
-      );
+        });
+        for (const pre of it.prerequisitos ?? []) {
+          const origem = porId.get(pre);
+          if (!origem || !visivel(origem)) continue;
+          l.push({
+            id: `prereq-${pre}-${it.id}`,
+            de: pre,
+            para: it.id,
+            tipo: "prereq",
+          });
+        }
+      });
     });
     return l;
-  }, [roadmap]);
+  }, [roadmap, soEssencial, porId]);
 
   const { containerRef, registerNode, paths } = useConnectorLayout(links);
 
@@ -89,13 +136,19 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
       conceito: item.conceito,
       descricao: item.descricao,
       contexto,
+      recursos: item.recursos,
+      prerequisitos: (item.prerequisitos ?? [])
+        .map((id) => {
+          const pre = porId.get(id);
+          return pre ? { id, titulo: pre.titulo } : null;
+        })
+        .filter((x): x is { id: string; titulo: string } => x !== null),
     });
 
   return (
     <div className="space-y-4">
-      {/* Barra de progresso + legenda */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="h-2 w-40 overflow-hidden rounded-full bg-card-border">
             <div
               className="h-full rounded-full bg-cat-criacional transition-all"
@@ -105,6 +158,16 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
           <span className="text-sm text-muted">
             {contagem.concluidos}/{contagem.total} concluídos
           </span>
+          {temEssencial && (
+            <Button
+              variant={soEssencial ? "subtle" : "ghost"}
+              size="sm"
+              onClick={() => setSoEssencial((v) => !v)}
+              aria-pressed={soEssencial}
+            >
+              {soEssencial ? "Mostrar tudo" : "Só o essencial"}
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden items-center gap-3 sm:flex">
@@ -114,6 +177,13 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
                 {l.label}
               </span>
             ))}
+            <span className="flex items-center gap-1.5 text-xs text-muted">
+              <span
+                className="size-2.5 rounded-full border border-dashed border-[var(--acento,var(--primary))]"
+                style={{ opacity: 0.7 }}
+              />
+              Pré-requisito
+            </span>
           </div>
           <Button variant="ghost" size="sm" onClick={resetar}>
             <RotateCcw /> Zerar
@@ -121,7 +191,6 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
         </div>
       </div>
 
-      {/* Mapa com conectores */}
       <div ref={containerRef} className="relative pb-6">
         <svg
           aria-hidden
@@ -147,8 +216,11 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
         <div className="flex flex-col gap-8 lg:gap-16">
           {roadmap.sections.map((s, i) => {
             const stTopic = statusDe(s.id);
-            const esquerda = s.items.filter((_, j) => j % 2 === 1);
-            const direita = s.items.filter((_, j) => j % 2 === 0);
+            const itens = soEssencial
+              ? s.items.filter((it) => it.essencial)
+              : s.items;
+            const esquerda = itens.filter((_, j) => j % 2 === 1);
+            const direita = itens.filter((_, j) => j % 2 === 0);
 
             const renderItem = (it: RoadmapItem, lado: "esquerda" | "direita") => {
               const st = statusDe(it.id);
@@ -164,7 +236,6 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
                   )}
                 >
                   <StatusCheck progresso={st} onToggle={() => ciclar(it.id)} />
-                  {/* overlay: toda a área do card abre o drawer, sem aninhar botões */}
                   <button
                     type="button"
                     onClick={() => abrirItem(it, s.titulo)}
@@ -184,7 +255,6 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
                 key={s.id}
                 className="flex flex-col gap-3 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-x-12"
               >
-                {/* Tópico (espinha central) */}
                 <div className="flex lg:order-2 lg:justify-center">
                   <div
                     ref={registerNode(s.id)}
@@ -213,7 +283,6 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
                   </div>
                 </div>
 
-                {/* Itens à esquerda (desktop) / trilho (mobile) */}
                 <div
                   className={cn(
                     "flex flex-col gap-2.5 lg:order-1 lg:items-end",
@@ -224,7 +293,6 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
                   {esquerda.map((it) => renderItem(it, "esquerda"))}
                 </div>
 
-                {/* Itens à direita */}
                 <div
                   className={cn(
                     "flex flex-col gap-2.5 lg:order-3 lg:items-start",
@@ -249,6 +317,14 @@ export function RoadmapFlow({ roadmap }: { roadmap: Roadmap }) {
           setSel(null);
           router.push(`/conceitos/${slug}`);
         }}
+        onAbrirItem={(id) => {
+          const item = porId.get(id);
+          if (!item) return;
+          const secao = roadmap.sections.find((s) =>
+            s.items.some((it) => it.id === id)
+          );
+          abrirItem(item, secao?.titulo ?? "");
+        }}
       />
     </div>
   );
@@ -260,12 +336,14 @@ function DetalheDrawer({
   statusDe,
   onToggleDone,
   onAbrir,
+  onAbrirItem,
 }: {
   sel: Selecionado | null;
   onClose: () => void;
   statusDe: (id: string) => string;
   onToggleDone: (id: string) => void;
   onAbrir: (slug: string) => void;
+  onAbrirItem: (id: string) => void;
 }) {
   if (!sel) return null;
   const conceito = sel.conceito ? getConceito(sel.conceito) : undefined;
@@ -273,65 +351,112 @@ function DetalheDrawer({
   const feito = statusDe(sel.id) === "done";
 
   return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <aside
-        aria-label="Detalhes do tópico"
-        className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-card-border bg-card shadow-2xl"
-      >
-        <div className="flex items-start justify-between gap-3 border-b border-card-border p-5">
-          <div>
-            {sel.contexto && (
-              <p className="text-xs font-medium uppercase tracking-wide text-muted">
-                {sel.contexto}
-              </p>
-            )}
-            <h2 className="mt-0.5 text-xl font-semibold">{sel.titulo}</h2>
-            {cat && (
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <Badge className={cat.badge}>{cat.label}</Badge>
-                <span className="text-xs text-muted">
-                  {DIFICULDADES[conceito!.dificuldade]} · {conceito!.tempoLeitura} min
-                </span>
-              </div>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar"
-            className="rounded-md p-1 text-muted hover:bg-muted/10"
-          >
-            <X className="size-5" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-5 text-sm leading-relaxed text-foreground">
-          {conceito ? (
-            <p>{conceito.resumo}</p>
-          ) : sel.descricao ? (
-            <p>{sel.descricao}</p>
-          ) : (
-            <p className="text-muted">Conteúdo detalhado deste tópico chega em breve.</p>
+    <DrawerPanel
+      label="Detalhes do tópico"
+      onClose={onClose}
+      header={
+        <div className="min-w-0">
+          {sel.contexto && (
+            <p className="text-xs font-medium uppercase tracking-wide text-muted">
+              {sel.contexto}
+            </p>
+          )}
+          <h2 className="mt-0.5 text-lg font-semibold sm:text-xl">{sel.titulo}</h2>
+          {cat && (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <Badge className={cat.badge}>{cat.label}</Badge>
+              <span className="text-xs text-muted">
+                {DIFICULDADES[conceito!.dificuldade]} · {conceito!.tempoLeitura}{" "}
+                min
+              </span>
+            </div>
           )}
         </div>
-
-        <div className="flex items-center gap-2 border-t border-card-border p-5">
+      }
+      footer={
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Button
+            size="lg"
             variant={feito ? "subtle" : "outline"}
             onClick={() => onToggleDone(sel.id)}
-            className="flex-1"
+            className="h-12 w-full shrink-0 sm:flex-1"
           >
             <Check className={feito ? "text-cat-criacional" : ""} />
             {feito ? "Concluído" : "Marcar como concluído"}
           </Button>
           {conceito && (
-            <Button className="flex-1" onClick={() => onAbrir(conceito.slug)}>
+            <Button
+              size="lg"
+              className="h-12 w-full shrink-0 sm:flex-1"
+              onClick={() => onAbrir(conceito.slug)}
+            >
               Abrir conceito <ArrowUpRight />
             </Button>
           )}
         </div>
-      </aside>
-    </div>
+      }
+    >
+      <div className="space-y-4 text-sm leading-relaxed text-foreground">
+        {conceito ? (
+          <p>{conceito.resumo}</p>
+        ) : sel.descricao ? (
+          <p>{sel.descricao}</p>
+        ) : sel.recursos?.length ? null : (
+          <p className="text-muted">
+            Conteúdo detalhado deste tópico chega em breve.
+          </p>
+        )}
+
+        {sel.prerequisitos && sel.prerequisitos.length > 0 && (
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
+              O que preciso antes
+            </p>
+            <ul className="mt-2 space-y-1.5">
+              {sel.prerequisitos.map((p) => (
+                <li key={p.id}>
+                  <button
+                    type="button"
+                    onClick={() => onAbrirItem(p.id)}
+                    className="w-full rounded-lg border border-card-border px-3 py-2.5 text-left transition-colors hover:border-primary/60"
+                  >
+                    <span className="font-medium">{p.titulo}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {sel.recursos && sel.recursos.length > 0 && (
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
+              Recursos
+            </p>
+            <ul className="mt-2 space-y-1.5">
+              {sel.recursos.map((r) => (
+                <li key={r.href}>
+                  <a
+                    href={r.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-start gap-2 rounded-lg border border-card-border px-3 py-2.5 transition-colors hover:border-primary/60"
+                  >
+                    <ArrowUpRight className="mt-0.5 size-3.5 shrink-0 text-muted transition-colors group-hover:text-primary" />
+                    <span className="min-w-0">
+                      <span className="font-medium">{r.titulo}</span>
+                      <span className="ml-1.5 text-[11px] text-muted">
+                        {r.fonte ? `${r.fonte} · ` : ""}
+                        {ROTULO_RECURSO[r.tipo]}
+                      </span>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </DrawerPanel>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export type TipoConector = "espinha" | "ramo" | "ramo-opcional";
+export type TipoConector = "espinha" | "ramo" | "ramo-opcional" | "prereq";
 
 export interface ConnectorLink {
   id: string;
@@ -69,6 +69,24 @@ export function useConnectorLayout(links: ConnectorLink[]) {
           id: link.id,
           tipo: link.tipo,
           d: `M ${x1} ${y1} C ${x1} ${y1 + dy}, ${x2} ${y2 - dy}, ${x2} ${y2}`,
+        });
+      } else if (link.tipo === "prereq") {
+        // item → item: curva suave entre centros (grafo de dependência)
+        const x1 = a.left + a.width / 2 - cr.left;
+        const y1 = a.top + a.height / 2 - cr.top;
+        const x2 = b.left + b.width / 2 - cr.left;
+        const y2 = b.top + b.height / 2 - cr.top;
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.hypot(dx, dy) || 1;
+        const ox = (-dy / len) * 28;
+        const oy = (dx / len) * 28;
+        novos.push({
+          id: link.id,
+          tipo: link.tipo,
+          d: `M ${x1} ${y1} Q ${mx + ox} ${my + oy} ${x2} ${y2}`,
         });
       } else {
         // lateral do tópico → borda interna do card (curva que segue o card)

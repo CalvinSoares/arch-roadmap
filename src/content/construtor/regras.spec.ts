@@ -64,6 +64,32 @@ function corpus(): EstadoProjeto[] {
         camada("infra", [], ["prometheus", "vault"]),
       ],
     },
+    // ——— resiliência: as regras de combo não são alcançáveis por peça isolada ———
+    // retry + escrita durável, SEM idempotência
+    {
+      camadas: [
+        camada("api", ["retry"]),
+        camada("write-store", [], ["postgres"]),
+      ],
+    },
+    // timeout + retry (o par mínimo) e os três degraus juntos
+    {
+      camadas: [camada("api", ["timeout", "retry", "circuit-breaker"])],
+    },
+    // bulkhead com duas dependências concretas
+    {
+      camadas: [
+        camada("api", ["bulkhead"]),
+        camada("infra", [], ["postgres", "redis"]),
+      ],
+    },
+    // outbox com fila (o caminho feliz da entrega)
+    {
+      camadas: [
+        camada("write-store", ["outbox"], ["postgres"]),
+        camada("fila", ["dead-letter-queue"], ["kafka"]),
+      ],
+    },
     // observer em 3 camadas → cascata
     {
       camadas: [
@@ -107,6 +133,60 @@ function corpus(): EstadoProjeto[] {
         camada("dominio", ["hexagonal"]),
       ],
     },
+    // gateway + auth/JWT/rate limit (sinergia de borda)
+    {
+      camadas: [
+        camada("api", ["autenticacao", "jwt", "rate-limiting"], ["api-gateway"]),
+        camada("dominio", ["hexagonal"]),
+      ],
+    },
+    // WAF + allowlist
+    {
+      camadas: [
+        camada("api", ["allowlist"], ["waf"]),
+        camada("dominio", ["hexagonal"]),
+      ],
+    },
+    // IdP + MFA + JWT na UI (info)
+    {
+      camadas: [
+        camada("ui", ["jwt"]),
+        camada("api", ["mfa", "autenticacao"], ["idp"]),
+        camada("dominio", ["hexagonal"]),
+      ],
+    },
+    // autorizacao sem auth · login sem rate · API pública
+    {
+      camadas: [
+        camada("ui"),
+        camada("api", ["autorizacao"], ["nginx"]),
+        camada("dominio", ["hexagonal"]),
+      ],
+    },
+    {
+      camadas: [
+        camada("ui"),
+        camada("api", ["autenticacao"], ["nginx"]),
+        camada("dominio", ["hexagonal"]),
+      ],
+    },
+    {
+      camadas: [
+        camada("ui"),
+        camada("api", [], ["nginx"]),
+        camada("dominio", ["hexagonal"]),
+      ],
+    },
+    // MFA sem autenticação de base
+    {
+      camadas: [camada("api", ["mfa"], ["nginx"]), camada("dominio", ["hexagonal"])],
+    },
+    // gestao-de-segredos como padrão
+    {
+      camadas: [
+        camada("infra", ["gestao-de-segredos"], ["postgres", "redis", "kafka", "s3"]),
+      ],
+    },
     // posicionais: UI colada na infra · fila no topo · adapter no núcleo
     { camadas: [camada("ui"), camada("infra", [], ["postgres"])] },
     { camadas: [camada("fila", [], ["kafka"]), camada("ui"), camada("dominio")] },
@@ -120,7 +200,7 @@ function corpus(): EstadoProjeto[] {
     {
       camadas: [
         camada("ui", ["observer"], ["cdn"]),
-        camada("api", ["facade"], ["nginx"]),
+        camada("api", ["facade", "autenticacao", "rate-limiting"], ["nginx"]),
         camada("aplicacao", ["cqrs"], ["worker"]),
         camada("dominio", ["event-sourcing"]),
         camada("write-store", [], ["mongodb"]),

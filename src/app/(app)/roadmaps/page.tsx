@@ -6,8 +6,14 @@ import { SpotlightCard } from "@/shared/components/global/ui/spotlight-card";
 import { SeloNovo } from "@/shared/components/global/ui/selo-novo";
 import { listRoadmaps } from "@/shared/lib/content";
 import { ehNovo } from "@/shared/lib/novidades";
+import { pageMetadata } from "@/shared/lib/seo";
 
-export const metadata = { title: "Roadmaps" };
+export const metadata = pageMetadata({
+  title: "Roadmaps",
+  description:
+    "Trilhas de aprendizado navegáveis em grafo: padrões de projeto, backend, frontend, arquitetura e sistemas que aguentam produção.",
+  path: "/roadmaps",
+});
 
 export default function RoadmapsPage() {
   const roadmaps = listRoadmaps();

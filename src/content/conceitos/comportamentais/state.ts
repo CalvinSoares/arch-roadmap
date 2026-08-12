@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Pedido {
@@ -128,6 +129,33 @@ export const state: Conceito = {
   tags: ["maquina-de-estados", "transicoes", "polimorfismo", "gof"],
   dificuldade: "intermediario",
   tempoLeitura: 7,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "XState",
+      explicacao:
+        "A biblioteca inteira é este padrão: estados nomeados, transições declaradas, comportamento que muda com o estado.",
+    },
+    {
+      onde: "O ciclo de uma Promise",
+      explicacao:
+        "Pendente, resolvida e rejeitada respondem diferente ao mesmo `.then()` — e a transição é de mão única.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Comportamento muda com o estado atual.
+pedido.estado.pagar(pedido); // delega`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Uma classe por estado, mais a máquina que gerencia as transições entre elas",
+      "Espalhar o comportamento por várias classes dificulta ver o fluxo completo num lugar só",
+    ],
+    naoValeSe:
+      "há dois ou três estados com pouca lógica — um enum e um switch se leem melhor que uma classe por estado.",
+  },
   relacionados: ["strategy", "observer"],
   problema: [
     "Um objeto se comporta diferente conforme sua situação — pedido novo pode cancelar de graça, pago cancela com estorno, enviado não cancela. Modelar isso com um campo status e switch/if em cada método espalha a máquina de estados pelo código inteiro.",
@@ -272,6 +300,97 @@ export const state: Conceito = {
             "Eventos assíncronos podem chegar 'atrasados' para um estado que já mudou (o buffer terminou depois do usuário pausar) — cada estado precisa decidir conscientemente o que ignorar.",
         },
       ],
+    },
+    {
+      tipo: "refatoracao",
+      cheiro:
+        "O mesmo `if (status === ...)` repetido em cada método, e nenhum lugar sabendo quais transições são válidas.",
+      inicio: { lang: "typescript", code: `class Pedido {
+  status = "novo";
+
+  pagar() {
+    if (this.status === "cancelado") throw new Error("cancelado");
+    if (this.status === "pago") throw new Error("ja pago");
+    this.status = "pago";
+  }
+
+  enviar() {
+    if (this.status !== "pago") throw new Error("nao pago");
+    this.status = "enviado";
+  }
+
+  cancelar() {
+    // Esqueceram de checar "enviado". Pedido entregue vira cancelado.
+    if (this.status === "cancelado") throw new Error("ja cancelado");
+    this.status = "cancelado";
+  }
+}` },
+      passos: [
+        {
+          titulo: "Nomear os estados",
+          motivo:
+            "Enquanto o estado é `string`, o compilador não ajuda: `\"pagoo\"` é um valor válido. Um union fecha o conjunto e transforma typo em erro de compilação.",
+          depois: { lang: "typescript", code: `type Status = "novo" | "pago" | "enviado" | "cancelado";
+
+class Pedido {
+  status: Status = "novo";
+  // ... os ifs continuam iguais, mas agora sobre um conjunto fechado
+}` },
+        },
+        {
+          titulo: "Declarar as transições numa tabela",
+          motivo:
+            "Este é o passo que corrige o bug: a regra sai de dentro dos métodos e vira **dado**, num lugar só. O caso esquecido em `cancelar` deixa de ser possível, porque a tabela é exaustiva por construção.",
+          depois: { lang: "typescript", code: `type Evento = "pagar" | "enviar" | "cancelar";
+
+// A regra inteira, visivel de uma vez. Ausencia = transicao proibida.
+const TRANSICOES: Record<Status, Partial<Record<Evento, Status>>> = {
+  novo:      { pagar: "pago", cancelar: "cancelado" },
+  pago:      { enviar: "enviado", cancelar: "cancelado" },
+  enviado:   {},                      // nao cancela o que ja saiu
+  cancelado: {},                      // estado final
+};
+
+class Pedido {
+  status: Status = "novo";
+
+  aplicar(evento: Evento) {
+    const proximo = TRANSICOES[this.status][evento];
+    if (!proximo) {
+      throw new Error(\`nao da para \${evento} um pedido \${this.status}\`);
+    }
+    this.status = proximo;
+  }
+}` },
+        },
+        {
+          titulo: "Derivar o que era duplicado",
+          motivo:
+            "Com a tabela como fonte única, perguntas que antes exigiam mais `if` — 'este botão deve aparecer?' — passam a ser respondidas por consulta. E a interface para de reimplementar a regra.",
+          depois: { lang: "typescript", code: `class Pedido {
+  status: Status = "novo";
+
+  aplicar(evento: Evento) {
+    const proximo = TRANSICOES[this.status][evento];
+    if (!proximo) throw new TransicaoInvalida(this.status, evento);
+    this.status = proximo;
+  }
+
+  // Derivado da tabela: a UI para de duplicar a regra em condicional.
+  pode(evento: Evento): boolean {
+    return TRANSICOES[this.status][evento] !== undefined;
+  }
+
+  get eFinal(): boolean {
+    return Object.keys(TRANSICOES[this.status]).length === 0;
+  }
+}
+
+// <button disabled={!pedido.pode("cancelar")}>Cancelar</button>` },
+        },
+      ],
+      veredito:
+        "Ganhou-se: a regra num lugar só, transição inválida impossível, e a interface derivando o que antes duplicava. Pagou-se: uma tabela a mais para manter, e o erro deixou de ser específico por método — `TransicaoInvalida` é genérica, então mensagens amigáveis exigem trabalho extra. Com dois estados e uma transição, a tabela é cerimônia.",
     },
     {
       tipo: "armadilhas",

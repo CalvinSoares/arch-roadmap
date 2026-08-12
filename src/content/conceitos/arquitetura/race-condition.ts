@@ -47,6 +47,44 @@ export const raceCondition: Conceito = {
   tags: ["concorrencia", "atomicidade", "locks", "transacoes", "double-spend"],
   dificuldade: "intermediario",
   tempoLeitura: 7,
+  nasceu: {
+    quando: { rotulo: "anos 1950", ano: 1954, precisao: "aproximada" },
+    fonte:
+      "O termo vem da eletrônica digital dos anos 1950 — dois sinais 'correndo' por caminhos de atraso diferente até uma porta lógica; migrou para software concorrente depois",
+    precursor:
+      "Em circuitos, a corrida é física: dois sinais disputam qual chega primeiro. No software, a disputa é entre threads ou requisições pela mesma memória ou linha.",
+  },
+  ondeAparece: [
+    {
+      onde: "useEffect sem cleanup",
+      explicacao:
+        "Duas requisições em voo e a resposta antiga chega por último, sobrescrevendo a nova na tela — a corrida clássica do React sem função de limpeza.",
+    },
+    {
+      onde: "duplo clique em Pagar",
+      explicacao:
+        "Dois cliques rápidos disparam duas cobranças antes de a primeira marcar o pedido como pago — a janela entre checar e agir.",
+    },
+    {
+      onde: "if (!existe) cria() concorrente",
+      explicacao:
+        "Dois processos checam que o registro não existe ao mesmo tempo e ambos o criam: o check-then-act sem lock nem restrição de unicidade.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Duas escritas; a última ganha sem erro.
+// Use versão/lock: UPDATE ... WHERE version = $v`,
+  },
+  custo: {
+    indirecoes: 0,
+    cobra: [
+      "Proteger a seção crítica com lock, versão ou escrita atômica adiciona código e pontos de contenção",
+      "Bugs de corrida são intermitentes e difíceis de reproduzir, o que encarece o diagnóstico",
+    ],
+    naoValeSe:
+      "as execuções nunca tocam o mesmo estado ao mesmo tempo — sem dado disputado, não há corrida a proteger.",
+  },
   relacionados: ["idempotencia", "ledger", "maquina-de-estados"],
   problema: [
     "Ler, decidir e gravar são três passos — e entre eles o mundo muda. Com uma requisição por vez tudo funciona; com duas simultâneas, ambas leem o mesmo saldo, ambas passam na checagem, ambas gravam. O teste unitário nunca vê, porque o teste roda sozinho.",

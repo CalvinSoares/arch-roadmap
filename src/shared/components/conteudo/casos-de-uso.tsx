@@ -1,5 +1,6 @@
 import { Scale, TriangleAlert } from "lucide-react";
 import type { CasoDeUso } from "@/shared/types/bloco";
+import { TextoRico } from "@/shared/components/conteudo/texto-rico";
 
 function Rotulo({ children }: { children: React.ReactNode }) {
   return (
@@ -35,12 +36,12 @@ export function CasosDeUso({ casos }: { casos: CasoDeUso[] }) {
           <div className="flex flex-1 flex-col gap-4 px-5 py-4">
             <div>
               <Rotulo>Cenário</Rotulo>
-              <p className="mt-1 text-sm leading-relaxed text-muted">{c.cenario}</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted"><TextoRico>{c.cenario}</TextoRico></p>
             </div>
             <div className="flex-1">
               <Rotulo>Como o padrão entra</Rotulo>
               <p className="mt-1 text-sm leading-relaxed text-foreground">
-                {c.aplicacao}
+                <TextoRico>{c.aplicacao}</TextoRico>
               </p>
             </div>
           </div>
@@ -49,7 +50,7 @@ export function CasosDeUso({ casos }: { casos: CasoDeUso[] }) {
             <Scale className="mt-0.5 size-3.5 shrink-0 text-[var(--alerta)]" />
             <span>
               <b className="font-semibold text-foreground">Trade-off:</b>{" "}
-              {c.tradeoff}
+              <TextoRico>{c.tradeoff}</TextoRico>
             </span>
           </p>
         </article>
@@ -78,7 +79,7 @@ export function Armadilhas({ itens }: { itens: { titulo: string; texto: string }
               {a.titulo}
             </p>
             <p className="mt-1.5 text-sm leading-relaxed text-foreground">
-              {a.texto}
+              <TextoRico>{a.texto}</TextoRico>
             </p>
           </div>
         </li>

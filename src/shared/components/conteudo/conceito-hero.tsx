@@ -1,7 +1,29 @@
 import Link from "next/link";
-import { ChevronRight, Clock, Signal, ListOrdered, Zap } from "lucide-react";
+import {
+  ChevronRight,
+  Clock,
+  Signal,
+  ListOrdered,
+  Zap,
+  CalendarDays,
+  History,
+} from "lucide-react";
 import { CATEGORIAS, DIFICULDADES } from "@/shared/config/categorias";
 import type { Conceito } from "@/shared/types/conceito";
+import type { Precisao } from "@/shared/types/quando";
+
+/**
+ * O que a precisão quer dizer, em uma frase. Vai para o `title` do chip —
+ * "1994" sozinho sugere um rigor que a data não tem.
+ */
+const NOTA_PRECISAO: Record<Precisao, string> = {
+  exata: "Data conhecida",
+  aproximada: "Data aproximada",
+  seculo: "Século conhecido, ano não",
+  intervalo: "Aconteceu ao longo de um período",
+  convencao: "Marco de referência — a ideia é mais velha que a data",
+  disputada: "As fontes divergem sobre a data",
+};
 
 function Chip({
   icon: Icon,
@@ -83,6 +105,23 @@ export function ConceitoHero({ conceito, tldr, totalSecoes }: Props) {
             {totalSecoes ? (
               <Chip icon={ListOrdered}>{totalSecoes} seções</Chip>
             ) : null}
+            {conceito.nasceu && (
+              <span
+                title={`${NOTA_PRECISAO[conceito.nasceu.quando.precisao]} — ${conceito.nasceu.fonte}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-card-border bg-background px-2.5 py-1 text-xs font-medium text-muted"
+              >
+                <CalendarDays className="size-3.5" />
+                {conceito.nasceu.quando.rotulo}
+                {conceito.nasceu.quando.precisao === "disputada" && (
+                  <span aria-hidden className="text-[var(--acento)]">
+                    ?
+                  </span>
+                )}
+                <span className="sr-only">
+                  {` — ${NOTA_PRECISAO[conceito.nasceu.quando.precisao]}`}
+                </span>
+              </span>
+            )}
           </div>
 
           <h1 className="mt-4 text-3xl font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[2.75rem]">
@@ -120,6 +159,21 @@ export function ConceitoHero({ conceito, tldr, totalSecoes }: Props) {
                 </p>
                 <p className="mt-1 text-[15px] leading-relaxed text-foreground">
                   {tldr}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* O que veio antes do nome — é aqui que a data vira aula. */}
+          {conceito.nasceu?.precursor && (
+            <div className="mt-4 flex gap-3 rounded-xl border border-card-border bg-background/60 p-3.5">
+              <History className="mt-0.5 size-4 shrink-0 text-muted" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+                  Antes de ter nome
+                </p>
+                <p className="mt-1 max-w-[62ch] text-[14px] leading-relaxed text-foreground">
+                  {conceito.nasceu.precursor}
                 </p>
               </div>
             </div>

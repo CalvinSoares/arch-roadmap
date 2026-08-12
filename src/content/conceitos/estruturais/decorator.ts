@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Notificador {
@@ -112,6 +113,24 @@ notificador.enviar("Pedido aprovado")`,
   },
 ];
 
+const ANTI_EXEMPLO = `const cliente =
+  comCache(
+    comRetry(
+      comLog(
+        comAutenticacao(clienteBase))));
+
+// Leia de dentro para fora: autentica -> loga -> repete -> cacheia.
+// Consequencias que ninguem escreveu em lugar nenhum:
+//
+// 1. O cache esta FORA do retry: um erro cacheado nunca e repetido.
+// 2. O log esta DENTRO do retry: 3 tentativas viram 3 linhas iguais,
+//    e o painel conta 3 requisicoes onde houve 1.
+// 3. A autenticacao esta no fundo: o token e renovado a cada tentativa,
+//    inclusive nas que nem sairiam do cache.
+
+// Trocar duas linhas de lugar muda o comportamento em producao
+// sem mudar nenhum teste unitario — todos passam nos dois casos.`;
+
 export const decorator: Conceito = {
   slug: "decorator",
   titulo: "Decorator",
@@ -121,6 +140,43 @@ export const decorator: Conceito = {
   tags: ["composicao", "wrapper", "runtime", "gof"],
   dificuldade: "intermediario",
   tempoLeitura: 7,
+  nasceu: gof(),
+  ondeAparece: [
+    {
+      onde: "Middleware do Express",
+      explicacao:
+        "Cada middleware embrulha o próximo, acrescentando comportamento sem tocar no handler final.",
+    },
+    {
+      onde: "HOC do React",
+      explicacao:
+        "`withRouter(Componente)` devolve um componente novo com poderes extras e a mesma interface.",
+    },
+    {
+      onde: "@decorator do Python e do TS",
+      explicacao:
+        "O padrão virou sintaxe da linguagem — a função sai embrulhada por outra.",
+    },
+    {
+      onde: "Pipes de stream do Node",
+      explicacao:
+        "`.pipe(gzip).pipe(cipher)` empilha transformações que continuam sendo streams.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Mesma interface, comportamento a mais, empilhavel.
+const cliente = comCache(comRetry(clienteBase));`,
+  },
+  custo: {
+    indirecoes: 2,
+    cobra: [
+      "A ordem das camadas passa a importar e precisa estar documentada",
+      "A pilha de chamadas ganha um quadro por camada",
+    ],
+    naoValeSe:
+      "só existe uma camada e ela nunca é opcional — nesse caso o comportamento pertence ao próprio objeto.",
+  },
   relacionados: ["adapter", "facade"],
   problema: [
     "Você precisa adicionar responsabilidades a um objeto — log, retry, cache, criptografia — mas criar uma subclasse para cada combinação explode: com 4 extras opcionais já são 16 classes possíveis, e a escolha fica congelada em tempo de compilação.",
@@ -300,6 +356,110 @@ export const decorator: Conceito = {
             "Quando os opcionais começam a interagir (seguro custa mais se for expressa), decorators independentes deixam de bastar — a regra cruzada pede outro modelo.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "Decorators empilhados sem ordem definida",
+      comoSeParece:
+        "Cada decorator foi escrito isolado e funciona. Empilhados, a ordem passa a importar de um jeito que ninguém documentou — e a montagem acontece em um arquivo de configuração que ninguém lê como código.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Ao inverter duas camadas", efeito: "O comportamento muda em produção e nenhum teste unitário acusa, porque cada decorator continua correto isolado." },
+        { quando: "No diagnóstico", efeito: "A pilha de chamadas fica com dez quadros de embrulho antes do código real, e o erro aponta para o decorator, não para a causa." },
+        { quando: "Ao cachear erro", efeito: "Um `500` transitório entra no cache e passa a ser servido por minutos, mesmo depois de o serviço voltar." },
+      ],
+      correcao:
+        "A ordem é decisão de projeto e precisa estar escrita onde a pilha é montada, com o porquê de cada camada estar onde está. Regra prática: cache por fora do retry só se você aceitar cachear erro — normalmente o certo é o inverso.",
+    },
+    {
+      tipo: "refatoracao",
+      cheiro:
+        "Uma flag booleana que virou quatro, e um construtor que aceita todas as combinações possíveis.",
+      inicio: { lang: "typescript", code: `class ClienteHttp {
+  constructor(
+    private readonly comLog = false,
+    private readonly comCache = false,
+    private readonly comRetry = false,
+  ) {}
+
+  async buscar(url: string) {
+    if (this.comCache && cache.has(url)) return cache.get(url);
+    if (this.comLog) console.log("GET", url);
+
+    let r;
+    if (this.comRetry) r = await comTentativas(() => fetch(url));
+    else r = await fetch(url);
+
+    if (this.comCache) cache.set(url, r);
+    return r;
+  }
+}` },
+      passos: [
+        {
+          titulo: "Extrair a interface",
+          motivo:
+            "Para embrulhar, é preciso haver um contrato a preservar. Nomear a interface é o que torna o embrulho possível — e é o passo que quase todo mundo pula.",
+          depois: { lang: "typescript", code: `interface Cliente {
+  buscar(url: string): Promise<Resposta>;
+}
+
+// O cliente cru, sem nenhuma flag: so faz a requisicao.
+class ClienteHttp implements Cliente {
+  async buscar(url: string) {
+    return fetch(url);
+  }
+}` },
+        },
+        {
+          titulo: "Uma camada por responsabilidade",
+          motivo:
+            "Cada flag virou um embrulho que implementa a mesma interface e delega. O ganho não é estético: cada camada passa a ser testável com um cliente falso, sem rede.",
+          depois: { lang: "typescript", code: `class ComLog implements Cliente {
+  constructor(private readonly interno: Cliente) {}
+  async buscar(url: string) {
+    console.log("GET", url);
+    return this.interno.buscar(url);
+  }
+}
+
+class ComCache implements Cliente {
+  constructor(private readonly interno: Cliente) {}
+  async buscar(url: string) {
+    const guardado = cache.get(url);
+    if (guardado) return guardado;
+    const r = await this.interno.buscar(url);
+    cache.set(url, r);
+    return r;
+  }
+}
+
+class ComRetry implements Cliente {
+  constructor(private readonly interno: Cliente) {}
+  async buscar(url: string) {
+    return comTentativas(() => this.interno.buscar(url));
+  }
+}` },
+        },
+        {
+          titulo: "Declarar a ordem, com o porquê",
+          motivo:
+            "Aqui está a armadilha do padrão: a ordem virou comportamento, e ela **não** está óbvia no código. Sem o comentário, trocar duas linhas muda produção e nenhum teste unitário acusa.",
+          depois: { lang: "typescript", code: `// A ordem e decisao de projeto. Lida de dentro para fora:
+//   fetch -> retry -> cache -> log
+//
+//   retry POR DENTRO do cache: erro transitorio e repetido antes de
+//   qualquer chance de ser cacheado. O inverso cacharia o erro.
+//
+//   log POR FORA do retry: uma linha por chamada logica, nao uma por
+//   tentativa — senao o painel conta 3 requisicoes onde houve 1.
+const cliente: Cliente = new ComLog(
+  new ComCache(
+    new ComRetry(
+      new ClienteHttp())));` },
+        },
+      ],
+      veredito:
+        "Ganhou-se: cada responsabilidade isolada e testável, e combinações escolhidas em tempo de execução sem construtor combinatório. Pagou-se: dois quadros a mais na pilha de chamadas por camada, e uma ordem que precisa ser documentada porque não é auto-evidente. Com uma camada só, e nunca opcional, o comportamento pertencia ao próprio objeto.",
     },
     {
       tipo: "armadilhas",

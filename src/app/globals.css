@@ -48,7 +48,10 @@
   --cat-comportamental: #9b3d63;
   --cat-principio: #8b6a12;
   --cat-arquitetura: #6e4b3a;
+  --cat-resiliencia: #5d3fa0;
+  --cat-dados: #9c3f92;
   --cat-infra: #45636e;
+  --cat-seguranca: #8a3a2a;
 }
 
 .dark {
@@ -85,7 +88,10 @@
   --cat-comportamental: #ee8cb0;
   --cat-principio: #dfb94e;
   --cat-arquitetura: #c9a184;
+  --cat-resiliencia: #b39ce8;
+  --cat-dados: #e79ade;
   --cat-infra: #89bdd1;
+  --cat-seguranca: #e8957a;
 }
 
 @theme inline {
@@ -112,7 +118,10 @@
   --color-cat-comportamental: var(--cat-comportamental);
   --color-cat-principio: var(--cat-principio);
   --color-cat-arquitetura: var(--cat-arquitetura);
+  --color-cat-resiliencia: var(--cat-resiliencia);
+  --color-cat-dados: var(--cat-dados);
   --color-cat-infra: var(--cat-infra);
+  --color-cat-seguranca: var(--cat-seguranca);
 
   --shadow-soft: var(--shadow-md);
   --shadow-float: var(--shadow-lg);
@@ -299,12 +308,21 @@ body {
   pointer-events: none;
 }
 
+/* Evita “página inteira” deslizar horizontalmente no mobile */
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 /* Shell de página (equivalente ao .page-shell do PaaS) */
 .page-shell {
-  padding: 1.5rem 1rem;
+  padding: 1.25rem 0.875rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  min-width: 0;
+  max-width: 100%;
 }
 @media (min-width: 640px) {
   .page-shell { padding: 1.5rem; }
@@ -315,11 +333,12 @@ body {
 
 /* Título / subtítulo de página (tokens herdados) */
 .page-header-title {
-  font-size: 1.75rem;
+  font-size: clamp(1.375rem, 4.5vw + 0.5rem, 1.75rem);
   font-weight: 600;
   letter-spacing: -0.022em;
-  line-height: 2.25rem;
+  line-height: 1.25;
   color: var(--foreground);
+  overflow-wrap: anywhere;
 }
 .page-header-subtitle {
   font-size: 0.9375rem;
@@ -353,6 +372,7 @@ body {
   border-radius: 0.75rem;
   border: 1px solid var(--card-border);
   overflow-x: auto;
+  max-width: 100%;
   tab-size: 2;
 }
 .shiki,

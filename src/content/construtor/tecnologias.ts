@@ -26,7 +26,7 @@ export const TECNOLOGIAS_DEF: TecnologiaDef[] = [
     diferencaQueFaz:
       "Leituras que iam ao banco em ~10ms voltam em µs e o banco respira. Em troca: +1 peça para operar, dados voláteis por padrão e a pergunta 'e quando o cache cair?' passa a existir.",
     alternativas: ["Memcached", "Valkey", "CDN (para estáticos)"],
-    conceitos: ["cqrs"],
+    conceitos: ["cache", "cqrs"],
   },
   {
     id: "memcached",
@@ -41,6 +41,7 @@ export const TECNOLOGIAS_DEF: TecnologiaDef[] = [
       consistencia: "por nó; sem replicação nativa",
       latencia: "sub-milissegundo (µs)",
     },
+    conceitos: ["cache"],
     diferencaQueFaz:
       "O cache mais simples possível: multithreaded e previsível. Se você só precisa de GET/SET com TTL, é mais enxuto que Redis — mas sem estruturas, persistência ou pub/sub.",
     alternativas: ["Redis", "Valkey"],
@@ -155,7 +156,7 @@ export const TECNOLOGIAS_DEF: TecnologiaDef[] = [
     diferencaQueFaz:
       "Busca que o SQL não entrega: relevância, sinônimos, facetas em milissegundos. Trate como projeção derivada — a verdade continua no banco, e o replay/reindex é seu plano de recuperação.",
     alternativas: ["Meilisearch", "Typesense", "OpenSearch"],
-    conceitos: ["cqrs"],
+    conceitos: ["cqrs", "indice"],
   },
   {
     id: "nginx",
@@ -200,6 +201,7 @@ export const TECNOLOGIAS_DEF: TecnologiaDef[] = [
     diferencaQueFaz:
       "O asset sai de um servidor a 20ms do usuário em vez do seu datacenter a 200ms — e sua origem quase não vê tráfego de estático. Exige disciplina de versionamento/invalidação de cache.",
     alternativas: ["Cloudflare", "CloudFront", "Fastly"],
+    conceitos: ["cache"],
   },
   {
     id: "s3",
@@ -353,6 +355,53 @@ export const TECNOLOGIAS_DEF: TecnologiaDef[] = [
     diferencaQueFaz:
       "Segredo sai do .env e do repositório: acesso auditável, rotação sem redeploy e vazamento com raio limitado. Adiciona uma dependência crítica no boot da aplicação — precisa de cache e plano para quando o cofre estiver fora.",
     alternativas: ["Secrets do orquestrador (K8s)", "AWS Secrets Manager", "SOPS + git"],
+    conceitos: ["gestao-de-segredos"],
+  },
+  {
+    id: "idp",
+    nome: "Identity Provider (OAuth/OIDC)",
+    categoria: "seguranca",
+    descricao: "IdP que autentica usuários e emite tokens (Keycloak, Cognito, Auth0).",
+    viveEm: ["api", "infra"],
+    usos: [
+      "SSO e Login with X",
+      "Authorization Code + PKCE",
+      "MFA centralizado no IdP",
+      "Emissão de access/id tokens",
+    ],
+    especificacoes: {
+      modelo: "OAuth 2.0 / OIDC como serviço",
+      persistencia: "usuários e clientes no IdP",
+      consistencia: "forte no IdP",
+      latencia: "redirect + token exchange (centenas de ms)",
+    },
+    diferencaQueFaz:
+      "Tira login, MFA e emissão de token do seu monolito — ao preço de depender do IdP no caminho crítico do login e de operar clients/redirects com disciplina.",
+    alternativas: ["Sessão própria + MFA", "LDAP corporativo", "Social login direto"],
+    conceitos: ["oauth2", "autenticacao", "jwt", "mfa"],
+  },
+  {
+    id: "waf",
+    nome: "WAF / borda de proteção",
+    categoria: "seguranca",
+    descricao: "Filtro na borda: allowlist, bot, OWASP rules antes da API.",
+    viveEm: ["api"],
+    usos: [
+      "Allowlist / block de IP e país",
+      "Rate limit na borda",
+      "Regras OWASP (SQLi, XSS de request)",
+      "Shield na frente do gateway",
+    ],
+    especificacoes: {
+      modelo: "proxy de inspeção na borda",
+      persistencia: "regras e contadores",
+      consistencia: "eventual entre PoPs",
+      latencia: "poucos ms na borda",
+    },
+    diferencaQueFaz:
+      "Corta abuso e assinaturas conhecidas antes de tocar na app. Não substitui auth nem corrige IDOR — é camada, não produto inteiro de segurança.",
+    alternativas: ["Nginx + limit_req", "API Gateway policies", "Cloudflare / AWS WAF"],
+    conceitos: ["allowlist", "rate-limiting", "api-gateway"],
   },
 ];
 

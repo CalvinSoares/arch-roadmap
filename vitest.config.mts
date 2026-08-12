@@ -1,14 +1,34 @@
 import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
 
 /**
- * O motor do construtor (regras, score, sugestões, simulador) é todo função
- * pura e não importa React — por isso o ambiente é `node`, sem jsdom.
- * Os aliases `@/*` vêm do tsconfig via resolução nativa do Vite.
+ * Dois ambientes:
+ * - `node` para specs de conteúdo/motor (*.spec.ts) — sem React
+ * - `happy-dom` para componentes (*.spec.tsx)
  */
 export default defineConfig({
+  plugins: [react()],
   resolve: { tsconfigPaths: true },
   test: {
-    environment: "node",
-    include: ["src/**/*.spec.ts"],
+    projects: [
+      {
+        resolve: { tsconfigPaths: true },
+        test: {
+          name: "unit",
+          environment: "node",
+          include: ["src/**/*.spec.ts"],
+        },
+      },
+      {
+        plugins: [react()],
+        resolve: { tsconfigPaths: true },
+        test: {
+          name: "ui",
+          environment: "happy-dom",
+          include: ["src/**/*.spec.tsx"],
+          setupFiles: ["src/test/setup.ts"],
+        },
+      },
+    ],
   },
 });

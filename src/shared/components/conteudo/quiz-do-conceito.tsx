@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CircleHelp } from "lucide-react";
 import { Button } from "@/shared/components/global/ui/button";
-import { Quiz } from "@/app/(app)/estudar/_components/quiz";
+import { Quiz } from "@/shared/components/conteudo/quiz";
 import { paraISO } from "@/shared/lib/estudo";
 
 /**

@@ -129,6 +129,44 @@ export const srp: Conceito = {
   tags: ["solid", "coesao", "acoplamento", "design"],
   dificuldade: "iniciante",
   tempoLeitura: 6,
+  nasceu: {
+    quando: { rotulo: "2002", ano: 2002, precisao: "aproximada" },
+    fonte:
+      "Robert C. Martin, 'Agile Software Development, Principles, Patterns, and Practices', 2002; o acrônimo SOLID é de Michael Feathers, meados dos anos 2000",
+    precursor:
+      "A ideia de coesão — juntar o que muda pelo mesmo motivo — vem do 'structured design' de Constantine e Yourdon, nos anos 1970.",
+  },
+  ondeAparece: [
+    {
+      onde: "ferramentas Unix (grep, sort, wc)",
+      explicacao:
+        "A filosofia 'faça uma coisa bem feita': cada utilitário tem uma única razão para existir, e você os combina por pipe em vez de inchar um só.",
+    },
+    {
+      onde: "controller × service × repository",
+      explicacao:
+        "A divisão clássica do backend separa quem fala HTTP, quem tem a regra de negócio e quem fala com o banco — cada camada muda por um motivo.",
+    },
+    {
+      onde: "custom hooks no React",
+      explicacao:
+        "Extrair a lógica de estado para um hook próprio tira do componente a responsabilidade que não era de renderização — uma razão de cada vez.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Uma razão para mudar por módulo.
+class CalculadoraTotal { total(itens) { /* ... */ } }`,
+  },
+  custo: {
+    indirecoes: 0,
+    cobra: [
+      "Mais módulos e arquivos, cada um com uma responsabilidade, aumentam a navegação",
+      "Dividir cedo demais, antes de saber o que muda junto, cria fronteiras no lugar errado",
+    ],
+    naoValeSe:
+      "o módulo é pequeno e coeso e não há dois interessados distintos puxando-o — quebrar por quebrar só espalha o que estava junto.",
+  },
   relacionados: ["ocp", "isp", "hexagonal"],
   problema: [
     "Classes crescem acumulando tudo que se refere a um conceito: a regra de negócio, a persistência, o cálculo fiscal e a formatação do relatório convivem no mesmo arquivo.",

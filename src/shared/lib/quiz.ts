@@ -19,6 +19,15 @@ export interface Pergunta {
   alternativas: string[];
   /** O título da armadilha — revelado depois da resposta. */
   explicacao: string;
+  /**
+   * De qual formato a pergunta veio, para a UI rotular a rodada.
+   *
+   * Opcional porque o formato `armadilha` é o original e não precisava do
+   * campo — quem não declara é armadilha.
+   */
+  formato?: import("@/shared/lib/quiz-formatos").FormatoQuiz;
+  /** Trecho de código (formato explique-erro). */
+  codigo?: string;
 }
 
 const ALTERNATIVAS = 4;

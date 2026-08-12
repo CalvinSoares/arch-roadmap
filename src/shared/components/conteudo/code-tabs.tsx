@@ -43,7 +43,7 @@ export function CodeTabs({ exemplos }: { exemplos: ExemploDestacado[] }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-card-border bg-card">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-card-border bg-card">
       <div className="flex items-center gap-2 border-b border-card-border px-2">
         <div
           role="tablist"
@@ -107,7 +107,7 @@ export function CodeTabs({ exemplos }: { exemplos: ExemploDestacado[] }) {
           id={idPainel(ex.lang)}
           aria-labelledby={idAba(ex.lang)}
           hidden={ex.lang !== ativo}
-          className="[&_pre]:!m-0 [&_pre]:!rounded-none [&_pre]:!border-0"
+          className="max-w-full overflow-x-auto overscroll-x-contain [&_pre]:!m-0 [&_pre]:!max-w-none [&_pre]:!rounded-none [&_pre]:!border-0"
           dangerouslySetInnerHTML={{ __html: ex.html }}
         />
       ))}

@@ -112,6 +112,46 @@ export const hexagonal: Conceito = {
   tags: ["ports-and-adapters", "clean-architecture", "isolamento", "ddd"],
   dificuldade: "avancado",
   tempoLeitura: 9,
+  nasceu: {
+    quando: { rotulo: "c. 2005", ano: 2005, precisao: "aproximada" },
+    fonte:
+      "Alistair Cockburn — *Hexagonal Architecture (Ports and Adapters)*, " +
+      "publicado e revisado ao longo de 2005–2008",
+    precursor:
+      "A ideia de inverter a dependência para a borda já estava no DIP " +
+      "(Martin, 1996); Cockburn deu a ela um desenho e um nome.",
+  },
+  ondeAparece: [
+    {
+      onde: "banco real × in-memory nos testes",
+      explicacao:
+        "Trocar o repositório Postgres por um em memória no teste, sem tocar no domínio, é a prova de que a porta está no lugar certo.",
+    },
+    {
+      onde: "controllers do NestJS",
+      explicacao:
+        "O controller é um adaptador de entrada: traduz HTTP em uma chamada de caso de uso e nada do protocolo vaza para dentro do domínio.",
+    },
+    {
+      onde: "repositório com Prisma trocável",
+      explicacao:
+        "A interface de repositório é a porta; a implementação com Prisma é um adaptador que dá para substituir por outro ORM sem mexer na regra.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Domínio no centro; adapters nas bordas.
+dominio.executar(cmd, { repo: adapterPostgres });`,
+  },
+  custo: {
+    indirecoes: 2,
+    cobra: [
+      "Uma porta e um adaptador por integração, mais os mapeamentos entre o mundo externo e o domínio",
+      "A indireção extra em cada borda é peso morto num sistema pequeno",
+    ],
+    naoValeSe:
+      "o sistema é pequeno, tem uma integração só e não vai trocar de tecnologia — a cerimônia de portas custa mais do que protege.",
+  },
   relacionados: ["adapter", "cqrs"],
   problema: [
     "Quando as regras de negócio ficam grudadas no framework web, no ORM ou no SDK de terceiros, o domínio passa a depender de detalhes de infraestrutura. Trocar o banco, o broker de mensagens ou a camada HTTP obriga a reescrever lógica que nada tem a ver com essas tecnologias.",

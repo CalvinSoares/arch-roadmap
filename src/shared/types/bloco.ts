@@ -1,7 +1,19 @@
 import type { Camada, ExemploCodigo } from "@/shared/types/conceito";
 
 /** id de uma demo interativa registrada em `conteudo/demos`. */
-export type DemoId = "observer" | "strategy" | "adapter" | "cqrs";
+export type DemoId =
+  | "observer"
+  | "strategy"
+  | "adapter"
+  | "cqrs"
+  /** Laboratório de concorrência: duas transações, um nível, uma anomalia. */
+  | "isolamento"
+  /** Escala de latência: do ciclo de CPU à travessia do Pacífico. */
+  | "escala"
+  /** Mini-simulador: e se o Redis cair? */
+  | "falha-cache"
+  /** Mini-simulador: e se a dependência travar? */
+  | "falha-timeout";
 
 /** Camada navegável (v3): o usuário foca/expande cada camada. */
 export interface CamadaNav {
@@ -105,6 +117,50 @@ export type Bloco =
       }[];
     }
   | { tipo: "camadas-nav"; titulo?: string; camadas: CamadaNav[] }
+  /**
+   * O padrão **mal implementado** — não a ausência dele.
+   *
+   * Tipo próprio, e não mais um `antes-depois`, por dois motivos: o arquétipo
+   * `antes-depois` já significa "sem padrão × com padrão" em várias páginas, e
+   * ter dois blocos visualmente idênticos com sentidos diferentes na mesma
+   * página confunde; e o valor aqui está no **código errado**, que uma lista
+   * de itens curtos não consegue mostrar.
+   */
+  | {
+      tipo: "anti-exemplo";
+      titulo?: string;
+      /** Como o erro se reconhece no código de alguém, em uma linha. */
+      comoSeParece: string;
+      /** A implementação ingênua, com os comentários que a denunciam. */
+      codigo: ExemploCodigo;
+      /** O que quebra, e sob qual condição — sem isto é só código feio. */
+      sintomas: { quando: string; efeito: string }[];
+      /** A saída, em uma frase. Aponta para o que a página já ensinou. */
+      correcao: string;
+    }
+  /**
+   * Do código com cheiro até o padrão, um diff por vez.
+   *
+   * O `motivo` de cada passo é o que separa isto de um diff: sem ele, o leitor
+   * vê o quê e não aprende o porquê — e é o porquê que ele vai precisar quando
+   * encontrar um cheiro parecido mas não idêntico.
+   */
+  | {
+      tipo: "refatoracao";
+      titulo?: string;
+      /** O cheiro, nomeado em uma frase. */
+      cheiro: string;
+      /** O ponto de partida, com o problema visível. */
+      inicio: ExemploCodigo;
+      passos: {
+        titulo: string;
+        /** Por que este passo — sem isto, é só um diff. */
+        motivo: string;
+        depois: ExemploCodigo;
+      }[];
+      /** O que se ganhou, e o que se pagou. */
+      veredito: string;
+    }
   | {
       tipo: "ilustracao";
       arquetipo: "fluxo";

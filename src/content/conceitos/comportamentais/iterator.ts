@@ -1,4 +1,5 @@
 import type { Conceito } from "@/shared/types/conceito";
+import { gof } from "@/content/conceitos/_nascimento";
 
 const MERMAID = `classDiagram
     class Iteravel {
@@ -111,6 +112,41 @@ export const iterator: Conceito = {
   tags: ["travessia", "colecao", "lazy", "gof"],
   dificuldade: "iniciante",
   tempoLeitura: 6,
+  nasceu: gof(
+    "CLU, a linguagem de Barbara Liskov (1975), já tinha iteradores na " +
+      "própria sintaxe — a mesma Liskov do L de SOLID."
+  ),
+  ondeAparece: [
+    {
+      onde: "for...of e Symbol.iterator",
+      explicacao:
+        "O protocolo de iteração é o padrão elevado a contrato da linguagem.",
+    },
+    {
+      onde: "Generators",
+      explicacao:
+        "`function*` produz valores sob demanda, mantendo a posição entre chamadas — iterador com estado.",
+    },
+    {
+      onde: "Cursores de banco",
+      explicacao:
+        "Percorrer um resultado grande sem carregar tudo na memória de uma vez.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Percorre sem expor a estrutura.
+for (const item of colecao) { /* ... */ }`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Uma classe de iteração a manter junto com a coleção que ela percorre",
+      "Iterar enquanto a coleção muda pode invalidar o iterador de formas sutis",
+    ],
+    naoValeSe:
+      "a linguagem já dá iteração pronta sobre a estrutura — reimplementar o protocolo é reinventar o for-of.",
+  },
   relacionados: ["composite", "visitor", "strategy"],
   problema: [
     "Percorrer uma coleção exige conhecer sua estrutura: índice em array, ponteiro em lista ligada, pilha em árvore. Espalhar esse conhecimento pelo código amarra todo mundo à implementação atual.",

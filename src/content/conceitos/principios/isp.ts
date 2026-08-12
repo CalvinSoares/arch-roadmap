@@ -133,6 +133,44 @@ export const isp: Conceito = {
   tags: ["solid", "interface", "acoplamento", "design"],
   dificuldade: "intermediario",
   tempoLeitura: 5,
+  nasceu: {
+    quando: { rotulo: "1996", ano: 1996, precisao: "aproximada" },
+    fonte:
+      "Robert C. Martin, artigos sobre princípios de projeto OO em meados dos anos 1990, a partir de um problema real de software de impressora na Xerox",
+    precursor:
+      "É a aplicação, à interface, da mesma coesão que o SRP pede ao módulo — separar o que clientes diferentes usam por motivos diferentes.",
+  },
+  ondeAparece: [
+    {
+      onde: "io.Reader / io.Writer do Go",
+      explicacao:
+        "Interfaces de um método só: quem precisa apenas ler depende de Reader e ignora o resto — o cliente nunca carrega método que não usa.",
+    },
+    {
+      onde: "streams do Node",
+      explicacao:
+        "Readable, Writable e Duplex são contratos separados; um consumidor de leitura não é forçado a conhecer a metade de escrita da API.",
+    },
+    {
+      onde: "props específicas × objeto inteiro",
+      explicacao:
+        "Passar ao componente só as props que ele usa, em vez do objeto de domínio completo, é segregação de interface aplicada ao React.",
+    },
+  ],
+  emUmaLinha: {
+    lang: "typescript",
+    code: `// Interface só com o que o cliente usa.
+interface Legivel { ler(id: string): Promise<T>; }`,
+  },
+  custo: {
+    indirecoes: 1,
+    cobra: [
+      "Mais interfaces pequenas para nomear, manter e compor no lugar de uma só",
+      "Fragmentar demais espalha um contrato coeso em cacos que ninguém usa isolados",
+    ],
+    naoValeSe:
+      "todos os clientes usam a interface inteira do mesmo jeito — segregar aí só multiplica tipos sem aliviar ninguém.",
+  },
   relacionados: ["lsp", "srp", "dip"],
   problema: [
     "Interfaces crescem para cobrir todos os casos e passam a obrigar cada implementação a fornecer métodos que não fazem sentido para ela — normalmente resolvidos com exceção de 'não suportado'.",

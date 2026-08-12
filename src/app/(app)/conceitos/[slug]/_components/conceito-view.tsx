@@ -14,6 +14,9 @@ import {
   SubnavTrilha,
 } from "@/shared/components/conteudo/conceito-subnav";
 import { ConceitoHero } from "@/shared/components/conteudo/conceito-hero";
+import { OndeAparece } from "@/shared/components/conteudo/onde-aparece";
+import { EmPostmortems } from "@/shared/components/conteudo/em-postmortems";
+import { EmUmaLinha } from "@/shared/components/conteudo/em-uma-linha";
 import { CATEGORIAS } from "@/shared/config/categorias";
 import {
   getConceitos,
@@ -31,20 +34,22 @@ function ConfundidoCom({ slug }: { slug: string }) {
   if (duelos.length === 0) return null;
 
   return (
-    <section className="border-t border-card-border pt-8">
+    <section className="min-w-0 border-t border-card-border pt-8">
       <h2 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
         Costuma ser confundido com
       </h2>
-      <ul className="mt-4 flex flex-wrap gap-2">
+      <ul className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {duelos.map((d) => (
-          <li key={d.slug}>
+          <li key={d.slug} className="min-w-0">
             <Link
               href={`/comparar/${d.slug}`}
-              className="flex items-center gap-2 rounded-xl border border-card-border bg-card px-3 py-2 text-sm transition-colors hover:border-primary/60"
+              className="flex min-w-0 items-center gap-2 rounded-xl border border-card-border bg-card px-3 py-2.5 text-sm transition-colors hover:border-primary/60"
             >
               <GitCompareArrows className="size-3.5 shrink-0 text-primary" />
-              <span className="font-medium">{d.outro.titulo}</span>
-              <span className="text-muted">· ver comparação</span>
+              <span className="min-w-0 truncate font-medium">
+                {d.outro.titulo}
+              </span>
+              <span className="shrink-0 text-muted">· ver comparação</span>
             </Link>
           </li>
         ))}
@@ -153,6 +158,9 @@ export async function ConceitoView({ conceito }: { conceito: Conceito }) {
               total={todasAsArmadilhas([conceito.slug]).length}
 
             />
+            {conceito.ondeAparece && <OndeAparece itens={conceito.ondeAparece} />}
+            <EmUmaLinha emUmaLinha={conceito.emUmaLinha} custo={conceito.custo} />
+            <EmPostmortems slug={conceito.slug} />
             <ConfundidoCom slug={conceito.slug} />
             <EmRoadmaps slug={conceito.slug} />
             <Relacionados conceito={conceito} />
@@ -179,6 +187,9 @@ export async function ConceitoView({ conceito }: { conceito: Conceito }) {
             total={todasAsArmadilhas([conceito.slug]).length}
 
           />
+          {conceito.ondeAparece && <OndeAparece itens={conceito.ondeAparece} />}
+          <EmUmaLinha emUmaLinha={conceito.emUmaLinha} custo={conceito.custo} />
+          <EmPostmortems slug={conceito.slug} />
           <ConfundidoCom slug={conceito.slug} />
           <EmRoadmaps slug={conceito.slug} />
           <Relacionados conceito={conceito} />
@@ -256,6 +267,12 @@ export async function ConceitoView({ conceito }: { conceito: Conceito }) {
 
 
         />
+
+        {conceito.ondeAparece && <OndeAparece itens={conceito.ondeAparece} />}
+
+        <EmUmaLinha emUmaLinha={conceito.emUmaLinha} custo={conceito.custo} />
+
+        <EmPostmortems slug={conceito.slug} />
 
         <ConfundidoCom slug={conceito.slug} />
 
