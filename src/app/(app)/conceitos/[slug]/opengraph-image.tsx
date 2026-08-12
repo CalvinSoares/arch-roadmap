@@ -22,6 +22,7 @@ const COR: Record<Categoria, string> = {
   resiliencia: "#b39ce8",
   dados: "#e79ade",
   infra: "#89bdd1",
+  seguranca: "#e8957a",
 };
 
 export default async function Image({
