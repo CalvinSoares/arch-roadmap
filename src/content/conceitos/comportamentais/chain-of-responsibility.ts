@@ -291,6 +291,16 @@ auth.proximo(rateLimit).proximo(handler);`,
         "A corrente não reduz a quantidade de verificações; ela separa cada uma e transforma a ordem, que era acidental, em decisão declarada num lugar só.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Um elo, uma responsabilidade", texto: "Cada manipulador autentica, limita ou resolve — e decide se encerra ou repassa." },
+        { titulo: "Encadear na montagem", texto: "A ordem é configuração explícita: auth.encadear(rate).encadear(handler)." },
+        { titulo: "Entregar ao primeiro", texto: "O cliente chama só a entrada da corrente; não conhece os elos seguintes." },
+        { titulo: "Fim explícito", texto: "Se ninguém tratar, o último elo (ou o fallback) responde com erro claro — nunca silêncio." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [

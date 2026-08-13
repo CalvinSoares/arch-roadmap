@@ -70,6 +70,23 @@ print(c.saldo)     # query -> 70 (repetível e segura)`,
   },
 ];
 
+const ANTI_EXEMPLO = `class Conta {
+  private _saldo = 0;
+
+  // Parece query (retorna number)... e debita.
+  sacar(valor: number): number {
+    if (valor > this._saldo) throw new Error("saldo insuficiente");
+    this._saldo -= valor;
+    return this._saldo; // <- comando disfarçado de leitura
+  }
+}
+
+const c = new Conta();
+c.sacar(0); // "so para ver o saldo" — em contas reais, o retry debita 2x
+const a = c.sacar(10);
+const b = c.sacar(10); // segunda chamada muda o mundo de novo
+// Ninguem pode repetir, cachear ou logar sacar() sem medo.`;
+
 export const cqs: Conceito = {
   slug: "cqs",
   titulo: "CQS (Command Query Separation)",
@@ -187,6 +204,16 @@ const t = total(pedido);  // query`,
         "Mutação e observação em passos separados: o comando muda e não conta nada; a query conta e não muda nada.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Classificar a intenção", texto: "A operação pergunta (ler) ou manda (mutar)? Escolha um dos dois papéis." },
+        { titulo: "Comando = void", texto: "Métodos que mudam estado retornam void e deixam a mutação explícita na assinatura." },
+        { titulo: "Query = dado puro", texto: "Métodos que devolvem valor não alteram estado observável — seguros para repetir e cachear." },
+        { titulo: "Separar na chamada", texto: "Quem precisa agir e depois ler faz duas chamadas: depositar(100); saldo()." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Como o princípio escala",
       camadas: [
@@ -263,6 +290,20 @@ const t = total(pedido);  // query`,
             "Pureza é pré-condição, não mágica: a invalidação do cache continua sendo problema seu — comandos precisam sinalizar quando o dado subjacente mudou.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A query que debita",
+      comoSeParece:
+        "O método retorna um número — cara de leitura — e por baixo muta o saldo. Quem chama 'só para inspecionar' altera o mundo; retry e log viram armadilha.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "No retry", efeito: "Repetir a chamada por timeout debita duas vezes — a leitura não era idempotente." },
+        { quando: "No debugger", efeito: "Watch/evaluar a expressão muda o objeto sob inspeção." },
+        { quando: "No cache", efeito: "Memoizar ou logar o retorno esconde que cada invocação tem efeito." },
+      ],
+      correcao:
+        "Comando `sacar(valor): void` e query `saldo(): number`. Se precisar do saldo novo, chame a query depois. Exceções atômicas (pop) são conscientes — não o padrão escondido.",
     },
     {
       tipo: "armadilhas",

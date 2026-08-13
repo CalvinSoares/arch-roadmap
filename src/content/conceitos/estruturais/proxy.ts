@@ -96,6 +96,27 @@ galeria[0].exibir()  # carrega so a que o usuario abriu`,
   },
 ];
 
+const ANTI_EXEMPLO = `interface Imagem { exibir(): void; }
+
+class ImagemReal implements Imagem {
+  constructor(private arquivo: string) {
+    console.log("carregando do disco:", arquivo);
+  }
+  exibir() { console.log("exibindo", this.arquivo); }
+}
+
+// "Proxy virtual"... que carrega no construtor.
+class ImagemProxy implements Imagem {
+  private real: ImagemReal;
+  constructor(arquivo: string) {
+    this.real = new ImagemReal(arquivo); // <- paga o custo sempre
+  }
+  exibir() { this.real.exibir(); }       // so repassa
+}
+
+// A galeria de 100 itens volta a ler 100 arquivos no boot.
+// Mesma interface, zero controle de acesso — casca vazia.`;
+
 export const proxy: Conceito = {
   slug: "proxy",
   titulo: "Proxy",
@@ -326,6 +347,55 @@ imagem.desenhar(); // carrega sob demanda`,
             "A conveniência mente sobre a física: a chamada parece local mas pode levar 200ms, falhar por timeout ou por partição de rede. Código escrito como se fosse local (num laço, sem timeout, sem retry) vira incidente em produção.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como colocar o substituto na frente",
+      passos: [
+        {
+          titulo: "Compartilhar a interface",
+          texto:
+            "Proxy e objeto real implementam o mesmo contrato. Sem isso, o cliente distingue os dois e o padrão morre no tipo.",
+        },
+        {
+          titulo: "Guardar a política no proxy",
+          texto:
+            "Lazy, cache, permissão ou rede moram aqui — finos, sem regra de negócio. O real continua fazendo só o trabalho dele.",
+        },
+        {
+          titulo: "Adiar o custo real",
+          texto:
+            "No virtual: o caro só nasce no primeiro uso. Criar o real no construtor do proxy anula o ganho inteiro.",
+        },
+        {
+          titulo: "Entregar o proxy ao cliente",
+          texto:
+            "Quem consome programa contra a interface e não precisa saber que existe intermediário.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O Proxy que carrega no construtor",
+      comoSeParece:
+        "A classe se chama Proxy, implementa a interface certa e até aparece no diagrama — mas instancia o objeto caro no construtor. É um repasse com nome sofisticado; o lazy loading nunca aconteceu.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "No boot da galeria",
+          efeito: "Cem arquivos são lidos antes de qualquer clique — exatamente o custo que o proxy prometia adiar.",
+        },
+        {
+          quando: "Na memória",
+          efeito: "O consumo fica proporcional ao catálogo inteiro, não ao que o usuário abriu.",
+        },
+        {
+          quando: "No teste",
+          efeito: "Montar a lista já exige disco/rede; o falso barato que o proxy deveria permitir não existe.",
+        },
+      ],
+      correcao:
+        "Guarde só o caminho (ou a factory) no proxy. O `ImagemReal` nasce no primeiro `exibir()` — `this.real ??= new ImagemReal(...)` — e uma vez só.",
     },
     {
       tipo: "armadilhas",

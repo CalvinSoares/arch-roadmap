@@ -15,9 +15,23 @@ export const roadmapPadroes: Roadmap = {
       titulo: "Fundamentos de OOP",
       descricao: "A base: objetos, interfaces e polimorfismo — o que os padrões exploram.",
       items: [
-        { id: "oop-encaps", titulo: "Encapsulamento & Abstração", descricao: "Esconder o estado atrás de um contrato: quem usa não sabe — nem depende de — como é por dentro." },
-        { id: "oop-poli", titulo: "Herança & Polimorfismo", descricao: "Um mesmo contrato, várias implementações: a base que Strategy, State e quase todo padrão comportamental explora." },
-        { id: "oop-composicao", titulo: "Composição sobre Herança", conceito: "composicao-sobre-heranca" },
+        {
+          id: "oop-encaps",
+          titulo: "Encapsulamento & Abstração",
+          conceito: "encapsulamento",
+          descricao:
+            "Esconder o estado atrás de um contrato: quem usa não sabe — nem depende de — como é por dentro.",
+          essencial: true,
+        },
+        {
+          id: "oop-poli",
+          titulo: "Herança & Polimorfismo",
+          conceito: "polimorfismo",
+          descricao:
+            "Um mesmo contrato, várias implementações: a base que Strategy, State e quase todo padrão comportamental explora.",
+          essencial: true,
+        },
+        { id: "oop-composicao", titulo: "Composição sobre Herança", conceito: "composicao-sobre-heranca", essencial: true },
       ],
     },
     {

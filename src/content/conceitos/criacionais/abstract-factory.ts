@@ -134,6 +134,27 @@ print(montar_formulario(TemaEscuroFactory()))`,
   },
 ];
 
+const ANTI_EXEMPLO = `interface UIFactory {
+  criarBotao(): Botao;
+  criarCheckbox(): Checkbox;
+}
+
+class TemaEscuroFactory implements UIFactory {
+  criarBotao() { return new BotaoEscuro(); }
+  criarCheckbox() { return new CheckboxEscuro(); }
+}
+
+// A "familia" existe... e o cliente continua misturando na mao.
+function montarFormulario() {
+  const fabrica = new TemaEscuroFactory();
+  const botao = fabrica.criarBotao();
+  const check = new CheckboxClaro(); // <- furou a fabrica
+  return check.renderizar() + botao.renderizar();
+}
+
+// Tema novo nao e o problema: o problema e que new concreto
+// ainda vive no cliente. A garantia de consistencia morreu.`;
+
 export const abstractFactory: Conceito = {
   slug: "abstract-factory",
   titulo: "Abstract Factory",
@@ -239,6 +260,16 @@ const botao = ui.criarBotao();`,
         "O cliente fala só com a interface; a fábrica concreta escolhida garante que todos os produtos criados pertencem à mesma variante.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Declarar a família", texto: "A interface da fábrica lista um método de criação por produto (botão, checkbox…)." },
+        { titulo: "Uma fábrica por variante", texto: "Cada tema/plataforma implementa a fábrica criando só produtos da própria linha." },
+        { titulo: "Escolher uma vez", texto: "Na composição da aplicação, resolve-se qual fábrica concreta usar." },
+        { titulo: "Montar só com abstrações", texto: "O cliente chama criarBotao()/criarCheckbox() — nunca dá new em produto concreto." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [
@@ -325,6 +356,20 @@ const botao = ui.criarBotao();`,
             "Países muito parecidos geram fábricas quase idênticas — quando a diferença cabe em parâmetros, configuração por dados vence classes por variante.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A fábrica que o cliente fura com new",
+      comoSeParece:
+        "A Abstract Factory está montada, as famílias existem — mas em algum ponto o cliente ainda instancia um produto concreto na mão. A consistência que o padrão prometia vira convenção outra vez.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Na tela", efeito: "Botão escuro ao lado de checkbox claro: a mistura incompatível volta a ser possível." },
+        { quando: "Ao trocar o tema", efeito: "Parte da UI muda com a fábrica; a peça criada com new fica presa na variante antiga." },
+        { quando: "Na revisão", efeito: "Cada `new ProdutoX` no cliente é um furo na fronteira — e eles se espalham silenciosos." },
+      ],
+      correcao:
+        "Produto só nasce pela fábrica. Se faltar um método de criação, ele entra na interface — não se contorna com `new` no cliente. Construtores inacessíveis fora do módulo reforçam a regra.",
     },
     {
       tipo: "armadilhas",

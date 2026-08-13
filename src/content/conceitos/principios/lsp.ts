@@ -102,6 +102,31 @@ class Quad:
   },
 ];
 
+const ANTI_EXEMPLO = `abstract class Conta {
+  constructor(protected saldo: number) {}
+  abstract sacar(valor: number): void;
+}
+
+class ContaCorrente extends Conta {
+  sacar(valor: number): void {
+    if (valor > this.saldo) throw new Error("saldo insuficiente");
+    this.saldo -= valor;
+  }
+}
+
+// Compila. Encaixa no tipo. Quebra a promessa.
+class ContaSalario extends Conta {
+  sacar(_valor: number): void {
+    throw new Error("nao suportado"); // <- LSP morto aqui
+  }
+}
+
+function pagar(contas: Conta[], valor: number) {
+  for (const c of contas) c.sacar(valor); // explode com ContaSalario
+}
+
+// O chamador precisa saber QUAL conta recebeu — o polimorfismo mentiu.`;
+
 export const lsp: Conceito = {
   slug: "lsp",
   titulo: "LSP — Substituição de Liskov",
@@ -333,6 +358,55 @@ function migrar(aves: Ave[]) { for (const a of aves) a.voar(); }`,
             "Manter o falso fiel exige disciplina contínua; sem a suíte compartilhada, ele diverge devagar e os testes passam a validar um comportamento que a produção não tem.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como validar a substituição",
+      passos: [
+        {
+          titulo: "Escrever o contrato do supertipo",
+          texto:
+            "Liste o que o chamador pode assumir: pré-condições, pós-condições e invariantes. Isso é a promessa — não a assinatura sozinha.",
+        },
+        {
+          titulo: "Rodar a suíte contra todos os subtipos",
+          texto:
+            "Os mesmos testes do contrato devem passar em cada implementação. Se um subtipo precisa de caso especial, ele não é substituível.",
+        },
+        {
+          titulo: "Caçar 'não suportado' e instanceof",
+          texto:
+            "Método que só lança e código polimórfico que pergunta o tipo concreto são violações anunciadas — a hierarquia está mentindo.",
+        },
+        {
+          titulo: "Quebrar a herança quando não couber",
+          texto:
+            "Se o filho não cumpre a promessa, a correção não é adaptar com exceção: são tipos irmãos, composição ou interfaces menores (ISP).",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O subtipo que lança 'não suportado'",
+      comoSeParece:
+        "A hierarquia compila e o diagrama parece certo — mas um subtipo implementa o método só para lançar. Quem programa contra o pai precisa saber qual filho recebeu.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Em runtime",
+          efeito: "Código que funcionava com `ContaCorrente` explode ao receber `ContaSalario`, sem aviso em compilação.",
+        },
+        {
+          quando: "No chamador",
+          efeito: "Aparece `if (c instanceof ContaSalario)` — o polimorfismo morreu e o benefício do supertipo sumiu.",
+        },
+        {
+          quando: "Na documentação",
+          efeito: "'Funciona para todas as contas, exceto salário' — cada exceção assim é uma violação declarada.",
+        },
+      ],
+      correcao:
+        "Separe capacidades: quem não saca não implementa `sacar`. Interfaces menores (ISP) fazem o tipo dizer a verdade; herança que força mentira não é herança útil.",
     },
     {
       tipo: "armadilhas",

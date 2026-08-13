@@ -103,6 +103,29 @@ print([v for v in arvore if v > 4])  # [5, 7, 8]`,
   },
 ];
 
+const ANTI_EXEMPLO = `class Lista {
+  private itens: number[];
+  private posicao = 0; // <- cursor NA colecao
+
+  constructor(itens: number[]) {
+    this.itens = itens;
+  }
+
+  proximo(): number | undefined {
+    return this.itens[this.posicao++];
+  }
+
+  reset() { this.posicao = 0; }
+}
+
+const lista = new Lista([1, 2, 3, 4]);
+for (let a = lista.proximo(); a !== undefined; a = lista.proximo()) {
+  lista.reset(); // laço interno rouba o cursor do de fora
+  const b = lista.proximo();
+}
+
+// Dois percursos simultaneos sao impossiveis: ha um cursor so.`;
+
 export const iterator: Conceito = {
   slug: "iterator",
   titulo: "Iterator",
@@ -253,6 +276,16 @@ for (const item of colecao) { /* ... */ }`,
         "O ganho é a fronteira: depois de existir um iterador, a estrutura interna da coleção volta a ser assunto dela — que é onde deveria estar desde o começo.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Expor o protocolo", texto: "A coleção fabrica um iterador novo (ex.: Symbol.iterator / __iter__)." },
+        { titulo: "Cursor no iterador", texto: "A posição mora no iterador — nunca na coleção — para permitir travessias paralelas." },
+        { titulo: "Pedir o próximo", texto: "O cliente só consome 'próximo' / for-of, sem conhecer a estrutura interna." },
+        { titulo: "Produzir sob demanda", texto: "Com geradores, cada yield pausa e devolve o controle sem materializar a sequência inteira." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [
@@ -329,6 +362,20 @@ for (const item of colecao) { /* ... */ }`,
             "Cada travessia nova é código novo com sua própria chance de bug sutil (um nó visitado duas vezes, um ramo esquecido) — e esses erros costumam passar por testes de árvores pequenas.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O cursor grudado na coleção",
+      comoSeParece:
+        "A 'iteração' existe, mas a posição vive na própria coleção. Dois laços brigam pelo mesmo cursor; aninhar percursos quebra sem aviso claro.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Com laços aninhados", efeito: "O laço interno reseta ou avança o cursor do externo — itens pulados ou repetidos." },
+        { quando: "Em paralelo", efeito: "Duas leituras simultâneas corrompem a posição uma da outra." },
+        { quando: "Na API", efeito: "Quem consome precisa lembrar de reset() — estado escondido vaza para o cliente." },
+      ],
+      correcao:
+        "Cada travessia cria um iterador com cursor próprio. A coleção só fabrica; não guarda `posicaoAtual`. Prefira o protocolo da linguagem (`for...of` / geradores).",
     },
     {
       tipo: "armadilhas",

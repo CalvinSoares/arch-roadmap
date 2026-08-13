@@ -120,6 +120,28 @@ class EmissorNota:              # muda com o LAYOUT
   },
 ];
 
+const ANTI_EXEMPLO = `// "Aplicamos SRP": imposto e PDF viraram metodos privados.
+// Os tres atores continuam no mesmo arquivo — so mudaram de endereco.
+class Pedido {
+  itens: { preco: number; qtd: number }[] = [];
+
+  total(): number {
+    return this.itens.reduce((s, i) => s + i.preco * i.qtd, 0);
+  }
+
+  salvar(): void {
+    const imposto = this.calcularImposto(); // ator: fiscal
+    db.insert({ total: this.total(), imposto }); // ator: dados
+    this.gerarPdf();                            // ator: layout
+  }
+
+  private calcularImposto(): number { return this.total() * 0.18; }
+  private gerarPdf(): string { return "%PDF-1.4 ..."; }
+}
+
+// Reforma tributaria, migracao de banco e novo layout da nota
+// ainda abrem o MESMO arquivo. O principio nao e sobre private.`;
+
 export const srp: Conceito = {
   slug: "srp",
   titulo: "SRP — Responsabilidade Única",
@@ -344,6 +366,50 @@ class CalculadoraTotal { total(itens) { /* ... */ } }`,
             "Entender o fluxo completo passa a exigir abrir cinco arquivos em vez de um. Sem bons nomes e um ponto de composição legível, a clareza perdida pode superar o ganho.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como aplicar, passo a passo",
+      passos: [
+        {
+          titulo: "Nomear os atores",
+          texto:
+            "Pergunte quem pede mudança neste arquivo: fiscal, dados, layout, marketing. Cada resposta diferente é um candidato a módulo.",
+        },
+        {
+          titulo: "Separar por razão de mudar",
+          texto:
+            "O que muda junto fica junto; o que muda por motivo distinto sai. O critério é o interessado, não a contagem de métodos.",
+        },
+        {
+          titulo: "Compor num ponto só",
+          texto:
+            "Um caso de uso ou serviço de aplicação orquestra as peças. Sem isso, cada chamador remonta a sequência do seu jeito.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O SRP que só escondeu os métodos",
+      comoSeParece:
+        "A classe 'emagreceu' na API pública: imposto e PDF viraram `private`. Parece organizado — mas os três atores ainda moram no mesmo arquivo e ainda conflitam no mesmo diff.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Na reforma tributária",
+          efeito: "O PR de alíquota ainda toca a classe que salva no banco e gera PDF — o risco de regressão não mudou.",
+        },
+        {
+          quando: "No merge",
+          efeito: "Times diferentes continuam conflitando no mesmo arquivo; só o nome dos métodos privados mudou.",
+        },
+        {
+          quando: "No teste",
+          efeito: "Testar o total ainda arrasta persistência e geração de nota, porque tudo continua acoplado por dentro.",
+        },
+      ],
+      correcao:
+        "Extrair de verdade: `CalculadoraImpostos`, `RepositorioPedidos` e `EmissorNota` em módulos distintos. `private` não é fronteira — módulo e ator são.",
     },
     {
       tipo: "armadilhas",

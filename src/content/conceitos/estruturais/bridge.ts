@@ -112,6 +112,23 @@ NotificacaoUrgente(CanalSMS()).enviar("servidor caiu")`,
   },
 ];
 
+const ANTI_EXEMPLO = `class Notificacao {
+  constructor(protected canal: Canal) {}
+  enviar(msg: string) {
+    // A "ponte" existe... e a abstracao ainda pergunta o tipo.
+    if (this.canal instanceof CanalSMS) {
+      this.canal.entregar(msg.slice(0, 160));
+    } else if (this.canal instanceof CanalEmail) {
+      this.canal.entregar("<p>" + msg + "</p>");
+    } else {
+      this.canal.entregar(msg);
+    }
+  }
+}
+
+// Canal novo = editar Notificacao. As duas hierarquias
+// voltaram a se acoplar — so que agora com instanceof.`;
+
 export const bridge: Conceito = {
   slug: "bridge",
   titulo: "Bridge",
@@ -263,6 +280,16 @@ remoto.ligar();`,
         "São duas árvores lado a lado, não uma dentro da outra. A ponte é a referência que a abstração guarda para um implementador — e é ela que permite combinar qualquer folha de cima com qualquer folha de baixo.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Separar as dimensões", texto: "Identifique o QUE (abstração) e o COMO (implementação) — eixos que variam sozinhos." },
+        { titulo: "Contrato do implementador", texto: "Interface enxuta com as operações primitivas de que a abstração precisa." },
+        { titulo: "Abstração guarda a ponte", texto: "A abstração recebe o implementador por composição e delega a ele." },
+        { titulo: "Variar cada lado", texto: "Novos tipos e novos canais entram como classes novas — sem produto cartesiano." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [
@@ -339,6 +366,20 @@ remoto.ligar();`,
             "Convenções de plataforma divergem (navegação, gestos, atalhos). Forçar uniformidade produz interfaces que parecem estrangeiras em todo lugar — às vezes a duplicação consciente vale mais que a ponte.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A ponte que ainda faz instanceof",
+      comoSeParece:
+        "Há duas hierarquias e uma referência ao canal — mas a abstração continua ramificando por tipo concreto. A composição só mudou o endereço do acoplamento.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Ao adicionar canal", efeito: "É preciso reabrir a abstração e acrescentar mais um ramo — exatamente o M×N que o Bridge evitava." },
+        { quando: "No teste", efeito: "Testar Notificacao exige montar canais reais; o polimorfismo não cobre a decisão." },
+        { quando: "Na leitura", efeito: "A abstração 'sabe demais' sobre cada implementação — a ponte é cosmética." },
+      ],
+      correcao:
+        "A abstração fala só com a interface (`entregar`). Diferenças de formato ficam no próprio canal, ou em adaptadores por canal — nunca em `instanceof` na abstração.",
     },
     {
       tipo: "armadilhas",

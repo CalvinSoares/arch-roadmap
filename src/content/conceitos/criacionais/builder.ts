@@ -124,6 +124,33 @@ print(pedido.embrulho)  # True`,
   },
 ];
 
+const ANTI_EXEMPLO = `class PedidoBuilder {
+  private itens: string[] = [];
+  private cupom?: string;
+
+  adicionarItem(item: string): this {
+    this.itens.push(item);
+    return this;
+  }
+  comCupom(codigo: string): this {
+    this.cupom = codigo;
+    return this;
+  }
+
+  // "Builder"... sem validacao e com produto mutavel.
+  construir(): Pedido {
+    return new Pedido(this.itens, this.cupom); // pedido vazio passa
+  }
+}
+
+class Pedido {
+  constructor(public itens: string[], public cupom?: string) {}
+  addItem(i: string) { this.itens.push(i); } // <- reabre estado invalido
+}
+
+const p = new PedidoBuilder().construir(); // Pedido sem itens
+p.addItem("camiseta");                     // invariante validada? nunca.`;
+
 export const builder: Conceito = {
   slug: "builder",
   titulo: "Builder",
@@ -319,6 +346,55 @@ const url = new URLSearchParams().set("q", termo).set("page", "1");`,
             "Os defaults escondidos podem mascarar o que o teste realmente exige — um teste que passa por causa de um default do builder é um teste que mente sobre o próprio cenário.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como montar sem nascer pela metade",
+      passos: [
+        {
+          titulo: "Acumular no builder",
+          texto:
+            "Campos privados mutáveis e métodos fluentes que devolvem `this`. Só o builder pode estar 'pela metade'.",
+        },
+        {
+          titulo: "Validar em construir()",
+          texto:
+            "Invariantes que cruzam campos (itens não vazios, desconto compatível com vencimento) falham aqui — ou o objeto não nasce.",
+        },
+        {
+          titulo: "Entregar imutável",
+          texto:
+            "O produto recebe tudo no construtor e não expõe setters. Quem tem um `Pedido` tem a garantia da validação.",
+        },
+        {
+          titulo: "Um builder por produto",
+          texto:
+            "Reusar a mesma instância após `construir()` vaza cupom e itens do pedido anterior. Crie outro ou resete com clareza.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O Builder que não valida e entrega mutável",
+      comoSeParece:
+        "A API é fluente e o nome é Builder — mas `construir()` aceita qualquer coisa e o produto ainda tem `addItem`. A montagem bonita não fechou a janela de estados inválidos.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Com zero passos",
+          efeito: "Um pedido sem itens circula no sistema; o erro aparece longe, no gateway ou no PDF.",
+        },
+        {
+          quando: "Depois do construir",
+          efeito: "Qualquer código muta o produto e as invariantes 'validadas' deixam de ser garantia.",
+        },
+        {
+          quando: "Na leitura",
+          efeito: "Ninguém sabe se precisa passar pelo builder ou se pode `new Pedido([])` direto — dois caminhos, duas regras.",
+        },
+      ],
+      correcao:
+        "`construir()` recusa pedido vazio; o produto nasce com `readonly` e sem setters. O builder é o único caminho de criação — senão é só açúcar sintático.",
     },
     {
       tipo: "armadilhas",

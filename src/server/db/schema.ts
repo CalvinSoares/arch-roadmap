@@ -312,3 +312,24 @@ export const denuncias = pgTable("denuncias", {
   status: statusDenuncia("status").notNull().default("aberta"),
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
 });
+
+/* ————————————————————— Jornada (aba estilo Duolingo) ————————————————————— */
+
+/**
+ * Estado da jornada por nó — as **estrelas** conquistadas (precisão da lição).
+ * A conclusão do nó já mora em `progresso`; aqui vai só o brilho, que precisa
+ * sincronizar entre dispositivos (o localStorage cobre o anônimo/instantâneo).
+ * Mantém-se o **melhor** resultado — um replay pior nunca rebaixa estrelas.
+ */
+export const jornadaEstado = pgTable(
+  "jornada_estado",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    noId: text("no_id").notNull(),
+    estrelas: integer("estrelas").notNull().default(0),
+    concluidoEm: timestamp("concluido_em").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.noId] })]
+);

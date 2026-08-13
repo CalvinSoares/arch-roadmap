@@ -125,6 +125,29 @@ print(Carrinho([DescontoNatal(), DescontoCupom(0.05)]).total(200))`,
   },
 ];
 
+const ANTI_EXEMPLO = `interface Desconto {
+  aplicar(valor: number): number;
+}
+
+class DescontoNatal implements Desconto {
+  aplicar(valor: number) { return valor * 0.9; }
+}
+class DescontoFidelidade implements Desconto {
+  aplicar(valor: number) { return Math.max(0, valor - 10); }
+}
+
+class Carrinho {
+  // A interface existe... e o codigo "fechado" continua aberto.
+  total(bruto: number, d: Desconto): number {
+    if (d instanceof DescontoNatal) return bruto * 0.9;      // furou
+    if (d instanceof DescontoFidelidade) return bruto - 10;  // furou
+    return d.aplicar(bruto);
+  }
+}
+
+// Promocao nova = editar Carrinho de novo. O Aberto/Fechado
+// virou cerimonia: classes novas + o mesmo if de sempre.`;
+
 export const ocp: Conceito = {
   slug: "ocp",
   titulo: "OCP — Aberto/Fechado",
@@ -365,6 +388,55 @@ pagamentos.registrar("pix", novoPixStrategy);`,
             "A interface vira compromisso público e praticamente imutável: qualquer mudança quebra plugins de terceiros, então erros de desenho ficam para sempre — ou exigem manter duas versões em paralelo.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como fechar o módulo",
+      passos: [
+        {
+          titulo: "Esperar o eixo se declarar",
+          texto:
+            "Na primeira ocorrência, escreva direto. Na segunda, observe. Na terceira, o eixo de variação já apareceu com evidência — não com adivinhação.",
+        },
+        {
+          titulo: "Extrair a abstração mínima",
+          texto:
+            "Uma interface pequena e estável no eixo certo. Cada método a mais aqui é trabalho para todas as implementações futuras.",
+        },
+        {
+          titulo: "Depender só do contrato",
+          texto:
+            "O código que orquestra chama a abstração e para de conhecer concretos. Variante nova = classe nova, zero diff no núcleo.",
+        },
+        {
+          titulo: "Banir o instanceof no fechado",
+          texto:
+            "Se o trecho 'fechado' pergunta o tipo concreto, a porta reabriu. A decisão por variante mora na composição, não no orquestrador.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O OCP com instanceof no miolo",
+      comoSeParece:
+        "Existe interface, existem classes por promoção, o diagrama está bonito — e o carrinho ainda ramifica com `instanceof`. A abstração é decoração; o eixo continua aberto no lugar errado.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Ao adicionar promoção",
+          efeito: "É preciso reabrir o `Carrinho` e acrescentar mais um ramo — exatamente o que o princípio prometia evitar.",
+        },
+        {
+          quando: "No teste",
+          efeito: "Cobrir o total exige montar cada concreta real; o polimorfismo não está sendo exercitado de verdade.",
+        },
+        {
+          quando: "Na revisão",
+          efeito: "O `instanceof` se espalha para outros métodos (frete, cashback) e cada um sai de sincronia com os demais.",
+        },
+      ],
+      correcao:
+        "Chame só `d.aplicar(bruto)`. Se ainda for preciso escolher a concreta, o mapa mora na composição da aplicação — nunca dentro do código que deveria estar fechado.",
     },
     {
       tipo: "armadilhas",

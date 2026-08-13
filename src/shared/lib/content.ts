@@ -16,6 +16,8 @@ import { lsp } from "@/content/conceitos/principios/lsp";
 import { isp } from "@/content/conceitos/principios/isp";
 import { dip } from "@/content/conceitos/principios/dip";
 import { composicaoSobreHeranca } from "@/content/conceitos/principios/composicao-sobre-heranca";
+import { encapsulamento } from "@/content/conceitos/principios/encapsulamento";
+import { polimorfismo } from "@/content/conceitos/principios/polimorfismo";
 import { dryKissYagni } from "@/content/conceitos/principios/dry-kiss-yagni";
 import { leiDeDemeter } from "@/content/conceitos/principios/lei-de-demeter";
 import { leiDeConway } from "@/content/conceitos/principios/lei-de-conway";
@@ -132,6 +134,8 @@ const CONCEITOS: Conceito[] = [
   isp,
   dip,
   composicaoSobreHeranca,
+  encapsulamento,
+  polimorfismo,
   dryKissYagni,
   leiDeDemeter,
   leiDeConway,

@@ -111,6 +111,25 @@ print(d.botao_habilitado)  # True`,
   },
 ];
 
+const ANTI_EXEMPLO = `class Campo {
+  valor = "";
+  constructor(
+    private nome: string,
+    private mediador: Mediador,
+    private data?: Campo, // <- ainda conhece o colega
+  ) {}
+
+  digitar(v: string) {
+    this.valor = v;
+    this.mediador.notificar(this.nome, "mudou");
+    // "so neste caso" — a teia voltou pela porta dos fundos
+    if (this.nome === "destino" && this.data) this.data.valor = "";
+  }
+}
+
+// O mediador existe, mas o campo continua coordenando.
+// Reaproveitar Campo noutro dialogo leva a data junto.`;
+
 export const mediator: Conceito = {
   slug: "mediator",
   titulo: "Mediator",
@@ -255,6 +274,16 @@ mediador.notificar(this, "clique");`,
         "As setas que existiriam entre os três colegas desapareceram: nenhum deles tem referência aos outros, só ao centro. É isso que os torna reaproveitáveis fora desta tela.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Colega só relata", texto: "Cada componente avisa o mediador quando algo muda — sem conhecer os outros." },
+        { titulo: "Mediador recebe", texto: "O centro concentra as regras: quem limpa o quê, quem habilita o botão." },
+        { titulo: "Coordena os demais", texto: "A partir do aviso, o mediador atualiza os colegas necessários." },
+        { titulo: "Reaproveitar", texto: "O mesmo Campo serve em outro diálogo: a regra de interação fica no mediador daquela tela." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [
@@ -321,6 +350,20 @@ mediador.notificar(this, "clique");`,
             "Propagações em cadeia podem gerar laços (o gráfico ajusta a tabela, que reajusta o gráfico) — o mediador precisa de proteção contra reentrância, algo que raramente se prevê na primeira versão.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O mediador que os colegas ignoram",
+      comoSeParece:
+        "O mediador está no diagrama, mas o campo ainda segura referência ao colega e aplica a regra 'só neste caso'. A teia volta; o centro vira burocracia.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Ao reusar o campo", efeito: "Ele carrega dependências do diálogo antigo e não compila sozinho." },
+        { quando: "Ao mudar a regra", efeito: "Parte vive no mediador, parte no colega — as duas saem de sincronia." },
+        { quando: "No teste", efeito: "Testar um Campo exige montar os colegas que ele ainda conhece." },
+      ],
+      correcao:
+        "Colega só notifica; regra de interação só no mediador. Se a exceção 'direta' parecer inevitável, a fronteira do mediador está errada — não a regra do padrão.",
     },
     {
       tipo: "armadilhas",

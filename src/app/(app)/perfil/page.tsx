@@ -28,6 +28,7 @@ function rotuloEvento(tipo: string): string {
     noConcluido: "Nó concluído",
     desafioResolvido: "Desafio resolvido",
     bonusPrimeiraDoDia: "Bônus do dia",
+    bau: "Baú de recompensas",
   };
   return mapa[tipo] ?? tipo;
 }

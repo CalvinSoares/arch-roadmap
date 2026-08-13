@@ -1,4 +1,8 @@
-import type { RoadmapSection, ProgressoNo } from "@/shared/types/roadmap";
+import type {
+  RoadmapSection,
+  ProgressoNo,
+  RecursoRoadmap,
+} from "@/shared/types/roadmap";
 
 /**
  * Jornada (P1) — a trilha de jogo derivada de um roadmap. Seções viram
@@ -18,6 +22,10 @@ export interface NoJornada {
   titulo: string;
   /** slug do conceito, quando o nó abre uma página de conceito. */
   conceito?: string;
+  /** Contexto do nó de checkpoint (sem conceito) — mostrado antes de concluir. */
+  descricao?: string;
+  /** Links curados de um checkpoint de leitura (sem conceito). */
+  recursos?: RecursoRoadmap[];
   estado: EstadoNo;
 }
 
@@ -49,7 +57,14 @@ export function montarJornada(
             ? "current"
             : "locked";
       pos++;
-      return { id: it.id, titulo: it.titulo, conceito: it.conceito, estado };
+      return {
+        id: it.id,
+        titulo: it.titulo,
+        conceito: it.conceito,
+        descricao: it.descricao,
+        recursos: it.recursos,
+        estado,
+      };
     }),
   }));
 }

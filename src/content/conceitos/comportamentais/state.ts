@@ -120,6 +120,24 @@ class Enviado(EstadoPedido):
   },
 ];
 
+const ANTI_EXEMPLO = `interface EstadoPedido {
+  avancar(p: Pedido): void;
+  cancelar(p: Pedido): void;
+}
+
+class Pedido {
+  estado: EstadoPedido = new Novo();
+  avancar() { this.estado.avancar(this); }
+  cancelar() { this.estado.cancelar(this); }
+}
+
+// As classes de estado existem... e o cliente fura a maquina:
+const pedido = new Pedido();
+pedido.estado = new Enviado(); // pulou o pagamento
+
+// Transicao invalida virou assignment. O State virou Strategy
+// acidental: quem troca o estado e quem esta do lado de fora.`;
+
 export const state: Conceito = {
   slug: "state",
   titulo: "State",
@@ -300,6 +318,55 @@ pedido.estado.pagar(pedido); // delega`,
             "Eventos assíncronos podem chegar 'atrasados' para um estado que já mudou (o buffer terminou depois do usuário pausar) — cada estado precisa decidir conscientemente o que ignorar.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como montar a máquina",
+      passos: [
+        {
+          titulo: "Listar estados e operações",
+          texto:
+            "Quais situações o objeto vive e quais operações mudam de comportamento nelas. Isso vira a interface de estado.",
+        },
+        {
+          titulo: "Uma classe por estado",
+          texto:
+            "Cada estado implementa as operações — inclusive para recusar. Recusar também é comportamento explícito.",
+        },
+        {
+          titulo: "Delegar no contexto",
+          texto:
+            "O Pedido (ou Player) guarda o estado atual e só repassa. Nenhum `if (status === ...)` no contexto.",
+        },
+        {
+          titulo: "Deixar o estado transicionar",
+          texto:
+            "Quem decide o próximo é o estado atual (`p.mudarPara(new Pago())`), não o cliente. Assignment externo fura a máquina.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O State que o cliente troca na mão",
+      comoSeParece:
+        "Há classes Novo/Pago/Enviado e o contexto delega — mas `pedido.estado` é público e o chamador atribui o próximo estado. A máquina existe no diagrama e é ignorada no código.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "No fluxo feliz",
+          efeito: "Dá para pular de Novo para Enviado sem pagar — transição inválida virou uma linha.",
+        },
+        {
+          quando: "Na auditoria",
+          efeito: "Não há registro de quem autorizou a mudança; o histórico da máquina some.",
+        },
+        {
+          quando: "No teste",
+          efeito: "É preciso lembrar de setar estados 'impossíveis' para cobrir bugs que a máquina deveria tornar incompiláveis ou impossíveis.",
+        },
+      ],
+      correcao:
+        "Esconda o ponteiro: só os estados concretos chamam `mudarPara`. O cliente chama `avancar()`/`cancelar()` e nunca escolhe o sucessor — senão virou Strategy com nome errado.",
     },
     {
       tipo: "refatoracao",

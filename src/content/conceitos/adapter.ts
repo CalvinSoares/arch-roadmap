@@ -73,6 +73,23 @@ class EmailAdapter implements Notificador {
   },
 ];
 
+const ANTI_EXEMPLO = `// "Temos Adapter"... e os tipos do SDK vazaram pela interface alvo.
+import type { SdkPayload, SdkReceipt } from "sdk-email";
+
+interface Notificador {
+  enviar(payload: SdkPayload): SdkReceipt; // <- dominio fala SDK
+}
+
+class EmailAdapter implements Notificador {
+  constructor(private sdk: SdkEmail) {}
+  enviar(payload: SdkPayload) {
+    return this.sdk.dispatch(payload); // repasse, nao traducao
+  }
+}
+
+// Todo cliente importa SdkPayload. Trocar de fornecedor
+// espalha mudanca pelo sistema inteiro — o adaptador nao isolou nada.`;
+
 export const adapter: Conceito = {
   slug: "adapter",
   titulo: "Adapter",
@@ -267,6 +284,55 @@ const repo = { salvar: (p) => sdkExterno.persist(paraDto(p)) };`,
             "A tradução tem custo real de manutenção — cada mudança do legado exige atualizar o adaptador — e mapeamentos semânticos errados na borda corrompem silenciosamente o modelo novo.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como adaptar sem contaminar",
+      passos: [
+        {
+          titulo: "Fixar a interface alvo",
+          texto:
+            "Escreva o contrato no vocabulário do domínio (`enviar(mensagem)`), sem nenhum tipo do SDK. Esse é o lado estável.",
+        },
+        {
+          titulo: "Embrulhar o incompatível",
+          texto:
+            "O adaptador implementa o alvo e recebe o SDK por construtor. Por dentro, traduz nomes, formatos e erros.",
+        },
+        {
+          titulo: "Injetar no cliente",
+          texto:
+            "Quem usa depende só da interface alvo. Trocar de fornecedor vira trocar o adaptador injetado — zero diff nos casos de uso.",
+        },
+        {
+          titulo: "Manter o adaptador fino",
+          texto:
+            "Só tradução. Regra de negócio aqui some quando o fornecedor muda — e a decisão precisa viver no domínio.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O Adapter que vaza o SDK",
+      comoSeParece:
+        "Existe uma classe chamada Adapter e uma interface alvo — mas a assinatura carrega `SdkPayload` e `SdkReceipt`. O tradutor virou repasse; o domínio continua falando a língua do fornecedor.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Ao trocar de fornecedor",
+          efeito: "Todos os clientes que montam `SdkPayload` precisam mudar — o isolamento era só de nome.",
+        },
+        {
+          quando: "No import",
+          efeito: "Arquivos de domínio importam tipos do SDK; a fronteira anticorrupção não existe.",
+        },
+        {
+          quando: "No teste",
+          efeito: "O falso precisa fabricar objetos do fornecedor real, em vez de mensagens do domínio.",
+        },
+      ],
+      correcao:
+        "A interface alvo usa apenas tipos seus: `enviar(mensagem: string): void`. Conversão completa — ida e volta, inclusive de erros — é o trabalho do adaptador.",
     },
     {
       tipo: "armadilhas",

@@ -22,6 +22,16 @@ const frete = pedido.calcularFrete();   // pedido decide como, com seus internos
   },
 ];
 
+const ANTI_EXEMPLO = `// "Corrigiu" Demeter com metodos-repasse — a cadeia so mudou de lugar.
+class Pedido {
+  getCidadeDoCliente() {
+    return this.cliente.getEndereco().getCidade(); // ainda conhece tudo
+  }
+}
+
+const cidade = pedido.getCidadeDoCliente();
+// Quem chama nao ve pontos. Pedido ainda acopla a Cliente>Endereco>Cidade.`;
+
 export const leiDeDemeter: Conceito = {
   slug: "lei-de-demeter",
   titulo: "Lei de Deméter",
@@ -137,6 +147,55 @@ pedido.cidadeEntrega(); // em vez de getCliente().getEndereco()...`,
             "A conta ficou menos 'transparente' — não dá mais para mexer no saldo por fora. É exatamente o ponto: o encapsulamento voltou, e a invariante deixou de depender da disciplina de cada chamador.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como aplicar tell, don't ask",
+      passos: [
+        {
+          titulo: "Caçar o trem de getters",
+          texto:
+            "`a.getB().getC().getD()` atravessando objetos diferentes é o sintoma. Cada ponto a mais é acoplamento à estrutura alheia.",
+        },
+        {
+          titulo: "Perguntar quem decide",
+          texto:
+            "Se o chamador puxa dados para decidir, a decisão está no lugar errado. Migre a regra para o dono do dado.",
+        },
+        {
+          titulo: "Expor o que fazer, não o miolo",
+          texto:
+            "`pedido.calcularFrete()` ou `conta.debitar(valor)` — o objeto usa os próprios internos; quem chama fala só com o amigo próximo.",
+        },
+        {
+          titulo: "Evitar o mar de wrappers",
+          texto:
+            "Métodos-repasse (`getCidadeDoCliente`) escondem a cadeia sem remover o acoplamento. Se o meio ainda conhece toda a estrutura, Deméter não foi cumprida.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A Deméter que só escondeu os pontos",
+      comoSeParece:
+        "A cadeia sumiu do chamador: agora é `pedido.getCidadeDoCliente()`. Parece limpo — mas o método-repasse ainda navega `cliente → endereço → cidade`. O acoplamento mudou de endereço, não sumiu.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Ao mudar endereço",
+          efeito: "Pedido quebra junto: ele ainda conhece a estrutura interna que o wrapper fingiu esconder.",
+        },
+        {
+          quando: "Na interface",
+          efeito: "Surge um getter por campo distante (`getCepDoCliente`, `getUfDoCliente`) — a fachada engorda sem encapsular de verdade.",
+        },
+        {
+          quando: "No frete",
+          efeito: "Quem calcula ainda depende da forma do cadastro; a regra não migrou para o dono do dado.",
+        },
+      ],
+      correcao:
+        "Tell, don't ask: `pedido.calcularFrete()` (ou equivalente) carrega a decisão. Não exponha a estrutura — peça ao objeto que faça o trabalho com ela.",
     },
     {
       tipo: "armadilhas",

@@ -130,6 +130,32 @@ h.desfazer()`,
   },
 ];
 
+const ANTI_EXEMPLO = `interface Comando {
+  executar(): void;
+  desfazer(): void;
+}
+
+// O comando NAO congela os dados na criacao.
+class ColarTexto implements Comando {
+  constructor(private doc: Documento) {}
+
+  executar(): void {
+    const pos = cursor.atual();           // le estado externo AGORA
+    const trecho = clipboard.ler();
+    this.doc.texto =
+      this.doc.texto.slice(0, pos) + trecho + this.doc.texto.slice(pos);
+  }
+
+  desfazer(): void {
+    const pos = cursor.atual();           // le DE NOVO — posicao diferente
+    // recorta no lugar errado; o documento corrompe
+    this.doc.texto = this.doc.texto.slice(0, pos);
+  }
+}
+
+// Ctrl+Z apos mover o cursor desfaz outra coisa. Comando virou
+// "chame o servico depois" — nao um registro do que aconteceu.`;
+
 export const command: Conceito = {
   slug: "command",
   titulo: "Command",
@@ -353,6 +379,55 @@ historico.at(-1).executar();`,
             "O catálogo vira uma superfície pública que precisa de estabilidade: renomear o id de um comando quebra os atalhos que o usuário configurou e as extensões que dependem dele.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como objetivar a ação",
+      passos: [
+        {
+          titulo: "Congelar dados na criação",
+          texto:
+            "Receptor, posição, texto, usuário — tudo que a operação precisa entra no construtor. Nada de reler cursor ou clipboard no desfazer.",
+        },
+        {
+          titulo: "Implementar executar e desfazer",
+          texto:
+            "Os dois são simétricos: desfazer deve restaurar exatamente o estado anterior. Teste com sequência aleatória e compare byte a byte.",
+        },
+        {
+          titulo: "Empilhar no invocador",
+          texto:
+            "Histórico, fila ou botão conhecem só a interface `Comando`. Disparam sem saber qual concreta está na mão.",
+        },
+        {
+          titulo: "Disparar pelos gatilhos",
+          texto:
+            "Menu, atalho e API criam o mesmo objeto de comando. Remapear é trocar quem aponta para o id — não reimplementar a ação.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O Command que relê o mundo no desfazer",
+      comoSeParece:
+        "Existe `executar`/`desfazer` e uma pilha de histórico — mas o comando consulta cursor e clipboard de novo na hora de reverter. Ele não registrou o que aconteceu; só adiaria a chamada.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Após mover o cursor",
+          efeito: "Ctrl+Z recorta no lugar errado e o documento corrompe em silêncio.",
+        },
+        {
+          quando: "Na fila assíncrona",
+          efeito: "O worker executa com clipboard/usuário diferentes dos do momento da intenção — a ação muda de significado.",
+        },
+        {
+          quando: "No teste de propriedade",
+          efeito: "Executar e desfazer N vezes não devolve o estado inicial; a suíte acusa assimetria.",
+        },
+      ],
+      correcao:
+        "Trate o comando como registro imutável do que foi pedido: capture posição e trecho na criação. `desfazer` usa só o que está guardado no objeto — nunca o estado volátil atual.",
     },
     {
       tipo: "armadilhas",

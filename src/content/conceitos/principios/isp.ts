@@ -124,6 +124,20 @@ imprimir_relatorio(Multifuncional())`,
   },
 ];
 
+const ANTI_EXEMPLO = `interface Imprimivel { imprimir(doc: string): void; }
+interface Digitalizavel { digitalizar(): string; }
+interface Faxeavel { enviarFax(n: string): void; }
+
+// "Segregamos as interfaces"... e o cliente pede o combo inteiro.
+type MaquinaCompleta = Imprimivel & Digitalizavel & Faxeavel;
+
+function imprimirRelatorio(m: MaquinaCompleta): void {
+  m.imprimir("relatorio"); // so precisava de Imprimivel
+}
+
+// ImpressoraSimples nao encaixa mais. Voltou a obrigacao de
+// digitalizar e fax — so que agora com tres tipos no caminho.`;
+
 export const isp: Conceito = {
   slug: "isp",
   titulo: "ISP — Segregação de Interfaces",
@@ -361,6 +375,55 @@ interface Legivel { ler(id: string): Promise<T>; }`,
             "O código que escolhe o canal dinamicamente precisa lidar com capacidades variáveis, e a lógica de fallback ('se não suportar anexo, mande o link') tem de morar em algum lugar.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como segregar sem atomizar",
+      passos: [
+        {
+          titulo: "Olhar pelos clientes",
+          texto:
+            "Liste quem consome a interface e quais métodos cada um chama. Subconjuntos disjuntos são o sinal de que há mais de um contrato escondido.",
+        },
+        {
+          titulo: "Cortar por capacidade",
+          texto:
+            "Uma interface por papel (`Imprimivel`, `Digitalizavel`), não por objeto do mundo. Nome de capacidade impede a gordura de voltar.",
+        },
+        {
+          titulo: "Assinar só o que se cumpre",
+          texto:
+            "Cada implementação pega apenas as interfaces que honra de verdade. 'Não suportado' deixa de ser opção — vira erro de tipo.",
+        },
+        {
+          titulo: "Pedir o mínimo no cliente",
+          texto:
+            "Quem só imprime depende só de `Imprimivel`. Reunir tudo de novo com interseção no parâmetro desfaz a segregação.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A segregação que o cliente desfaz",
+      comoSeParece:
+        "As interfaces pequenas existem no papel. O cliente, porém, exige a interseção de todas — e a impressora simples volta a ficar de fora. ISP aplicado na declaração, anulado no uso.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Ao plugar impressora simples",
+          efeito: "O tipo não aceita: o chamador pediu fax e scanner que nunca vai usar.",
+        },
+        {
+          quando: "Na mudança do fax",
+          efeito: "Quem só imprime recompila e revisa de novo — o acoplamento que a segregação deveria cortar voltou pela assinatura do cliente.",
+        },
+        {
+          quando: "Na implementação",
+          efeito: "Alguém reintroduz `throw new Error('não suportado')` só para satisfazer o combo exigido pelo cliente.",
+        },
+      ],
+      correcao:
+        "O parâmetro do cliente deve ser o menor contrato que ele usa: `Imprimivel`. Composição de interfaces fica no objeto que realmente tem várias capacidades, não em quem chama um método só.",
     },
     {
       tipo: "armadilhas",

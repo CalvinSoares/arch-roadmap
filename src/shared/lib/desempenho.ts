@@ -32,7 +32,8 @@ export function totais(d: DesempenhoQuiz): TotaisDesempenho {
   let acertos = 0;
   let erros = 0;
   let conceitos = 0;
-  for (const v of Object.values(d)) {
+  for (const [slug, v] of Object.entries(d)) {
+    if (slug.startsWith("checkpoint:") || slug.startsWith("revisao:")) continue;
     acertos += v.acertos;
     erros += v.erros;
     if (v.acertos + v.erros > 0) conceitos++;
@@ -60,6 +61,8 @@ export function pontosFracos(
 ): PontoFraco[] {
   const out: PontoFraco[] = [];
   for (const [slug, v] of Object.entries(d)) {
+    // Checkpoints da jornada não são verbetes — fora de "pontos fracos".
+    if (slug.startsWith("checkpoint:") || slug.startsWith("revisao:")) continue;
     if (v.erros <= 0) continue;
     const total = v.acertos + v.erros;
     out.push({

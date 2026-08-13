@@ -34,7 +34,13 @@ export const NOVIDADES: Novidade[] = [
     titulo: "Prática: código errado, entrevista e lab de falha",
     resumo:
       "O plano de profundidade fecha com superfícies onde se erra de propósito: trechos tortos para diagnosticar, entrevista de código ao lado do system design, lab de falha com baseline e proteções, e postmortems jogáveis.",
+    conceitos: ["encapsulamento", "polimorfismo"],
     mudancas: [
+      {
+        tipo: "conteudo",
+        texto:
+          "Fundamentos OOP na trilha de Padrões: Encapsulamento e Polimorfismo viram verbetes jogáveis (antes eram só checkpoints de texto).",
+      },
       {
         tipo: "novo",
         texto:

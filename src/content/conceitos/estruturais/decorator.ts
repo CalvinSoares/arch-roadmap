@@ -272,6 +272,16 @@ const cliente = comCache(comRetry(clienteBase));`,
         "A mesma pilha vista por dentro: cada decorator embrulha o anterior, e o objeto original fica no centro sem ter sido modificado. Trocar a ordem das cascas troca a ordem dos efeitos.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Contrato comum", texto: "Componente e decorators implementam a mesma interface — são intercambiáveis." },
+        { titulo: "Uma responsabilidade por camada", texto: "Cada decorator adiciona um extra e delega ao interno." },
+        { titulo: "Empilhar em runtime", texto: "Monte a ordem na composição: new ComA(new ComB(base))." },
+        { titulo: "Cliente chama a interface", texto: "Quem usa não sabe quantas camadas existem — só o contrato." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [

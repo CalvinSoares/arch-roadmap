@@ -130,6 +130,19 @@ print(regra.interpretar({"plano": "pro", "regiao": "norte", "bloqueado": "nao"})
   },
 ];
 
+const ANTI_EXEMPLO = `class Campo implements Expressao {
+  constructor(private nome: string, private valor: string) {}
+
+  async interpretar(ctx: Contexto): Promise<boolean> {
+    // "Terminal" que consulta o banco a cada folha
+    const atual = await db.ler(this.nome);
+    return atual === this.valor;
+  }
+}
+
+// Avaliar a arvore vira cascata de I/O; curto-circuito de E/OU
+// muda quantas queries rodam. Terminal deve so ler o contexto.`;
+
 export const interpreter: Conceito = {
   slug: "interpreter",
   titulo: "Interpreter",
@@ -358,6 +371,55 @@ const n = parse("a AND b").avaliar(ctx);`,
             "Serializar a árvore cria um formato persistido: renomear um operador ou mudar sua semântica quebra os filtros que os usuários salvaram meses atrás.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como montar o Interpreter",
+      passos: [
+        {
+          titulo: "Delimitar a gramática",
+          texto:
+            "Poucas regras estáveis (E, OU, NÃO, comparação). Se a linguagem tende a crescer sem freio, prefira uma engine pronta.",
+        },
+        {
+          titulo: "Uma classe por regra",
+          texto:
+            "Terminais leem o contexto; não-terminais combinam filhos. Cada operador novo é uma classe — não um ramo num switch.",
+        },
+        {
+          titulo: "Montar a árvore",
+          texto:
+            "A frase vira objetos aninhados (parser ou UI). Avaliar é chamar `interpretar` na raiz e deixar a recursão descer.",
+        },
+        {
+          titulo: "Manter terminais puros",
+          texto:
+            "Folhas só leem o contexto já carregado. I/O, banco ou API no terminal destroem previsibilidade e curto-circuito.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O terminal que consulta o banco",
+      comoSeParece:
+        "A gramática existe (Campo, E, OU) — mas o terminal faz `await db.ler` a cada folha. A árvore deixou de ser avaliação previsível e virou cascata de I/O.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "No curto-circuito",
+          efeito: "E/OU muda quantas queries rodam conforme a ordem dos ramos — custo e side effects imprevisíveis.",
+        },
+        {
+          quando: "No teste",
+          efeito: "Avaliar uma expressão exige banco (ou mock) em cada folha; a regra deixa de ser dado puro.",
+        },
+        {
+          quando: "Na auditoria",
+          efeito: "Explicar 'por que entrou' fica opaco: o resultado depende do estado do banco no instante da folha.",
+        },
+      ],
+      correcao:
+        "Carregue o contexto antes; terminais só comparam o que já está em memória. Se precisar de dados externos, resolva na borda — não dentro da árvore.",
     },
     {
       tipo: "armadilhas",

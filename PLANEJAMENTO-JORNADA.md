@@ -86,8 +86,94 @@ Mínimo, na filosofia "conteúdo em Git, só estado no banco":
 3. **P3 — Estrelas + animações** ✅ estrelas (precisão) persistidas em localStorage
    e exibidas nos nós; framer-motion: path desenhando (pathLength), pop dos nós em
    cascata, burst de estrelas ao concluir; respeita `prefers-reduced-motion`.
-4. **P4 — Polimento:** estrelas no servidor (`jornada_estado`), nós "lendários",
-   meta diária (anel), checkpoints de revisão, som/haptics leves.
+4. **P4 — Polimento** ✅: estrelas no servidor (`jornada_estado`, híbrido
+   local+conta), nós **lendários** (3★ → coroa + glow), **meta diária** (anel de XP,
+   só logado), **haptics** leves (navigator.vibrate), **checkpoints de revisão**
+   (decoração por unidade → `modo="revisao"`) e **som** Web Audio com mute.
+5. **P5 — Interatividade & revisão de erros** ✅: **erro volta no fim da lição**
+   (fila de repetição estilo Duolingo — só fecha com tudo certo; selo "Erro
+   anterior"); estrelas pela *limpeza* (0 erros = 3★); **replay** de nós concluídos
+   (bolha "Praticar" no hover) + **Refazer trilha** (reset local com confirmação;
+   XP do ledger fica); transições animadas entre perguntas, shake no erro,
+   estrelas em cascata, count-up de XP, "Praticar de novo" na tela final; layout
+   consertado (bolha × banner medido no browser, rótulos responsivos,
+   overflow-x-clip). Guard de clique-duplo no "Continuar" (bug real achado no smoke).
+
+## 7.1 Próximas fases — redesign do path (análise Duolingo)
+
+O que faz o path do Duolingo funcionar (e o nosso parecer genérico): nós são
+**botões 3D** (disco chapado + borda de espessura escura embaixo, que afunda ao
+apertar), futuro é **cinza neutro** (estrela apagada — cadeado só no tooltip),
+só o ativo tem cor + bolha START **balançando continuamente**, decorações com
+propósito (baú de recompensa, troféu de fim de unidade) quebram a monotonia, e o
+header da seção fica **fixo** enquanto se rola a unidade.
+
+- **P6 — Redesign 3D do path** ✅: nós-botão com espessura e press físico
+  (box-shadow rim + `group-active:translate-y`); estados repensados (ativo
+  colorido + START com bob contínuo, futuro cinza com estrela apagada — sem
+  cadeado, concluído dourado com check, lendário coroa); banner de unidade
+  **sticky** em fluxo (verificado pinando em 64px); baú no meio e troféu no fim
+  de cada unidade (acendem quando alcançados; recompensa real fica pra P8).
+  **Polish pós-feedback**: **linhas removidas** de vez (Duolingo não tem — o SVG
+  inteiro saiu); nós **ancorados pelo topo do disco** (a âncora no botão inteiro
+  deixava a altura variável do rótulo empurrar a bolha COMEÇAR pra cima do
+  banner — causa-raiz das sobreposições); entrada por **scroll** (`whileInView`)
+  em vez de cascata no load; banner virou **cartão tingido** pela cor da unidade
+  (legível nos 2 temas, sem branco sobre pastel); rótulos 13px semibold com
+  hierarquia por estado (atual aceso, futuro apagado). Medido no browser: 110px
+  de folga bolha×banner, 0 colisões rótulo×disco, 0 linhas, pops disparando no
+  scroll (opacity 0→1), console limpo.
+- **P6.2 — Identidade DevMappa** ✅ (pós-feedback "está igual demais ao
+  Duolingo"): nós viraram **squircles** (rounded-22px — a forma da marca: logo e
+  medalhão de nível), **marco numerado** em mono no canto de cada nó (jeito mapa
+  de engenharia), ícone **semântico** (checkpoint de leitura = BookOpen; lição =
+  estrela), **glow ambiente** no nó atual (a linguagem de brilho do site),
+  contador `x/y` no banner de cada unidade. Cursor: regra global em
+  `@layer base` devolve o pointer aos botões (Tailwind v4 tirou), sem atropelar
+  `cursor-not-allowed` (aprendizado: CSS sem layer vence utilities por ordem de
+  camada — a regra TEM que viver em `@layer base`).
+- **P7 — Rail lateral de jogo (desktop)** ✅: grid
+  `lg:grid-cols-[minmax(0,1fr)_320px]` com `aside` sticky (top-20): meta diária,
+  **missões do dia** com barras (action enxuta `missoesDeHoje` em status.ts),
+  atalhos Liga/Amigos/Perfil; anônimo vê convite de conta no lugar
+  ("login é acréscimo"). Mobile: meta diária no topo (lg:hidden), rail some.
+- **P8 — Recompensas de verdade** ✅: baú concede recompensa **servidor-autoritativa
+  e idempotente** — `abrirBau(slug, seção)` confere no `progresso` da conta que o
+  nó do meio foi concluído, credita via ledger (`bau:<slug>:<seção>` → +25 XP) e
+  **+1 freeze** pega carona na idempotência do evento (só incrementa quando o
+  INSERT acontece); reabrir nunca paga de novo. `bausAbertos` lê o ledger p/ o
+  estado "coletado ✓". Troféu vira botão com **confete** (14 partículas) ao
+  fechar a unidade e no clique. Anônimo: baú/troféu clicáveis com toast de
+  convite (servidor nem é chamado). Rótulo "bau" no histórico do perfil.
+  Verificado no browser: troféu 14 partículas + toast, baú ativo → guard
+  anônimo "Entre para coletar", **0 sobreposições** entre 49 elementos, sem
+  scroll horizontal, console limpo. Correção de layout junto: decorações usam
+  `ladoOposto` (o espelho 100−x caía sobre o nó perto do centro) e ROW_H 128→150
+  + AMP/FASE ajustados — some a sobreposição de discos do print.
+
+## 7.2 Qualidade da pergunta (pós-path)
+
+O path/baú/rail já está “pronto de produto”. O que falta — e o que mais afeta
+confiança — é **a pergunta valer a pena**.
+
+- **P0 — Confiança no XP/desempenho** ✅: replay (“praticar de novo” / nó já
+  feito) **não credita** XP de quiz; toasts `+XP` mid-lição silenciados na
+  jornada (nível ainda celebra); chaves `checkpoint:…` **fora** do mapa de
+  desempenho / pontos fracos.
+- **P1 — Anti-hollow nas lições de conceito** ✅: `gerarDesafiosLicao` +
+  `desafioOco` barram VF-de-resumo, lacuna-de-título e “se chama”; preferem
+  dois-códigos / ordenar / MCQ do quiz.
+- **P2 — Profundidade de checkpoint** ✅: ≥3 desafios curados por nó; recursos
+  externos na UI da lição; `descricao` nos nós FE/BE magros.
+- **P3 — Polimento** ✅ (esta leva): bolha “Praticar” também em checkpoint;
+  estrelas mais rígidas em lição curta; parear/ordenar com progresso, limpar e
+  feedback visual mais claro.
+- **P4 leftover — Revisão + som** ✅: decoração de revisão por unidade (abre
+  `modo="revisao"` com `slugsFracos`); som Web Audio (acerto/erro/conclusão) com
+  mute persistente e acorde curto sob `prefers-reduced-motion`.
+
+Regra permanente: pergunta testa **ideia**, não o rótulo do nó. Specs em
+`desafios.spec.ts` / `checkpoints.spec.ts` / `desempenho.spec.ts` guardam isso.
 
 ## 8. Decisões em aberto (o que preciso de você)
 

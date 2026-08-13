@@ -136,6 +136,31 @@ print(ed)  # "" (cursor 0)`,
   },
 ];
 
+const ANTI_EXEMPLO = `class Editor {
+  texto = "";
+  cursor = 0;
+  digitar(t: string) { this.texto += t; this.cursor = this.texto.length; }
+}
+
+class Historico {
+  private pilha: { texto: string; cursor: number }[] = [];
+
+  // O zelador bisbilhota os campos do originador.
+  guardar(ed: Editor) {
+    this.pilha.push({ texto: ed.texto, cursor: ed.cursor });
+  }
+
+  voltar(ed: Editor) {
+    const m = this.pilha.pop();
+    if (!m) return;
+    ed.texto = m.texto;
+    ed.cursor = m.cursor;
+  }
+}
+
+// Campos internos viraram API do historico.
+// Renomear cursor no Editor quebra o Historico.`;
+
 export const memento: Conceito = {
   slug: "memento",
   titulo: "Memento",
@@ -279,6 +304,16 @@ editor.restaurar(snap);`,
         "A troca é encapsulamento por espaço. Quando o estado é pequeno, é quase de graça; quando é grande, o padrão continua certo mas pede política de retenção.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Originador captura", texto: "O objeto produz um memento com o mínimo necessário para restaurar — campos continuam privados." },
+        { titulo: "Zelador guarda", texto: "O histórico empilha o instantâneo sem ler o conteúdo (caixa-preta)." },
+        { titulo: "Estado muda", texto: "O originador segue editando; o passado fica congelado no memento." },
+        { titulo: "Restaurar", texto: "O zelador devolve o memento; só o originador sabe remontar o estado a partir dele." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [
@@ -355,6 +390,20 @@ editor.restaurar(snap);`,
             "O snapshot vira formato persistido e ganha o problema de versionamento: mudar o estado interno do agregado exige conseguir ler os instantâneos antigos ou descartá-los e reprocessar tudo.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O histórico que bisbilhota o editor",
+      comoSeParece:
+        "Em vez do editor entregar um memento opaco, o histórico lê e escreve os campos públicos. O encapsulamento morreu; a estrutura interna virou contrato do undo.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Ao renomear um campo", efeito: "O histórico (e qualquer snapshot em disco) quebra junto — o interno virou API." },
+        { quando: "Ao evoluir o estado", efeito: "Cada campo novo precisa ser lembrado em dois lugares: originador e zelador." },
+        { quando: "Na revisão", efeito: "Campos públicos 'para o undo' são o cheiro de memento invertido." },
+      ],
+      correcao:
+        "Originador expõe `salvar()` / `restaurar(m)`. Zelador só guarda e devolve. Se a UI precisa de rótulo no histórico, o originador fornece um resumo — não abre a caixa.",
     },
     {
       tipo: "armadilhas",

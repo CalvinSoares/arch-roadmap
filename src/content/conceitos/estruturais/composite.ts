@@ -113,6 +113,32 @@ print(raiz.tamanho())  # 6264`,
   },
 ];
 
+const ANTI_EXEMPLO = `interface No {
+  tamanho(): number;
+  adicionar(no: No): void; // na interface "transparente"
+}
+
+class Arquivo implements No {
+  constructor(private bytes: number) {}
+  tamanho() { return this.bytes; }
+  adicionar(_no: No) {
+    throw new Error("arquivo nao tem filhos"); // <- Liskov quebrado
+  }
+}
+
+class Pasta implements No {
+  private filhos: No[] = [];
+  adicionar(no: No) { this.filhos.push(no); }
+  tamanho() {
+    return this.filhos.reduce((t, f) => t + f.tamanho(), 0);
+  }
+}
+
+// O cliente "trata tudo igual"... ate chamar adicionar numa folha.
+function montar(raiz: No, filho: No) {
+  raiz.adicionar(filho); // explode se raiz for Arquivo
+}`;
+
 export const composite: Conceito = {
   slug: "composite",
   titulo: "Composite",
@@ -244,6 +270,16 @@ pasta.tamanho(); // soma os filhos`,
         "A árvore é o padrão. Chamar tamanho() na raiz desce até as folhas e volta somando — e o cliente que fez a chamada não escreveu nenhuma recursão.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Definir a interface", texto: "Declare as operações de negócio que valem para folha e grupo (ex.: tamanho())." },
+        { titulo: "Implementar a folha", texto: "O item indivisível faz o trabalho real — é onde a recursão termina." },
+        { titulo: "Implementar o composto", texto: "Guarda filhos, delega a operação e combina os resultados (soma, concatena…)." },
+        { titulo: "Chamar na raiz", texto: "O cliente opera sobre a interface comum; a profundidade da árvore fica encapsulada." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [
@@ -320,6 +356,20 @@ pasta.tamanho(); // soma os filhos`,
             "Descontos aninhados compõem de formas surpreendentes (desconto sobre desconto) e estoque de kit depende do estoque de todos os filhos — regras que a recursão simples não expressa e que acabam num serviço à parte.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A folha que mente no contrato",
+      comoSeParece:
+        "Para 'tratar tudo igual', `adicionar` entra na interface comum. A folha implementa com `throw`. O polimorfismo vira armadilha: o tipo promete o que a folha não cumpre.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Na montagem", efeito: "Um cast errado ou um nó trocado explode longe de onde a árvore foi construída." },
+        { quando: "No teste", efeito: "Testar o cliente exige garantir que ninguém chama adicionar em folha — o contrato não protege." },
+        { quando: "Na revisão", efeito: "UnsupportedOperation na folha é cheiro clássico de Liskov violado de propósito." },
+      ],
+      correcao:
+        "Versão segura: `adicionar` só no composto; quem monta a árvore já conhece o tipo. Ou aceite que a folha trate filhos de forma sensata — nunca com throw como contrato.",
     },
     {
       tipo: "armadilhas",

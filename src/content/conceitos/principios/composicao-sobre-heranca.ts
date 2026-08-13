@@ -40,6 +40,22 @@ function usePaginacao(total: number) { /* ... */ }`,
   },
 ];
 
+const ANTI_EXEMPLO = `// Parece composicao: tem um Logger. Mas ainda ESTENDE ServicoBase
+// so para herdar salvar() e validar().
+class PedidoService extends ServicoBase {
+  constructor(private log: Logger) {
+    super();
+  }
+  criar(dados: Pedido) {
+    this.validar(dados); // herdado
+    this.salvar(dados);  // herdado
+    this.log.info("ok");
+  }
+}
+
+// Mudar ServicoBase quebra PedidoService. A peca Logger nao
+// salvou o acoplamento — so mascarou a heranca de reuso.`;
+
 export const composicaoSobreHeranca: Conceito = {
   slug: "composicao-sobre-heranca",
   titulo: "Composição sobre herança",
@@ -181,6 +197,55 @@ class PedidoService { constructor(private log: Logger) {} }`,
             "Cada tela ficou com alguns imports a mais em vez de herdar tudo de graça. Em troca, mexer numa utilidade deixou de ter potencial de quebrar telas que nem a usavam.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como preferir composição",
+      passos: [
+        {
+          titulo: "Mapear os eixos",
+          texto:
+            "Liste o que varia de forma independente (como se move, o que come, quem notifica). Cada eixo é candidato a uma peça.",
+        },
+        {
+          titulo: "Extrair a peça",
+          texto:
+            "Uma interface pequena por eixo e implementações encaixáveis. O objeto recebe a peça — não herda o comportamento.",
+        },
+        {
+          titulo: "Delegar, não sobrescrever",
+          texto:
+            "O dono chama a peça. Trocar comportamento em runtime é trocar a peça, sem reabrir a hierarquia.",
+        },
+        {
+          titulo: "Herdar só com 'é um' honesto",
+          texto:
+            "Se o filho não substitui o pai em todo lugar (LSP), a herança está mentindo — composição é o caminho certo.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A composição que ainda herda para reusar",
+      comoSeParece:
+        "Há uma peça injetada (Logger) e o diagrama fala em composição — mas a classe ainda estende uma base só para pegar `salvar` e `validar`. O acoplamento da herança continua; a peça só mascarou.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Ao mudar a base",
+          efeito: "PedidoService quebra mesmo sem tocar no Logger — a herança de reuso ainda amarra.",
+        },
+        {
+          quando: "No teste",
+          efeito: "Testar criar exige montar ServicoBase inteiro; a peça injetada não isolou o que importa.",
+        },
+        {
+          quando: "Na revisão",
+          efeito: "Aparece `extends` 'só por conveniência' sem relação 'é um' — sinal clássico de herança errada.",
+        },
+      ],
+      correcao:
+        "Receba também persistência e validação por composição (ou módulos), não por `extends`. Herde só quando o subtipo for substituível de verdade.",
     },
     {
       tipo: "armadilhas",

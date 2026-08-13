@@ -134,6 +134,16 @@
   border-color: var(--card-border);
 }
 
+/* Tailwind v4 tirou o cursor pointer dos botões; devolvemos — botão clicável
+   deve parecer clicável. Dentro de @layer base: CSS sem layer venceria as
+   utilities (ex.: cursor-not-allowed) por ordem de camada, não de especificidade. */
+@layer base {
+  button:where(:not(:disabled)),
+  [role="button"]:where(:not(:disabled)) {
+    cursor: pointer;
+  }
+}
+
 /* Scrollbar minimalista — fina, discreta, aparece com mais contraste no hover */
 * {
   scrollbar-width: thin;

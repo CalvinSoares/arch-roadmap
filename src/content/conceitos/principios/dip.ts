@@ -112,6 +112,25 @@ print(len(repo.salvos))  # 1`,
   },
 ];
 
+const ANTI_EXEMPLO = `// "Temos DIP": existe uma interface... no pacote de infraestrutura.
+// A seta de dependencia CONTINUA apontando para fora.
+import type { PostgresPedidos } from "../infra/postgres-pedidos";
+
+interface IPostgresPedidos {
+  // espelho da classe concreta — nomes de SQL vazaram
+  executarInsert(row: Record<string, unknown>): void;
+}
+
+class CriarPedido {
+  constructor(private repo: IPostgresPedidos) {} // depende de "infra"
+
+  executar(dados: Record<string, unknown>) {
+    this.repo.executarInsert(dados); // dominio fala SQL disfarçado
+  }
+}
+
+// Trocar de banco ainda toca o caso de uso: a abstração nasceu do lado errado.`;
+
 export const dip: Conceito = {
   slug: "dip",
   titulo: "DIP — Inversão de Dependência",
@@ -355,6 +374,55 @@ constructor(private mail: PortaEmail) {}`,
             "É invasivo: praticamente todo objeto que precisa da data passa a recebê-la, e o código fica mais verboso em troca de determinismo nos testes.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como inverter a seta",
+      passos: [
+        {
+          titulo: "Declarar a porta no domínio",
+          texto:
+            "O caso de uso escreve a interface no vocabulário dele (`salvar(pedido)`), junto dele — não no pacote de infraestrutura.",
+        },
+        {
+          titulo: "Depender só da porta",
+          texto:
+            "O alto nível recebe a abstração por construtor. Nenhum `import` de driver, SDK ou framework entra no caso de uso.",
+        },
+        {
+          titulo: "Implementar o adaptador fora",
+          texto:
+            "Postgres, HTTP e fila implementam o contrato alheio. A seta de compilação aponta da infra para o domínio.",
+        },
+        {
+          titulo: "Injetar na composição",
+          texto:
+            "Produção pluga o adaptador real; teste pluga memória. A montagem é o único lugar que conhece os dois lados.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "A interface no pacote errado",
+      comoSeParece:
+        "Há uma interface, há injeção no construtor, o time diz que 'segue DIP' — mas o contrato vive na infra e fala SQL. A seta nunca inverteu; só ganhou um `I` no nome.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "No import",
+          efeito: "O domínio importa de `../infra` — a dependência ainda aponta para fora.",
+        },
+        {
+          quando: "Ao trocar de banco",
+          efeito: "A interface carrega `executarInsert` e obriga o caso de uso a mudar junto com a tecnologia.",
+        },
+        {
+          quando: "No teste",
+          efeito: "O falso precisa imitar a API do Postgres, não a necessidade do domínio — e diverge em silêncio.",
+        },
+      ],
+      correcao:
+        "Mova a porta para o domínio e reescreva no vocabulário do negócio: `salvar(p: Pedido)`. A infra implementa esse contrato; o caso de uso deixa de saber que Postgres existe.",
     },
     {
       tipo: "armadilhas",

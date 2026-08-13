@@ -231,6 +231,16 @@ await pedidos.confirmar(pedidoId);`,
         "Os três subsistemas ficam atrás da facade, não em fila: ela chama cada um na ordem certa, e nenhum deles conhece os outros. O cliente enxerga uma chamada só.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Identificar a coreografia", texto: "Liste as peças e a ordem que o cliente hoje repete à mão." },
+        { titulo: "Criar a operação de alto nível", texto: "A facade expõe algo como finalizarPedido() com vocabulário de negócio." },
+        { titulo: "Orquestrar por dentro", texto: "Ela chama estoque, pagamento, frete… na ordem certa e traduz erros." },
+        { titulo: "Cliente fala só com a porta", texto: "Uma chamada; o subsistema continua acessível a quem precisa de controle fino." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [

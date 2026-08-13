@@ -20,6 +20,17 @@ const impostoRetido       = salario * 0.1;   // regra fiscal
   },
 ];
 
+const ANTI_EXEMPLO = `// Dois 10% "iguais" — DRY apressado unifica.
+function aplicarDezPorcento(valor: number) {
+  return valor * 0.1;
+}
+
+const descontoRH = aplicarDezPorcento(salario); // politica de RH
+const imposto = aplicarDezPorcento(salario);    // regra fiscal
+
+// Aliquota fiscal vira 12%. Alguem edita a funcao unica.
+// Desconto de RH muda junto. A abstracao acoplou dois mundos.`;
+
 export const dryKissYagni: Conceito = {
   slug: "dry-kiss-yagni",
   titulo: "DRY, KISS e YAGNI",
@@ -135,6 +146,55 @@ export const dryKissYagni: Conceito = {
             "Voltou a existir código parecido em dois lugares. Em troca, cada contexto passou a evoluir sozinho, sem que uma mudança fiscal quebrasse a vitrine.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como aplicar sem exagerar",
+      passos: [
+        {
+          titulo: "Olhar o motivo da mudança",
+          texto:
+            "Dois trechos iguais mudam pelo mesmo motivo? É conhecimento duplicado. Mudam por motivos diferentes? É coincidência — deixe separado.",
+        },
+        {
+          titulo: "Esperar a terceira repetição",
+          texto:
+            "Com uma ou duas ocorrências, ainda não dá para acertar o recorte. Na terceira, o padrão real aparece e a abstração cabe.",
+        },
+        {
+          titulo: "Extrair só o que é a mesma regra",
+          texto:
+            "DRY une conhecimento, não texto. Unifique a regra de negócio compartilhada; não funda RH com fiscal porque ambos são 10%.",
+        },
+        {
+          titulo: "Parar no mínimo que funciona",
+          texto:
+            "KISS e YAGNI: resolva o problema de hoje. Generalize quando o terceiro caso real pedir — não antes.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O DRY que acoplou dois mundos",
+      comoSeParece:
+        "Dois cálculos 'iguais' (desconto de RH e imposto) viram uma função única. O diff ficou menor — e uma mudança fiscal passa a alterar a política de RH sem ninguém pedir.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Na reforma tributária",
+          efeito: "Editar a função compartilhada muda o desconto de RH junto — bug silencioso em outro domínio.",
+        },
+        {
+          quando: "No teste",
+          efeito: "Cobrir fiscal exige raciocinar sobre RH, porque os dois compartilham o mesmo ponto de mudança.",
+        },
+        {
+          quando: "Na revisão",
+          efeito: "O nome genérico (`aplicarDezPorcento`) esconde que há duas regras de negócio distintas atrás.",
+        },
+      ],
+      correcao:
+        "Separe por motivo de mudança: `descontoRH` e `impostoRetido` podem parecer iguais e ainda assim ser conhecimento diferente. Unifique só o que sempre muda junto.",
     },
     {
       tipo: "armadilhas",

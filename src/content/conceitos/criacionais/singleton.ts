@@ -214,6 +214,16 @@ export const pool = criarPool();`,
         "Qualquer ponto do código chega à mesma instância — a conveniência do acesso global e o risco do estado compartilhado são o MESMO mecanismo.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Fechar o construtor", texto: "Construtor privado impede `new` externo — a unicidade deixa de ser convenção." },
+        { titulo: "Guardar a instância", texto: "Campo estático privado começa vazio e recebe o único exemplar." },
+        { titulo: "Acessar via getInstancia()", texto: "Na primeira chamada cria; depois devolve sempre o mesmo objeto." },
+        { titulo: "Preferir injeção", texto: "Mesmo existindo o singleton, receba a instância por parâmetro quando puder — testável e visível." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [

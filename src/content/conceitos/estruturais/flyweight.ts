@@ -131,6 +131,24 @@ print(len(floresta), "arvores usando", len(fabrica), "texturas")  # 100000 / 2`,
   },
 ];
 
+const ANTI_EXEMPLO = `class TipoArvore {
+  constructor(
+    public especie: string,
+    public textura: string,
+    public corTintura = "natural", // <- mutavel e compartilhado
+  ) {}
+
+  pintar(cor: string) { this.corTintura = cor; }
+  desenhar(x: number, y: number) {
+    console.log(this.especie, this.corTintura, x, y);
+  }
+}
+
+const pinheiro = new TipoArvore("pinheiro", "tex...");
+// milhares de arvores apontam para o MESMO pinheiro
+pinheiro.pintar("vermelho");
+// todas as arvores da especie mudaram de cor — sem aviso.`;
+
 export const flyweight: Conceito = {
   slug: "flyweight",
   titulo: "Flyweight",
@@ -284,6 +302,16 @@ const glyph = GlyphFactory.obter("A", fonte);`,
         "Cem mil objetos leves apontando para dois pesados. A fábrica é o que garante que o segundo pedido de 'pinheiro' devolva o mesmo objeto do primeiro.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Separar o estado", texto: "Intrínseco (igual e imutável) fica no flyweight; extrínseco (posição, dono) fica fora." },
+        { titulo: "Criar pela fábrica", texto: "A fábrica devolve a mesma instância para a mesma chave — sem duplicar o pesado." },
+        { titulo: "Contexto leve", texto: "Cada instância guarda só o extrínseco + a referência ao flyweight." },
+        { titulo: "Passar o extrínseco", texto: "Nas operações, o contexto envia x/y (etc.) por parâmetro ao flyweight." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [
@@ -360,6 +388,20 @@ const glyph = GlyphFactory.obter("A", fonte);`,
             "A tabela de internamento cresce com a cardinalidade e vira vazamento se as chaves forem geradas dinamicamente (um rótulo com id de usuário, por exemplo) — o cache passa a guardar tudo para sempre.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O flyweight mutável",
+      comoSeParece:
+        "O compartilhamento está lá — e o estado intrínseco ainda aceita escrita. Uma alteração num contexto pinta todos os outros da mesma chave.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Na tela", efeito: "Árvores 'mudam de cor sozinhas' — o sintoma clássico de estado compartilhado mutável." },
+        { quando: "No teste", efeito: "Um caso pinta o tipo e o próximo herda a cor sem resetar a fábrica." },
+        { quando: "Ao escalar", efeito: "Quanto mais compartilhamento, mais larga a blast radius de cada mutação." },
+      ],
+      correcao:
+        "Estado intrínseco imutável por construção (`readonly`, congelar, sem setters). Variação por instância (cor, escala) vai para o extrínseco — no contexto, não no flyweight.",
     },
     {
       tipo: "armadilhas",

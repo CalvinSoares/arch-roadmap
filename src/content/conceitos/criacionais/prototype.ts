@@ -116,6 +116,28 @@ print(len(registro.criar("contrato").blocos))  # 2 — o modelo segue intacto`,
   },
 ];
 
+const ANTI_EXEMPLO = `class Documento {
+  constructor(
+    public titulo: string,
+    public blocos: string[],
+    public config: { tema: string },
+  ) {}
+
+  // "Clone" que so copia a casca — listas e objetos ficam compartilhados.
+  clonar(): Documento {
+    return new Documento(this.titulo, this.blocos, this.config);
+  }
+}
+
+const modelo = new Documento("Contrato", ["clausula 1"], { tema: "formal" });
+const copia = modelo.clonar();
+copia.blocos.push("clausula extra");
+copia.config.tema = "informal";
+
+// O modelo "protegido" tambem mudou.
+console.log(modelo.blocos);   // ["clausula 1", "clausula extra"]
+console.log(modelo.config.tema); // "informal"`;
+
 export const prototype: Conceito = {
   slug: "prototype",
   titulo: "Prototype",
@@ -272,6 +294,16 @@ const copia = structuredClone(modelo);`,
         "O modelo fica dentro do registro e só sai como cópia. É essa fronteira que impede alguém de alterar o protótipo e contaminar todas as criações seguintes.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Preparar o modelo", texto: "Monte uma vez o objeto já configurado (o protótipo) e trate-o como somente-leitura." },
+        { titulo: "Implementar clonar()", texto: "O próprio objeto decide o que duplicar (cópia profunda nos mutáveis) e o que compartilhar." },
+        { titulo: "Registrar no catálogo", texto: "Guarde os modelos por nome; o registro nunca devolve o original — só clones." },
+        { titulo: "Criar pedindo cópia", texto: "Quem precisa de uma instância chama criar(nome) e edita a cópia, sem tocar no modelo." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [
@@ -348,6 +380,20 @@ const copia = structuredClone(modelo);`,
             "Grupos aninhados exigem cópia profunda cuidadosa; e formas que referenciam recursos externos (uma imagem carregada) precisam decidir se duplicam o recurso ou compartilham — decisão que muda o consumo de memória do editor.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O clone que compartilha o miolo",
+      comoSeParece:
+        "Existe `clonar()`, o registro devolve 'cópias', tudo parece certo — mas listas e objetos internos continuam sendo a mesma referência. Alterar o clone altera o modelo.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "No teste seguinte", efeito: "O modelo 'limpo' já veio contaminado pelo teste anterior — falhas que dependem da ordem." },
+        { quando: "Em produção", efeito: "Um usuário edita o documento e o template padrão muda para todo mundo." },
+        { quando: "Ao depurar", efeito: "Ninguém tocou no modelo; mesmo assim ele mudou — a referência compartilhada esconde a causa." },
+      ],
+      correcao:
+        "Clone profundo no que é mutável (`[...blocos]`, `{ ...config }`, ou `structuredClone`). O teste que importa: clonar, alterar profundamente a cópia e afirmar que o original não mudou.",
     },
     {
       tipo: "armadilhas",

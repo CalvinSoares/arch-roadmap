@@ -107,6 +107,28 @@ ImportadorCSV().importar("vendas.csv")`,
   },
 ];
 
+const ANTI_EXEMPLO = `abstract class ImportadorRelatorio {
+  // O "template" deixou de ser final — cada subclasse reescreve a ordem.
+  importar(caminho: string): number {
+    return this.rodar(caminho);
+  }
+
+  protected abstract rodar(caminho: string): number;
+}
+
+class ImportadorCSV extends ImportadorRelatorio {
+  protected rodar(caminho: string): number {
+    const linhas = this.ler(caminho);
+    this.gravar(linhas);          // <- validar sumiu
+    return linhas.length;
+  }
+  protected ler(c: string) { return ["a,1"]; }
+  protected gravar(_l: string[]) {}
+}
+
+// A ordem unica morreu. Cada formato tem a sua sequencia —
+// e o bug "esquecemos de validar" volta a ser possivel.`;
+
 export const templateMethod: Conceito = {
   slug: "template-method",
   titulo: "Template Method",
@@ -253,6 +275,16 @@ class Teste { run() { this.setup(); this.test(); this.teardown(); } }`,
         "O padrão troca duplicação por acoplamento hierárquico. Compensa quando a ordem é estável e as variações são poucas — se as duas coisas mudam, Strategy envelhece melhor.",
     },
     {
+      tipo: "passos",
+      titulo: "O fluxo, passo a passo",
+      passos: [
+        { titulo: "Escrever o esqueleto", texto: "Na base, o método-template chama os passos na ordem certa e não deve ser sobrescrito." },
+        { titulo: "Abrir os buracos", texto: "Declare passos abstratos (obrigatórios), com padrão razoável ou ganchos vazios." },
+        { titulo: "Preencher nas subclasses", texto: "Cada variação implementa só o que lhe é próprio — sem reordenar o fluxo." },
+        { titulo: "Chamar o template", texto: "O cliente invoca importar(); a base orquestra e chama os passos no momento certo." },
+      ],
+    },
+    {
       tipo: "camadas-nav",
       titulo: "Navegue pelas camadas",
       camadas: [
@@ -329,6 +361,20 @@ class Teste { run() { this.setup(); this.test(); this.teardown(); } }`,
             "Hierarquias de classes-base de teste tendem a crescer em profundidade, e depois de três níveis fica difícil saber qual setup rodou — a herança que economizava passa a esconder.",
         },
       ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O template que a subclasse reescreve",
+      comoSeParece:
+        "A classe base existe, mas o método-template virou hook aberto: cada subclasse redefine a ordem inteira. O padrão vira herança comum sem a invariante que justificava o esqueleto.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        { quando: "Ao corrigir um passo", efeito: "A correção na base não alcança quem sobrescreveu o fluxo — as cópias divergem de novo." },
+        { quando: "Na auditoria", efeito: "Um formato 'esquece' validar e ninguém percebe, porque a ordem não é única." },
+        { quando: "Na leitura", efeito: "Para entender o algoritmo, é preciso abrir cada subclasse — o esqueleto sumiu." },
+      ],
+      correcao:
+        "Marque o template como final (ou documente como não-sobrescrevível). Subclasse preenche passos e ganchos — nunca a ordem. Se a ordem precisa variar, o padrão certo é outro (Strategy).",
     },
     {
       tipo: "armadilhas",

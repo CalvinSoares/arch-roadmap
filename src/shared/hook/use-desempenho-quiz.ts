@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -12,6 +10,25 @@ import { registrarAcertoQuiz } from "@/server/gamificacao/acoes";
 const CHAVE = "DevMappa:quiz-desempenho";
 /** Constante de módulo: o padrão precisa ser referencialmente estável. */
 const VAZIO: DesempenhoQuiz = {};
+
+export type OpcoesRegistroQuiz = {
+  /**
+   * Concede XP no servidor (default: true).
+   * Desligar em replay da jornada — `tentativaId` novo farmava XP a cada acerto.
+   */
+  creditarXp?: boolean;
+  /**
+   * Toast `+XP` por resposta (default: true).
+   * Na jornada fica off: o toast de conclusão do nó já cobre a recompensa.
+   * Subida de nível ainda notifica.
+   */
+  toastXp?: boolean;
+  /**
+   * Grava no mapa local de desempenho por conceito (default: true).
+   * Desligar para chaves `checkpoint:…` — não são verbetes.
+   */
+  desempenhoLocal?: boolean;
+};
 
 /**
  * Histórico de acertos/erros do quiz.
@@ -28,26 +45,33 @@ export function useDesempenhoQuiz() {
   const logado = auth === "authenticated";
 
   const registrar = useCallback(
-    (slug: string, acertou: boolean) => {
-      persistir(registrarPuro(desempenho, slug, acertou, paraISO(new Date())));
-      if (logado) {
-        void registrarAcertoQuiz({
-          tentativaId: crypto.randomUUID(),
-          conceitoSlug: slug,
-          acertou,
-        })
-          .then((r) => {
-            if (!r?.ok) return;
-            if (r.subiuNivel && r.nivel) {
-              toast.success(`Subiu para o nível ${r.nivel}! 🎉`);
-            } else if (r.xp) {
-              toast.success(`+${r.xp} XP`);
-            }
-          })
-          .catch(() => {
-            /* offline/erro — o histórico local já refletiu */
-          });
+    (slug: string, acertou: boolean, opcoes?: OpcoesRegistroQuiz) => {
+      const desempenhoLocal = opcoes?.desempenhoLocal !== false;
+      const creditarXp = opcoes?.creditarXp !== false;
+      const toastXp = opcoes?.toastXp !== false;
+
+      if (desempenhoLocal) {
+        persistir(registrarPuro(desempenho, slug, acertou, paraISO(new Date())));
       }
+
+      if (!logado || !creditarXp) return;
+
+      void registrarAcertoQuiz({
+        tentativaId: crypto.randomUUID(),
+        conceitoSlug: slug,
+        acertou,
+      })
+        .then((r) => {
+          if (!r?.ok) return;
+          if (r.subiuNivel && r.nivel) {
+            toast.success(`Subiu para o nível ${r.nivel}! 🎉`);
+          } else if (toastXp && r.xp) {
+            toast.success(`+${r.xp} XP`);
+          }
+        })
+        .catch(() => {
+          /* offline/erro — o histórico local já refletiu quando aplicável */
+        });
     },
     [desempenho, persistir, logado]
   );

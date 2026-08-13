@@ -128,6 +128,22 @@ print(expr.aceitar(Avaliador()))  # 6`,
   },
 ];
 
+const ANTI_EXEMPLO = `interface Visitante {
+  visitar(no: No): number;
+}
+
+class Avaliador implements Visitante {
+  visitar(no: No): number {
+    if (no instanceof Numero) return no.valor;
+    if (no instanceof Soma)
+      return this.visitar(no.esq) + this.visitar(no.dir);
+    throw new Error("tipo desconhecido");
+  }
+}
+
+// Tipo novo passa despercebido ate runtime. O duplo despacho
+// foi abandonado — e a verificacao do compilador junto.`;
+
 export const visitor: Conceito = {
   slug: "visitor",
   titulo: "Visitor",
@@ -346,6 +362,55 @@ no.accept(visitorTypeCheck);`,
             "Visitantes com estado acumulado não são reutilizáveis entre execuções nem seguros em paralelo — cada análise precisa de uma instância nova, o que é fácil de esquecer.",
         },
       ],
+    },
+    {
+      tipo: "passos",
+      titulo: "Como montar o Visitor",
+      passos: [
+        {
+          titulo: "Congelar os tipos de nó",
+          texto:
+            "O padrão só se paga com hierarquia estável. Se tipos novos entram todo mês, prefira método nos nós ou casamento de padrões.",
+        },
+        {
+          titulo: "Dar aceitar a cada nó",
+          texto:
+            "O nó só sabe chamar o método certo do visitante (`v.visitarSoma(this)`). Sem lógica de negócio dentro do aceitar.",
+        },
+        {
+          titulo: "Um método por tipo no visitante",
+          texto:
+            "A interface do visitante lista todos os tipos. Operação nova = classe nova; tipo novo = alterar todos os visitantes.",
+        },
+        {
+          titulo: "Percorrer pela recursão",
+          texto:
+            "O visitante (ou o nó) decide a ordem dos filhos. Cada operação fica inteira num arquivo — sem espalhar 'imprimir' por dez classes.",
+        },
+      ],
+    },
+    {
+      tipo: "anti-exemplo",
+      titulo: "O Visitor que virou instanceof",
+      comoSeParece:
+        "Existe uma interface Visitante e um Avaliador — mas em vez do duplo despacho, o visitante faz cadeia de `instanceof`. A cerimônia ficou; a verificação do compilador sumiu.",
+      codigo: { lang: "typescript", code: ANTI_EXEMPLO },
+      sintomas: [
+        {
+          quando: "Ao adicionar um tipo de nó",
+          efeito: "Nada quebra na compilação — o erro só aparece em runtime com 'tipo desconhecido'.",
+        },
+        {
+          quando: "Na revisão",
+          efeito: "O `instanceof` se multiplica em cada visitante; cada um trata um subconjunto diferente de tipos.",
+        },
+        {
+          quando: "No teste",
+          efeito: "Cobrir um nó novo exige lembrar de atualizar cada cadeia manualmente — exatamente o que o padrão deveria impedir.",
+        },
+      ],
+      correcao:
+        "Volte ao duplo despacho: `aceitar` no nó chama `visitarNumero` / `visitarSoma`. Tipo novo na interface força todos os visitantes a compilar de novo.",
     },
     {
       tipo: "armadilhas",

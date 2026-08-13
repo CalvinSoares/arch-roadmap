@@ -92,4 +92,17 @@ describe("desempenho do quiz", () => {
     d = registrar(d, "cqrs", true, HOJE); // só acerto -> fora
     expect(slugsFracos(d)).toEqual(["saga"]);
   });
+
+  it("ignora chaves de checkpoint da jornada em pontos fracos e totais", () => {
+    let d: DesempenhoQuiz = {};
+    d = registrar(d, "checkpoint:backend:be-git", false, HOJE);
+    d = registrar(d, "checkpoint:backend:be-git", false, HOJE);
+    d = registrar(d, "saga", false, HOJE);
+    expect(pontosFracos(d).map((p) => p.slug)).toEqual(["saga"]);
+    expect(totais(d)).toMatchObject({
+      respostas: 1,
+      erros: 1,
+      conceitos: 1,
+    });
+  });
 });

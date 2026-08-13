@@ -28,6 +28,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-git",
           titulo: "Git e fluxo de trabalho",
+          descricao: "Histórico, branches e o fluxo que evita caos no time.",
           recursos: [
             { titulo: "Pro Git (livro completo)", href: "https://git-scm.com/book/en/v2", tipo: "doc", fonte: "git-scm" },
             { titulo: "Learn Git Branching (interativo)", href: "https://learngitbranching.js.org/", tipo: "ferramenta", fonte: "LGB" },
@@ -36,6 +37,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-terminal",
           titulo: "Terminal e Linux básico",
+          descricao: "Navegar, editar e depurar sem sair da linha de comando.",
           recursos: [
             { titulo: "The Missing Semester (MIT)", href: "https://missing.csail.mit.edu/", tipo: "curso", fonte: "MIT" },
             { titulo: "Linux Journey", href: "https://linuxjourney.com/", tipo: "curso", fonte: "Linux Journey" },
@@ -44,6 +46,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-estruturas",
           titulo: "Estruturas de dados e complexidade",
+          descricao: "Escolher a estrutura certa muda o custo de cada operação.",
           recursos: [
             { titulo: "VisuAlgo — estruturas visualizadas", href: "https://visualgo.net/en", tipo: "ferramenta", fonte: "VisuAlgo" },
             { titulo: "Big-O Cheat Sheet", href: "https://www.bigocheatsheet.com/", tipo: "artigo", fonte: "Big-O" },
@@ -89,6 +92,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-rest",
           titulo: "REST e modelagem de recursos",
+          descricao: "Recursos, verbos e URLs que descrevem o domínio.",
           recursos: [
             { titulo: "Richardson Maturity Model", href: "https://martinfowler.com/articles/richardsonMaturityModel.html", tipo: "artigo", fonte: "Fowler" },
             { titulo: "REST API Tutorial", href: "https://restfulapi.net/", tipo: "artigo", fonte: "restfulapi.net" },
@@ -132,6 +136,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-versionamento",
           titulo: "Versionamento e compatibilidade",
+          descricao: "Quebrar clientes é caro — planeje a evolução da API.",
           recursos: [
             { titulo: "Semantic Versioning", href: "https://semver.org/", tipo: "spec", fonte: "SemVer" },
             { titulo: "API versioning (Stripe)", href: "https://stripe.com/blog/api-versioning", tipo: "artigo", fonte: "Stripe" },
@@ -141,6 +146,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-graphql",
           titulo: "GraphQL",
+          descricao: "O cliente pede o que precisa — com cuidado no N+1.",
           opcional: true,
           recursos: [
             { titulo: "Introduction to GraphQL", href: "https://graphql.org/learn/", tipo: "doc", fonte: "graphql.org" },
@@ -149,6 +155,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-grpc",
           titulo: "gRPC para comunicação interna",
+          descricao: "RPC tipado e eficiente entre serviços internos.",
           opcional: true,
           recursos: [
             { titulo: "What is gRPC?", href: "https://grpc.io/docs/what-is-grpc/introduction/", tipo: "doc", fonte: "grpc.io" },
@@ -166,6 +173,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-sql",
           titulo: "SQL e modelagem relacional",
+          descricao: "Tabelas, joins e a modelagem que carrega o sistema.",
           recursos: [
             { titulo: "SQLBolt — SQL interativo", href: "https://sqlbolt.com/", tipo: "curso", fonte: "SQLBolt" },
             { titulo: "PostgreSQL Tutorial", href: "https://www.postgresql.org/docs/current/tutorial.html", tipo: "doc", fonte: "PostgreSQL" },
@@ -187,6 +195,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-nosql",
           titulo: "NoSQL: quando faz sentido",
+          descricao: "Documento, chave-valor ou grafo — só quando o modelo pede.",
           opcional: true,
           recursos: [
             { titulo: "NoSQL (Martin Fowler)", href: "https://martinfowler.com/nosql.html", tipo: "artigo", fonte: "Fowler" },
@@ -227,6 +236,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-logs",
           titulo: "Logs estruturados",
+          descricao: "Eventos consultáveis, não print espalhado.",
           recursos: [
             { titulo: "The Twelve-Factor App — Logs", href: "https://12factor.net/logs", tipo: "artigo", fonte: "12factor" },
           ],
@@ -234,6 +244,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-metricas",
           titulo: "Métricas e alertas",
+          descricao: "Números que disparam alerta antes do usuário reclamar.",
           recursos: [
             { titulo: "SRE Book — Monitoring", href: "https://sre.google/sre-book/monitoring-distributed-systems/", tipo: "doc", fonte: "Google SRE" },
             { titulo: "Prometheus — Overview", href: "https://prometheus.io/docs/introduction/overview/", tipo: "doc", fonte: "Prometheus" },
@@ -242,6 +253,7 @@ export const roadmapBackend: Roadmap = {
         {
           id: "be-tracing",
           titulo: "Tracing distribuído",
+          descricao: "Seguir uma requisição através de vários serviços.",
           opcional: true,
           recursos: [
             { titulo: "What is OpenTelemetry?", href: "https://opentelemetry.io/docs/what-is-opentelemetry/", tipo: "doc", fonte: "OpenTelemetry" },
