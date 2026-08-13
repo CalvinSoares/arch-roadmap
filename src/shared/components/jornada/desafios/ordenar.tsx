@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
+import { classesOpcaoDesafio } from "@/shared/components/jornada/desafios/opcao-estilo";
 import type { DesafioOrdenar } from "@/shared/types/desafio";
 
 /**
@@ -99,20 +100,13 @@ export function DesafioOrdenarView({
                 type="button"
                 onClick={() => tocar(item.id)}
                 disabled={revelado}
-                className={cn(
-                  "flex min-h-12 w-full items-center gap-3 rounded-xl border-2 border-b-4 px-3.5 py-3 text-left text-sm font-medium transition-colors active:translate-y-0.5 active:border-b-2",
-                  !revelado &&
-                    pos === null &&
-                    "border-card-border bg-card hover:border-primary/50",
-                  !revelado &&
-                    pos !== null &&
-                    "border-primary/45 bg-primary/8",
-                  certoAqui && "border-cat-criacional bg-cat-criacional/14",
-                  erradoAqui && "border-cat-principio bg-cat-principio/12",
-                  revelado &&
-                    pos === null &&
-                    "border-card-border opacity-45"
-                )}
+                className={classesOpcaoDesafio({
+                  revelado,
+                  correta: certoAqui,
+                  escolhida: erradoAqui,
+                  ativa: pos !== null,
+                  className: "flex items-center gap-3",
+                })}
               >
                 <span
                   className={cn(

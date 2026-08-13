@@ -58,7 +58,9 @@ export async function concederXp(
       quantia: e.quantia,
       origemRef: e.origemRef,
     })
-    .onConflictDoNothing({ target: xpEvents.origemRef })
+    .onConflictDoNothing({
+      target: [xpEvents.userId, xpEvents.origemRef],
+    })
     .returning({ id: xpEvents.id });
 
   const concedido = inseridos.length > 0;

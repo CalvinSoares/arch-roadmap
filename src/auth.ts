@@ -32,8 +32,8 @@ const providers: NextAuthConfig["providers"] = [
       // como um login inválido (não vaza se a conta existe).
       const ip = await ipDoPedido();
       const [porIp, porEmail] = await Promise.all([
-        limitar(limitadores.login, `login:ip:${ip}`),
-        limitar(limitadores.login, `login:email:${email}`),
+        limitar(limitadores.login, `login:ip:${ip}`, "auth"),
+        limitar(limitadores.login, `login:email:${email}`, "auth"),
       ]);
       if (!porIp.sucesso || !porEmail.sucesso) return null;
 

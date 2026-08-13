@@ -23,6 +23,8 @@ import {
 import { slugComparacao } from "@/shared/types/comparacao";
 import { cn } from "@/shared/utils/cn";
 import { TextoRico } from "@/shared/components/conteudo/texto-rico";
+import type { ProvaRespostaQuiz } from "@/shared/lib/quiz/avaliar-prova";
+import type { OpcoesRegistroQuiz } from "@/shared/hook/use-desempenho-quiz";
 
 const QUANTAS = 5;
 const ENTREVISTA_SEGUNDOS = 10 * 60;
@@ -108,8 +110,15 @@ const PERGUNTA_DO_FORMATO: Record<FormatoQuiz, string> = {
 interface Props {
   /** ISO do dia — define a semente, então o quiz do dia é estável. */
   hoje: string;
-  /** Registra o resultado na agenda de revisão do conceito sorteado. */
-  onResponder?: (slug: string, acertou: boolean) => void;
+  /**
+   * Registra o resultado. O 3º arg carrega a `prova` para o servidor
+   * regenerar o gabarito (XP não confia no boolean local).
+   */
+  onResponder?: (
+    slug: string,
+    acertou: boolean,
+    meta?: Pick<OpcoesRegistroQuiz, "prova">
+  ) => void;
   /** Limita o sorteio a estes conceitos. Sem escopo, vale o catálogo inteiro. */
   escopo?: readonly string[];
   /** Quantas perguntas por rodada. */
@@ -209,8 +218,20 @@ export function Quiz({
     if (escolha || !pergunta || tempoEsgotado) return;
     setEscolha(slug);
     const acertou = slug === pergunta.correta;
+    const indiceAtual = respostas.length;
     setRespostas((r) => [...r, acertou]);
-    onResponder?.(pergunta.correta, acertou);
+    const prova: ProvaRespostaQuiz = {
+      kind: "mcq-rodada",
+      hoje,
+      rodada,
+      indice: indiceAtual,
+      quantidade,
+      escopo: escopo ? [...escopo] : undefined,
+      formatos: formatos ? [...formatos] : undefined,
+      entrevista,
+      escolha: slug,
+    };
+    onResponder?.(pergunta.correta, acertou, { prova });
   };
 
   const avancar = () => setEscolha(null);

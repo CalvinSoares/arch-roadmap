@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { TextoRico } from "@/shared/components/conteudo/texto-rico";
-import { cn } from "@/shared/utils/cn";
+import { classesOpcaoDesafio } from "@/shared/components/jornada/desafios/opcao-estilo";
 import type { DesafioVf } from "@/shared/types/desafio";
 
 export function DesafioVfView({
@@ -25,10 +25,10 @@ export function DesafioVfView({
 
   return (
     <div>
-      <blockquote className="border-l-2 border-primary/50 pl-3.5 text-[16px] leading-relaxed text-foreground">
+      <blockquote className="border-l-2 border-primary/50 pl-3.5 text-[15px] leading-relaxed text-foreground sm:text-[16px]">
         <TextoRico>{desafio.afirmacao}</TextoRico>
       </blockquote>
-      <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+      <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
         {opcoes.map(({ valor, label }) => {
           const correta = valor === desafio.correta;
           const escolhida = escolha === valor;
@@ -38,29 +38,19 @@ export function DesafioVfView({
                 type="button"
                 onClick={() => onEscolher(valor)}
                 disabled={revelado}
-                whileTap={revelado ? undefined : { scale: 0.97 }}
+                whileTap={revelado ? undefined : { scale: 0.98 }}
                 animate={
                   revelado && escolhida && !correta && !reduzir
                     ? { x: [0, -7, 7, -4, 4, 0] }
                     : { x: 0 }
                 }
                 transition={{ duration: 0.35 }}
-                className={cn(
-                  "min-h-14 w-full rounded-xl border-2 border-b-4 px-3.5 py-3 text-center text-base font-semibold transition-colors",
-                  !revelado &&
-                    "border-card-border bg-card hover:border-primary/50 hover:bg-primary/5",
-                  revelado &&
-                    correta &&
-                    "border-cat-criacional bg-cat-criacional/14",
-                  revelado &&
-                    escolhida &&
-                    !correta &&
-                    "border-cat-principio bg-cat-principio/12",
-                  revelado &&
-                    !correta &&
-                    !escolhida &&
-                    "border-card-border opacity-45"
-                )}
+                className={classesOpcaoDesafio({
+                  revelado,
+                  correta,
+                  escolhida,
+                  className: "min-h-14 text-center text-base font-semibold",
+                })}
               >
                 {label}
               </motion.button>

@@ -25,7 +25,11 @@ export async function registrar(
   const senha = String(form.get("password") ?? "");
 
   // Rate limit: freia criação de contas em massa a partir de um mesmo IP.
-  const lim = await limitar(limitadores.registro, `registro:${await ipDoPedido()}`);
+  const lim = await limitar(
+    limitadores.registro,
+    `registro:${await ipDoPedido()}`,
+    "auth"
+  );
   if (!lim.sucesso) {
     return { erro: "Muitas tentativas. Espere alguns minutos e tente de novo." };
   }

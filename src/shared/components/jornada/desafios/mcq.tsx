@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { getConceito } from "@/shared/lib/content";
 import { TextoRico } from "@/shared/components/conteudo/texto-rico";
-import { cn } from "@/shared/utils/cn";
+import { classesOpcaoDesafio } from "@/shared/components/jornada/desafios/opcao-estilo";
 import type { DesafioMcq } from "@/shared/types/desafio";
 
 export function DesafioMcqView({
@@ -21,15 +21,15 @@ export function DesafioMcqView({
 }) {
   return (
     <div>
-      <blockquote className="border-l-2 border-primary/50 pl-3.5 text-[16px] leading-relaxed text-foreground">
+      <blockquote className="border-l-2 border-primary/50 pl-3.5 text-[15px] leading-relaxed text-foreground sm:text-[16px]">
         <TextoRico>{desafio.enunciado}</TextoRico>
       </blockquote>
       {desafio.codigo && (
-        <pre className="mt-3 overflow-x-auto rounded-xl border border-card-border bg-canvas p-3 font-mono text-[12px] leading-relaxed sm:text-[13px]">
-          <code>{desafio.codigo}</code>
+        <pre className="mt-3 max-h-48 overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-xl border border-card-border bg-canvas p-3 font-mono text-[12px] leading-relaxed sm:text-[13px]">
+          <code className="block w-full">{desafio.codigo}</code>
         </pre>
       )}
-      <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+      <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
         {desafio.alternativas.map((id) => {
           const label =
             desafio.labels?.[id] ?? getConceito(id)?.titulo ?? id;
@@ -41,29 +41,18 @@ export function DesafioMcqView({
                 type="button"
                 onClick={() => onEscolher(id)}
                 disabled={revelado}
-                whileTap={revelado ? undefined : { scale: 0.97 }}
+                whileTap={revelado ? undefined : { scale: 0.98 }}
                 animate={
                   revelado && escolhida && !correta && !reduzir
                     ? { x: [0, -7, 7, -4, 4, 0] }
                     : { x: 0 }
                 }
                 transition={{ duration: 0.35 }}
-                className={cn(
-                  "min-h-12 w-full rounded-xl border-2 border-b-4 px-3.5 py-3 text-left text-sm font-medium transition-colors",
-                  !revelado &&
-                    "border-card-border bg-card hover:border-primary/50 hover:bg-primary/5",
-                  revelado &&
-                    correta &&
-                    "border-cat-criacional bg-cat-criacional/14",
-                  revelado &&
-                    escolhida &&
-                    !correta &&
-                    "border-cat-principio bg-cat-principio/12",
-                  revelado &&
-                    !correta &&
-                    !escolhida &&
-                    "border-card-border opacity-45"
-                )}
+                className={classesOpcaoDesafio({
+                  revelado,
+                  correta,
+                  escolhida,
+                })}
               >
                 {label}
               </motion.button>

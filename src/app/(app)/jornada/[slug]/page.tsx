@@ -48,7 +48,6 @@ export default async function JornadaRoadmapPage({
   const [estrelasServidor, bausDoUsuario] = usuario
     ? await Promise.all([
         estrelasDoUsuario(
-          usuario.id,
           roadmap.sections.flatMap((s) => s.items.map((it) => it.id))
         ),
         bausAbertos(refsBau),

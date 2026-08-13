@@ -110,10 +110,9 @@ export const progresso = pgTable(
 /**
  * Ledger de XP — **append-only**. Nunca se dá UPDATE aqui.
  *
- * `origem_ref` é a **chave de idempotência**: "quiz:<attemptId>",
- * "no:<roadmap>:<noId>", etc. O índice único nela mata a race condition de
- * dois awards simultâneos (o segundo INSERT falha em vez de pagar de novo).
- * É a Idempotência + o Ledger + a escrita atômica que o próprio catálogo ensina.
+ * `origem_ref` é a **chave de idempotência por usuário**: "quiz:<attemptId>",
+ * "no:<roadmap>:<noId>", etc. O índice único composto `(user_id, origem_ref)`
+ * mata race de duplo award **sem** bloquear o mesmo nó/baú para outro usuário.
  */
 export const xpEvents = pgTable(
   "xp_events",
@@ -129,7 +128,7 @@ export const xpEvents = pgTable(
     origemRef: text("origem_ref").notNull(),
     criadoEm: timestamp("criado_em").notNull().defaultNow(),
   },
-  (t) => [uniqueIndex("xp_events_origem_ref_uq").on(t.origemRef)]
+  (t) => [uniqueIndex("xp_events_user_origem_uq").on(t.userId, t.origemRef)]
 );
 
 /**

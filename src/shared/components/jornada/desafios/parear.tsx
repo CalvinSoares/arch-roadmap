@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/shared/utils/cn";
+import { classesOpcaoDesafio } from "@/shared/components/jornada/desafios/opcao-estilo";
 import type { DesafioParear } from "@/shared/types/desafio";
 
 /**
@@ -120,20 +121,18 @@ export function DesafioParearView({
                   type="button"
                   disabled={revelado}
                   onClick={() => tocarEsq(p.esquerda)}
-                  className={cn(
-                    "min-h-12 w-full rounded-xl border-2 border-b-4 px-2.5 py-2.5 text-left text-[13px] font-medium leading-snug transition-colors active:translate-y-0.5 active:border-b-2",
-                    sel && "border-primary bg-primary/12 ring-2 ring-primary/25",
-                    ligada && !revelado && !sel && "border-primary/40 bg-primary/5",
-                    !ligada &&
-                      !sel &&
-                      "border-card-border bg-card",
-                    ok && "border-cat-criacional bg-cat-criacional/14",
-                    bad && "border-cat-principio bg-cat-principio/12"
-                  )}
+                  className={classesOpcaoDesafio({
+                    revelado,
+                    correta: !!ok,
+                    escolhida: !!bad,
+                    ativa: sel || (!!ligada && !revelado),
+                    className:
+                      "px-2.5 py-2.5 text-[13px] leading-snug break-words",
+                  })}
                 >
                   <span className="block">{p.esquerda}</span>
                   {ligada && (
-                    <span className="mt-1 block truncate text-[11px] font-normal text-muted">
+                    <span className="mt-1 block text-[11px] font-normal text-muted break-words">
                       → {ligada}
                     </span>
                   )}
@@ -153,7 +152,6 @@ export function DesafioParearView({
               revelado &&
               dono !== undefined &&
               mapaCorreto[dono] !== dir;
-            const disponivel = !!selecionadaEsq || !!dono;
             return (
               <li key={dir}>
                 <button
@@ -170,17 +168,22 @@ export function DesafioParearView({
                     tocarDir(dir);
                   }}
                   className={cn(
-                    "min-h-12 w-full rounded-xl border-2 border-b-4 px-2.5 py-2.5 text-left text-[13px] font-medium leading-snug transition-colors active:translate-y-0.5 active:border-b-2",
-                    usadasDir.has(dir) && !revelado && "border-primary/40 bg-primary/5",
-                    !usadasDir.has(dir) && disponivel && "border-card-border bg-card",
-                    !usadasDir.has(dir) &&
-                      !disponivel &&
-                      "border-card-border bg-card opacity-50",
-                    selecionadaEsq &&
-                      !usadasDir.has(dir) &&
-                      "hover:border-primary/50",
-                    ok && "border-cat-criacional bg-cat-criacional/14",
-                    bad && "border-cat-principio bg-cat-principio/12"
+                    classesOpcaoDesafio({
+                      revelado,
+                      correta: !!ok,
+                      escolhida: !!bad,
+                      ativa: !!dono && !revelado,
+                      className:
+                        "px-2.5 py-2.5 text-[13px] leading-snug break-words",
+                    }),
+                    !revelado &&
+                      !dono &&
+                      !selecionadaEsq &&
+                      "opacity-50",
+                    !revelado &&
+                      !!selecionadaEsq &&
+                      !dono &&
+                      "hover:border-primary hover:bg-primary/12"
                   )}
                 >
                   {dir}

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/shared/utils/cn";
+import { classesOpcaoDesafio } from "@/shared/components/jornada/desafios/opcao-estilo";
 import type { DesafioDoisCodigos } from "@/shared/types/desafio";
 
 export function DesafioDoisCodigosView({
@@ -24,7 +25,7 @@ export function DesafioDoisCodigosView({
 
   return (
     <div>
-      <p className="text-[16px] leading-relaxed text-foreground">
+      <p className="text-[15px] leading-relaxed text-foreground sm:text-[16px]">
         {desafio.enunciado}
       </p>
       <ul className="mt-4 grid gap-3">
@@ -37,7 +38,7 @@ export function DesafioDoisCodigosView({
                 type="button"
                 onClick={() => onEscolher(id)}
                 disabled={revelado}
-                whileTap={revelado ? undefined : { scale: 0.985 }}
+                whileTap={revelado ? undefined : { scale: 0.99 }}
                 animate={
                   revelado && escolhida && !correta && !reduzir
                     ? { x: [0, -7, 7, -4, 4, 0] }
@@ -45,32 +46,51 @@ export function DesafioDoisCodigosView({
                 }
                 transition={{ duration: 0.35 }}
                 className={cn(
-                  "w-full overflow-hidden rounded-xl border-2 border-b-4 text-left transition-colors",
-                  !revelado &&
-                    "border-card-border bg-card hover:border-primary/50",
-                  revelado &&
-                    correta &&
-                    "border-cat-criacional bg-cat-criacional/10",
-                  revelado &&
-                    escolhida &&
-                    !correta &&
-                    "border-cat-principio bg-cat-principio/10",
-                  revelado &&
-                    !correta &&
-                    !escolhida &&
-                    "border-card-border opacity-45"
+                  classesOpcaoDesafio({
+                    revelado,
+                    correta,
+                    escolhida,
+                  }),
+                  "overflow-hidden p-0"
                 )}
               >
-                <div className="flex items-center gap-2 border-b border-card-border px-3 py-1.5">
-                  <span className="grid size-6 place-items-center rounded-md bg-foreground/8 font-mono text-[11px] font-bold">
+                <div
+                  className={cn(
+                    "flex items-center gap-2 border-b px-3 py-2",
+                    revelado && correta
+                      ? "border-cat-criacional/35 bg-cat-criacional/10"
+                      : revelado && escolhida && !correta
+                        ? "border-cat-principio/35 bg-cat-principio/10"
+                        : "border-card-border bg-foreground/[0.04]"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "grid size-7 place-items-center rounded-md font-mono text-[12px] font-bold",
+                      revelado && correta
+                        ? "bg-cat-criacional text-white"
+                        : revelado && escolhida && !correta
+                          ? "bg-cat-principio text-white"
+                          : "bg-primary/18 text-primary"
+                    )}
+                  >
                     {rotulo}
                   </span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted">
                     Opção {rotulo}
                   </span>
+                  <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-muted/80">
+                    {revelado
+                      ? correta
+                        ? "Certo"
+                        : escolhida
+                          ? "Errado"
+                          : ""
+                      : "Toque para escolher"}
+                  </span>
                 </div>
-                <pre className="max-h-48 overflow-auto p-3 font-mono text-[11px] leading-relaxed sm:text-[12px]">
-                  <code>{code}</code>
+                <pre className="max-h-56 overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words p-3 font-mono text-[11px] leading-relaxed sm:text-[12.5px]">
+                  <code className="block w-full">{code}</code>
                 </pre>
               </motion.button>
             </li>

@@ -25,6 +25,7 @@ import {
 } from "@/shared/lib/gamificacao/jornada";
 import { ehChaveCheckpoint } from "@/shared/lib/jornada/desafios";
 import { slugsFracos } from "@/shared/lib/desempenho";
+import type { ProvaRespostaQuiz } from "@/shared/lib/quiz/avaliar-prova";
 import { registrarEstrelasNo, abrirBau } from "@/server/gamificacao/jornada";
 import { LicaoModal } from "@/shared/components/jornada/licao-modal";
 import { MetaDiaria } from "@/shared/components/jornada/meta-diaria";
@@ -125,12 +126,17 @@ export function JornadaPath({
   );
   const { desempenho, registrar } = useDesempenhoQuiz();
   const registrarNaJornada = useCallback(
-    (chave: string, acertou: boolean, meta: { creditarXp: boolean }) => {
+    (
+      chave: string,
+      acertou: boolean,
+      meta: { creditarXp: boolean; prova?: ProvaRespostaQuiz }
+    ) => {
       registrar(chave, acertou, {
         creditarXp: meta.creditarXp,
         toastXp: false,
         desempenhoLocal:
           !ehChaveCheckpoint(chave) && !chave.startsWith("revisao:"),
+        prova: meta.prova,
       });
     },
     [registrar]

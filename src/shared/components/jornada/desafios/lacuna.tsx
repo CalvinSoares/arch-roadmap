@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/shared/utils/cn";
+import { classesOpcaoDesafio } from "@/shared/components/jornada/desafios/opcao-estilo";
 import type { DesafioLacuna } from "@/shared/types/desafio";
 
 export function DesafioLacunaView({
@@ -19,7 +20,7 @@ export function DesafioLacunaView({
 }) {
   return (
     <div>
-      <p className="text-[16px] leading-relaxed text-foreground">
+      <p className="text-[15px] leading-relaxed text-foreground sm:text-[16px]">
         {desafio.fraseAntes}
         <span
           className={cn(
@@ -52,22 +53,13 @@ export function DesafioLacunaView({
                     : { x: 0 }
                 }
                 transition={{ duration: 0.35 }}
-                className={cn(
-                  "rounded-xl border-2 border-b-4 px-3.5 py-2.5 text-sm font-medium transition-colors",
-                  !revelado &&
-                    "border-card-border bg-card hover:border-primary/50 hover:bg-primary/5",
-                  revelado &&
-                    correta &&
-                    "border-cat-criacional bg-cat-criacional/14",
-                  revelado &&
-                    escolhida &&
-                    !correta &&
-                    "border-cat-principio bg-cat-principio/12",
-                  revelado &&
-                    !correta &&
-                    !escolhida &&
-                    "border-card-border opacity-45"
-                )}
+                className={classesOpcaoDesafio({
+                  revelado,
+                  correta,
+                  escolhida,
+                  compacta: true,
+                  className: "w-auto",
+                })}
               >
                 {op}
               </motion.button>

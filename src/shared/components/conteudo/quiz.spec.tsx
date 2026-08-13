@@ -50,6 +50,14 @@ describe("Quiz (UI)", () => {
     expect(onResponder).toHaveBeenCalledTimes(1);
     expect(onResponder.mock.calls[0][0]).toEqual(expect.any(String));
     expect(typeof onResponder.mock.calls[0][1]).toBe("boolean");
+    expect(onResponder.mock.calls[0][2]).toEqual(
+      expect.objectContaining({
+        prova: expect.objectContaining({
+          kind: "mcq-rodada",
+          escolha: expect.any(String),
+        }),
+      })
+    );
 
     // feedback + avanço
     expect(

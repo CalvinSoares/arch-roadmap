@@ -26,6 +26,7 @@ import {
 } from "@/shared/components/jornada/desafio-view";
 import { ROTULO_DESAFIO, type Desafio, type RespostaDesafio } from "@/shared/types/desafio";
 import type { RoadmapItem } from "@/shared/types/roadmap";
+import type { ProvaRespostaQuiz } from "@/shared/lib/quiz/avaliar-prova";
 import { cn } from "@/shared/utils/cn";
 
 const QUANTAS_CONCEITO = 5;
@@ -47,7 +48,7 @@ type CallbacksComuns = {
   onResponder: (
     chave: string,
     acertou: boolean,
-    meta: { creditarXp: boolean }
+    meta: { creditarXp: boolean; prova?: ProvaRespostaQuiz }
   ) => void;
   onConcluir: (estrelas: number) => void;
   onFechar: () => void;
@@ -176,7 +177,36 @@ export function LicaoModal(props: LicaoModalProps) {
     setResposta(r);
     setUltimoOk(ok);
     setUltimaExplicacao(explicacao);
-    onResponder(chaveXp, ok, { creditarXp });
+
+    const sementeEfetiva = semente + rodada;
+    const quantas =
+      modo === "checkpoint"
+        ? QUANTAS_CHECKPOINT
+        : modo === "revisao"
+          ? QUANTAS_REVISAO
+          : QUANTAS_CONCEITO;
+
+    const prova: ProvaRespostaQuiz | undefined = emRevisao
+      ? undefined // fila de erro: desafio pode não estar no lote regenerável
+      : {
+          kind: "desafio-jornada",
+          modo:
+            modo === "conceito"
+              ? "conceito"
+              : modo === "checkpoint"
+                ? "checkpoint"
+                : "revisao",
+          semente: sementeEfetiva,
+          desafioId: desafio.id,
+          quantas,
+          slug: conceitoSlug ?? undefined,
+          roadmapSlug: roadmapSlug ?? undefined,
+          itemId: checkpointItem?.id,
+          slugs: slugsRevisao ? [...slugsRevisao] : undefined,
+          resposta: r,
+        };
+
+    onResponder(chaveXp, ok, { creditarXp: creditarXp && !!prova, prova });
     vibrar(ok ? 15 : [30, 40, 30]);
     tocarSomJornada(ok ? "acerto" : "erro", { reduzir: !!reduzir });
     if (ok) {
@@ -284,7 +314,7 @@ export function LicaoModal(props: LicaoModalProps) {
         </span>
       </div>
 
-      <div className="mx-auto w-full max-w-lg flex-1 overflow-y-auto px-5 pb-6">
+      <div className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         {props.modo === "checkpoint" &&
           checkpointItem?.recursos &&
           checkpointItem.recursos.length > 0 &&
@@ -393,7 +423,7 @@ export function LicaoModal(props: LicaoModalProps) {
                 : "border-cat-principio/40 bg-cat-principio/10"
             )}
           >
-            <div className="mx-auto max-w-lg">
+            <div className="mx-auto max-w-2xl">
               <p className="text-[13px] leading-relaxed text-foreground">
                 <span className="font-semibold">
                   {ultimoOk ? "Isso! " : "Quase — volta no fim da lição. "}

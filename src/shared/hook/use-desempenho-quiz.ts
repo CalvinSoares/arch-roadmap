@@ -5,6 +5,7 @@ import { useArmazenamentoLocal } from "@/shared/hook/use-armazenamento-local";
 import { registrar as registrarPuro } from "@/shared/lib/desempenho";
 import { paraISO } from "@/shared/lib/estudo";
 import type { DesempenhoQuiz } from "@/shared/types/desempenho";
+import type { ProvaRespostaQuiz } from "@/shared/lib/quiz/avaliar-prova";
 import { registrarAcertoQuiz } from "@/server/gamificacao/acoes";
 
 const CHAVE = "DevMappa:quiz-desempenho";
@@ -28,16 +29,20 @@ export type OpcoesRegistroQuiz = {
    * Desligar para chaves `checkpoint:…` — não são verbetes.
    */
   desempenhoLocal?: boolean;
+  /**
+   * Contexto + resposta para o servidor regenerar o gabarito.
+   * Sem prova, não há crédito de XP (o boolean local não basta).
+   */
+  prova?: ProvaRespostaQuiz;
 };
 
 /**
  * Histórico de acertos/erros do quiz.
  *
  * Híbrido: o localStorage segue como fonte imediata da UI (vazio na chegada,
- * funciona anônimo). Havendo sessão, cada resposta é **reportada** ao servidor
- * com um `tentativaId` único (uuid) — o servidor grava a tentativa e concede o
- * XP do acerto de forma idempotente (retry de rede não conta duas vezes). É o
- * cliente reportando a *ação*, nunca o XP.
+ * funciona anônimo). Havendo sessão e `prova`, cada resposta vai ao servidor —
+ * que **regenera** a pergunta/desafio e decide o acerto. O cliente nunca manda
+ * `acertou` para pagar XP.
  */
 export function useDesempenhoQuiz() {
   const [desempenho, persistir] = useArmazenamentoLocal(CHAVE, VAZIO);
@@ -49,17 +54,17 @@ export function useDesempenhoQuiz() {
       const desempenhoLocal = opcoes?.desempenhoLocal !== false;
       const creditarXp = opcoes?.creditarXp !== false;
       const toastXp = opcoes?.toastXp !== false;
+      const prova = opcoes?.prova;
 
       if (desempenhoLocal) {
         persistir(registrarPuro(desempenho, slug, acertou, paraISO(new Date())));
       }
 
-      if (!logado || !creditarXp) return;
+      if (!logado || !creditarXp || !prova) return;
 
       void registrarAcertoQuiz({
         tentativaId: crypto.randomUUID(),
-        conceitoSlug: slug,
-        acertou,
+        prova,
       })
         .then((r) => {
           if (!r?.ok) return;

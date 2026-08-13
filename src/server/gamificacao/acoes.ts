@@ -1,10 +1,9 @@
 "use server";
 
-import { eq } from "drizzle-orm";
-import { sql } from "drizzle-orm";
-import { getUsuario } from "@/server/auth/dal";
+import { and, eq, gte, sql } from "drizzle-orm";
+import { requireUsuarioAtivo } from "@/server/auth/dal";
 import { db } from "@/server/db";
-import { users, quizTentativas, progresso } from "@/server/db/schema";
+import { users, quizTentativas, progresso, xpEvents } from "@/server/db/schema";
 import { limitadores, limitar } from "@/server/rate-limit";
 import { XP } from "@/shared/lib/gamificacao/xp";
 import type { ProgressoNo } from "@/shared/types/roadmap";
@@ -16,24 +15,23 @@ import {
 } from "@/server/gamificacao/conceder-xp";
 import { avancarMissoesDoDia } from "@/server/gamificacao/missoes";
 import { avaliarConquistas } from "@/server/gamificacao/conquistas";
+import {
+  conceitoValidoParaQuiz,
+  ehUuid,
+  noExisteNoRoadmap,
+  statusProgressoValido,
+  TETO_QUIZ_ACERTO_DIA,
+} from "@/server/gamificacao/validacao";
+import {
+  avaliarProvaRespostaQuiz,
+  type ProvaRespostaQuiz,
+} from "@/shared/lib/quiz/avaliar-prova";
 
 /**
  * Ações de gamificação — a **fronteira confiável**. O cliente reporta a ação;
  * aqui o servidor valida, grava e **concede** o XP (nunca o cliente diz quanto
- * ganhou). Cada concessão é idempotente pela `origem_ref` no ledger.
- *
- * Como o driver HTTP da Neon não faz transação interativa, as escritas são
- * sequenciais; a projeção (`user_stats`) é reconstruível, então uma falha no
- * meio no máximo adia a atualização da projeção — o ledger, que é a verdade,
- * fica consistente.
+ * ganhou). Cada concessão é idempotente por `(user_id, origem_ref)`.
  */
-
-const STATUS_VALIDOS: readonly ProgressoNo[] = [
-  "pending",
-  "done",
-  "in-progress",
-  "skipped",
-];
 
 async function fusoDoUsuario(userId: string): Promise<string | null> {
   const [u] = await db
@@ -43,13 +41,7 @@ async function fusoDoUsuario(userId: string): Promise<string | null> {
   return u?.tz ?? null;
 }
 
-/**
- * Marca "esteve ativo hoje": concede o bônus da primeira atividade do dia (uma
- * vez por dia, idempotente) e atualiza o streak. Chamado quando uma ação nova
- * de verdade acontece (resposta inédita, nó recém-concluído).
- */
 async function creditarAtividade(userId: string, hoje: string): Promise<void> {
-  // Bônus só na primeira do dia — a chave por (usuário, dia) garante uma vez.
   await concederXp({
     userId,
     tipo: "bonusPrimeiraDoDia",
@@ -59,42 +51,58 @@ async function creditarAtividade(userId: string, hoje: string): Promise<void> {
   await registrarDiaAtivo(userId, hoje);
 }
 
+async function quizAcertosHoje(userId: string, hoje: string): Promise<number> {
+  const inicio = new Date(`${hoje}T00:00:00.000Z`);
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(xpEvents)
+    .where(
+      and(
+        eq(xpEvents.userId, userId),
+        eq(xpEvents.tipo, "quizAcerto"),
+        gte(xpEvents.criadoEm, inicio)
+      )
+    );
+  return Number(row?.n ?? 0);
+}
+
 export interface ResultadoAcao {
   ok: boolean;
-  /** XP concedido nesta chamada (0 em repetição idempotente). */
   xp?: number;
-  /** Nível atual após a ação. */
   nivel?: number;
-  /** A ação fez o usuário subir de nível (dispara a celebração no cliente). */
   subiuNivel?: boolean;
   erro?: string;
 }
 
 /**
- * Registra uma resposta do quiz. `tentativaId` é um uuid gerado no cliente por
- * resposta — chave de idempotência: o mesmo envio (retry de rede) não conta duas
- * vezes, mas respostas distintas contam cada uma.
+ * Registra uma resposta do quiz.
+ *
+ * O cliente manda **contexto + resposta**; o servidor regenera o gabarito,
+ * decide `acertou` e só então paga XP (UUID, rate limit, teto diário e
+ * conceito real no catálogo). O boolean do cliente não entra na conta.
  */
 export async function registrarAcertoQuiz(entrada: {
   tentativaId: string;
-  conceitoSlug: string;
-  acertou: boolean;
-  formato?: string;
+  prova: ProvaRespostaQuiz;
 }): Promise<ResultadoAcao> {
-  const u = await getUsuario();
+  const u = await requireUsuarioAtivo();
   if (!u) return { ok: false, erro: "sem sessão" };
 
   const tentativaId = String(entrada.tentativaId ?? "").trim();
-  const conceitoSlug = String(entrada.conceitoSlug ?? "").trim();
-  if (!tentativaId || !conceitoSlug) return { ok: false, erro: "dados inválidos" };
+  if (!ehUuid(tentativaId)) return { ok: false, erro: "dados inválidos" };
 
-  const lim = await limitar(limitadores.escrita, `quiz:${u.id}`);
+  const veredito = avaliarProvaRespostaQuiz(entrada.prova);
+  if (!veredito.valido) return { ok: false, erro: "dados inválidos" };
+
+  // XP de quiz só para verbetes reais (checkpoint/revisão: ledger sem XP).
+  const pagaXp = conceitoValidoParaQuiz(veredito.conceitoSlug);
+
+  const lim = await limitar(limitadores.escrita, `quiz:${u.id}`, "escrita");
   if (!lim.sucesso) return { ok: false, erro: "muitas tentativas" };
 
-  const acertou = Boolean(entrada.acertou);
+  const acertou = veredito.acertou;
+  const conceitoSlug = veredito.conceitoSlug;
 
-  // A tentativa é o registro-âncora. Se já existe (mesmo id), é repetição:
-  // não recredita nada.
   const inseridos = await db
     .insert(quizTentativas)
     .values({
@@ -102,28 +110,35 @@ export async function registrarAcertoQuiz(entrada: {
       userId: u.id,
       conceitoSlug,
       acertou,
-      formato: entrada.formato ?? null,
+      formato: veredito.formato ?? null,
     })
     .onConflictDoNothing({ target: quizTentativas.id })
     .returning({ id: quizTentativas.id });
 
-  if (inseridos.length === 0) return { ok: true, xp: 0 }; // idempotente
+  if (inseridos.length === 0) return { ok: true, xp: 0 };
 
   const hoje = hojeDoUsuario(await fusoDoUsuario(u.id));
   await creditarAtividade(u.id, hoje);
 
   let xp = 0;
-  if (acertou) {
-    const r = await concederXp({
-      userId: u.id,
-      tipo: "quizAcerto",
-      quantia: XP.quizAcerto,
-      origemRef: `quiz:${tentativaId}`,
-    });
-    xp += r.xp;
-    await avancarMissoesDoDia(u.id, hoje, "quizAcerto", 1);
+  if (acertou && pagaXp) {
+    const jaHoje = await quizAcertosHoje(u.id, hoje);
+    if (jaHoje < TETO_QUIZ_ACERTO_DIA) {
+      const r = await concederXp({
+        userId: u.id,
+        tipo: "quizAcerto",
+        quantia: XP.quizAcerto,
+        origemRef: `quiz:${tentativaId}`,
+      });
+      xp += r.xp;
+      if (r.concedido) {
+        await avancarMissoesDoDia(u.id, hoje, "quizAcerto", 1);
+      }
+    }
   }
-  await avancarMissoesDoDia(u.id, hoje, "quizResposta", 1);
+  if (pagaXp) {
+    await avancarMissoesDoDia(u.id, hoje, "quizResposta", 1);
+  }
 
   const proj = await reprojetarXp(u.id);
   await avaliarConquistas(u.id);
@@ -136,27 +151,33 @@ export async function registrarAcertoQuiz(entrada: {
 }
 
 /**
- * Grava o progresso de um nó de roadmap na conta (write-through) e, quando o nó
- * é **concluído**, concede o XP correspondente — uma única vez por nó (a
- * `origem_ref` "no:<slug>:<id>" não paga de novo ao alternar concluído/pendente,
- * o que também fecha a porta pro farm por duplo-clique).
+ * Grava progresso e, se `done`, concede XP **só** se o nó existir no roadmap.
  */
 export async function definirProgresso(entrada: {
   roadmapSlug: string;
   noId: string;
   status: ProgressoNo;
 }): Promise<ResultadoAcao> {
-  const u = await getUsuario();
+  const u = await requireUsuarioAtivo();
   if (!u) return { ok: false, erro: "sem sessão" };
 
   const roadmapSlug = String(entrada.roadmapSlug ?? "").trim();
   const noId = String(entrada.noId ?? "").trim();
   const status = entrada.status;
-  if (!roadmapSlug || !noId || !STATUS_VALIDOS.includes(status)) {
+  if (
+    !roadmapSlug ||
+    !noId ||
+    !statusProgressoValido(status) ||
+    !noExisteNoRoadmap(roadmapSlug, noId)
+  ) {
     return { ok: false, erro: "dados inválidos" };
   }
 
-  const lim = await limitar(limitadores.escrita, `progresso:${u.id}`);
+  const lim = await limitar(
+    limitadores.escrita,
+    `progresso:${u.id}`,
+    "escrita"
+  );
   if (!lim.sucesso) return { ok: false, erro: "muitas tentativas" };
 
   await db
@@ -176,7 +197,6 @@ export async function definirProgresso(entrada: {
     origemRef: `no:${roadmapSlug}:${noId}`,
   });
 
-  // Só credita atividade/missão numa conclusão inédita (não em re-toggle).
   if (r.concedido) {
     const hoje = hojeDoUsuario(await fusoDoUsuario(u.id));
     await creditarAtividade(u.id, hoje);
