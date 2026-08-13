@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Menu, Search, PanelLeft } from "lucide-react";
 import { ThemeToggle } from "@/shared/components/global/theme-toggle";
+import { UserMenu } from "@/shared/components/global/user-menu";
+import { StatusGamificacao } from "@/shared/components/global/status-gamificacao";
 import { useSidebar } from "@/shared/context/sidebar-context";
 import { useSearchPalette } from "@/shared/context/search-context";
 import { temNovidadeRecente } from "@/shared/lib/novidades";
@@ -143,7 +145,9 @@ export function AppHeader() {
             />
           )}
         </Link>
+        <StatusGamificacao />
         <ThemeToggle />
+        <UserMenu />
       </div>
     </header>
   );

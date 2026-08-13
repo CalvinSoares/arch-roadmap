@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
-import { Map } from "lucide-react";
+import Link from "next/link";
+import { Map, Waypoints } from "lucide-react";
 import { PageTemplate } from "@/shared/components/templates/page-template";
 import { RoadmapFlow } from "@/shared/components/diagramas/roadmap-flow";
+import { MapaDeFases } from "@/shared/components/diagramas/mapa-de-fases";
 import { getRoadmap, listRoadmaps } from "@/shared/lib/content";
 import { pageMetadata, breadcrumbJsonLd, courseJsonLd } from "@/shared/lib/seo";
 import { JsonLd } from "@/shared/components/seo/json-ld";
@@ -45,6 +47,15 @@ export default async function RoadmapPage({
         { label: "Roadmaps", href: "/roadmaps" },
         { label: roadmap.titulo },
       ]}
+      actions={
+        <Link
+          href={`/jornada/${roadmap.slug}`}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-card-border bg-card px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-foreground/5"
+        >
+          <Waypoints className="size-4 text-[var(--glow-c)]" />
+          Ver como jornada
+        </Link>
+      }
     >
       <JsonLd
         data={[
@@ -61,6 +72,18 @@ export default async function RoadmapPage({
         ]}
       />
       <RoadmapFlow roadmap={roadmap} />
+
+      <details className="mt-6 rounded-2xl border border-card-border bg-card">
+        <summary className="cursor-pointer list-none px-5 py-4 text-sm font-semibold text-foreground marker:content-none">
+          🗺️ Mapa de fases
+          <span className="ml-2 font-normal text-muted">
+            — a trilha como fases com desbloqueio
+          </span>
+        </summary>
+        <div className="border-t border-card-border p-4">
+          <MapaDeFases roadmap={roadmap} />
+        </div>
+      </details>
     </PageTemplate>
   );
 }

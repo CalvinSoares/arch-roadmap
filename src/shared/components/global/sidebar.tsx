@@ -8,6 +8,7 @@ import {
   Compass,
   LayoutGrid,
   Map,
+  Waypoints,
   X,
   Blocks,
   GitCompareArrows,
@@ -55,6 +56,12 @@ const GRUPOS: Grupo[] = [
         label: "Roadmaps",
         icon: Map,
         cor: "var(--cat-estrutural)",
+      },
+      {
+        href: "/jornada",
+        label: "Jornada",
+        icon: Waypoints,
+        cor: "var(--glow-c)",
       },
       {
         href: "/conceitos",

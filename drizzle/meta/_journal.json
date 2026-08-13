@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1786588994948,
+      "tag": "0000_puzzling_shatterstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786591447685,
+      "tag": "0001_wealthy_karma",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786591956684,
+      "tag": "0002_demonic_maximus",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786626508958,
+      "tag": "0003_romantic_tigra",
+      "breakpoints": true
+    }
+  ]
+}
