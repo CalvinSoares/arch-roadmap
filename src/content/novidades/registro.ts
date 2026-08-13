@@ -29,6 +29,45 @@ export const A_SEGUIR: ItemPlanejado[] = [
  */
 export const NOVIDADES: Novidade[] = [
   {
+    versao: "0.11.0",
+    data: "2026-08-13",
+    titulo: "Jornada jogável, revisão e XP confiável no servidor",
+    resumo:
+      "A trilha estilo caminho ganha desafios verificáveis de verdade, revisão dos pontos fracos, som e conteúdo mais denso — e o servidor deixa de acreditar no “eu acertei” do cliente na hora de pagar XP.",
+    mudancas: [
+      {
+        tipo: "novo",
+        texto:
+          "Jornada: cada nó abre lição com desafios mistos (VF, lacuna, ordenar, parear, dois códigos, MCQ) — checkpoints com banco curado (≥3 por nó) e conceitos com gerador anti-oco.",
+      },
+      {
+        tipo: "novo",
+        texto:
+          "Revisão na jornada: pratica os conceitos em que você mais erra, com decoração própria e sem farmar XP de novo no replay.",
+      },
+      {
+        tipo: "melhoria",
+        texto:
+          "Feedback da lição: som leve (com mute), estrelas por precisão, baú de unidade no servidor e roadmaps FE/BE/AR/RES com descrições e recursos mais úteis.",
+      },
+      {
+        tipo: "conteudo",
+        texto:
+          "Padrões: dezenas de verbetes ganham anti-exemplo e passos concretos — a lição deixa de ser só resumo.",
+      },
+      {
+        tipo: "correcao",
+        texto:
+          "XP de quiz: o cliente manda contexto + resposta; o servidor regenera o gabarito e decide o acerto. Acabou o atalho de reportar acertou: true.",
+      },
+      {
+        tipo: "correcao",
+        texto:
+          "Gamificação mais segura: XP idempotente por usuário (não trava o 2º aluno no mesmo nó), progresso só com nó real, rate-limit fail-closed em produção sem Redis, ban/role relidos do banco e estrelas só da sessão.",
+      },
+    ],
+  },
+  {
     versao: "0.10.0",
     data: "2026-08-11",
     titulo: "Prática: código errado, entrevista e lab de falha",
