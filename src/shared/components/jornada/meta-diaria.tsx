@@ -9,8 +9,8 @@ const R = 20;
 const CIRC = 2 * Math.PI * R;
 
 /**
- * Anel de meta diária de XP — a alavanca de retorno, "com respeito": um objetivo
- * modesto (50 XP/dia), sem punição por não bater. Só aparece logado; lê o XP de
+ * Anel de meta diária de XP: um objetivo modesto (50 XP/dia), sem punição
+ * por não bater. Só aparece logado; lê o XP de
  * hoje do ledger. Fica invisível deslogado (vazio na chegada).
  */
 export function MetaDiaria() {
@@ -25,7 +25,7 @@ export function MetaDiaria() {
         if (vivo) setDados(d);
       })
       .catch(() => {
-        /* offline/erro — o anel só não aparece */
+        /* offline/erro; o anel só não aparece */
       });
     return () => {
       vivo = false;

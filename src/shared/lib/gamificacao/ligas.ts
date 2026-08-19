@@ -1,10 +1,10 @@
 /**
- * Ligas e a virada semanal de temporada — a competição estilo Duolingo.
+ * Ligas e a virada semanal de temporada (estilo Duolingo).
  *
- * Função **pura**: recebe os membros de um tier já ordenados e devolve para onde
- * cada um vai (promove / mantém / rebaixa). Sem DB, sem relógio — o serviço de
- * virada (cron) faz o I/O em volta e chama isto. Assim a regra de promoção é
- * testável sem subir um banco.
+ * Função pura: recebe os membros de um tier já ordenados e devolve pra onde
+ * cada um vai (promove / mantém / rebaixa). Sem DB e sem relógio; o serviço de
+ * virada (cron) faz o I/O em volta. Assim a regra de promoção é testável sem
+ * subir um banco.
  */
 
 export const NIVEIS_LIGA = [
@@ -50,13 +50,13 @@ export interface TransicaoLiga {
 }
 
 /**
- * Classifica os membros de **um** tier no fim da temporada.
+ * Classifica os membros de um tier no fim da temporada.
  *
  * Espera a lista já ordenada por XP da temporada (maior primeiro). Regras:
- *  - Quem não pontuou (xp ≤ 0) rebaixa — inatividade não segura o lugar.
+ *  - Quem não pontuou (xp ≤ 0) rebaixa, mesmo que sobre vaga no meio.
  *  - Top `promover` sobem; base `rebaixar` descem; o miolo fica.
  * Ordem determinística (a spec depende): o caller deve desempatar antes (ex.:
- * por `userId`) para a virada ser reprodutível.
+ * por `userId`) pra virada ser reprodutível.
  */
 export function classificarTier(
   ordenados: readonly MembroTier[],

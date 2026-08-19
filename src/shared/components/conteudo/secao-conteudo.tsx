@@ -2,7 +2,7 @@ import { cn } from "@/shared/utils/cn";
 
 interface SecaoConteudoProps {
   id?: string;
-  /** Posição na trilha de leitura — vira "01", "02"… */
+  /** Posição na trilha de leitura; vira "01", "02"… */
   numero?: number;
   /** Rótulo curto do tipo de seção ("Conceito", "Interativo"…). */
   etiqueta?: string;
@@ -52,8 +52,8 @@ export function SecaoConteudo({
 }
 
 /**
- * Figura de apoio — ilustrações e passos que pertencem à seção anterior.
- * Sem número: não é um novo degrau da trilha, é o mesmo assunto ilustrado.
+ * Figura de apoio: ilustrações e passos que pertencem à seção anterior.
+ * Sem número, porque continua o mesmo assunto da seção, só ilustrado.
  */
 export function FiguraApoio({
   etiqueta,

@@ -9,7 +9,7 @@ import type { Bloco } from "@/shared/types/bloco";
 import type { Conceito } from "@/shared/types/conceito";
 
 export interface Pergunta {
-  /** `${slug}:${indice}` — estável entre execuções com a mesma semente. */
+  /** `${slug}:${indice}`, estável entre execuções com a mesma semente. */
   id: string;
   /** O texto da armadilha, com o nome do padrão mascarado. */
   enunciado: string;
@@ -17,13 +17,11 @@ export interface Pergunta {
   correta: string;
   /** 4 slugs embaralhados, incluindo o correto. */
   alternativas: string[];
-  /** O título da armadilha — revelado depois da resposta. */
+  /** O título da armadilha, revelado depois da resposta. */
   explicacao: string;
   /**
-   * De qual formato a pergunta veio, para a UI rotular a rodada.
-   *
-   * Opcional porque o formato `armadilha` é o original e não precisava do
-   * campo — quem não declara é armadilha.
+   * De qual formato a pergunta veio, pra UI rotular a rodada.
+   * Ausente = armadilha (o formato original, anterior ao campo).
    */
   formato?: import("@/shared/lib/quiz-formatos").FormatoQuiz;
   /** Trecho de código (formato explique-erro). */
@@ -43,7 +41,7 @@ function prng(semente: number): () => number {
   };
 }
 
-/** Fisher-Yates com aleatoriedade injetada — nunca `Math.random()`. */
+/** Fisher-Yates com aleatoriedade injetada (nunca `Math.random()`). */
 function embaralhar<T>(itens: T[], rnd: () => number): T[] {
   const out = [...itens];
   for (let i = out.length - 1; i > 0; i--) {
@@ -117,9 +115,9 @@ function armadilhasDe(c: Conceito): ArmadilhaComDono[] {
 /**
  * Armadilhas do catálogo, já mascaradas.
  *
- * `escopo` limita o sorteio a um conjunto de conceitos — é o que permite um
- * quiz de uma categoria, de uma trilha ou de um conceito só. Sem escopo, vale
- * o catálogo inteiro.
+ * `escopo` limita o sorteio a um conjunto de conceitos: permite quiz de uma
+ * categoria, de uma trilha ou de um conceito só. Sem escopo, vale o catálogo
+ * inteiro.
  */
 export function todasAsArmadilhas(
   escopo?: readonly string[]
@@ -133,9 +131,9 @@ export function todasAsArmadilhas(
 /**
  * Distratores: conceitos com que este é genuinamente confundido.
  *
- * Usa `relacionados` **nos dois sentidos** mais os pares do comparador —
- * quase metade das ligações de `relacionados` é de mão única, e sem a união
- * alguns conceitos ficariam sem distratores plausíveis.
+ * Usa `relacionados` nos dois sentidos mais os pares do comparador: quase
+ * metade das ligações de `relacionados` é de mão única, e sem a união alguns
+ * conceitos ficariam sem distratores plausíveis.
  */
 export function distratoresDe(slug: string): string[] {
   const c = getConceito(slug);
@@ -156,7 +154,7 @@ export function distratoresDe(slug: string): string[] {
 /**
  * Monta um conjunto de perguntas determinístico.
  *
- * A mesma semente sempre produz as mesmas perguntas na mesma ordem — é o que
+ * A mesma semente sempre produz as mesmas perguntas na mesma ordem, o que
  * permite um "quiz do dia" estável e testes reprodutíveis.
  */
 export function gerarPerguntas(
@@ -203,7 +201,7 @@ export function gerarPerguntas(
 export interface TopicoQuiz {
   id: string;
   titulo: string;
-  /** "categoria" | "trilha" — agrupa os botões na tela. */
+  /** "categoria" | "trilha": agrupa os botões na tela. */
   familia: "categoria" | "trilha";
   slugs: string[];
   /** Quantas perguntas o tópico consegue oferecer. */
@@ -214,11 +212,9 @@ export interface TopicoQuiz {
 const MINIMO_POR_TOPICO = 6;
 
 /**
- * Tópicos disponíveis, **derivados** do catálogo e dos roadmaps — nada é
- * declarado à mão, então categorias e trilhas novas aparecem sozinhas.
- *
- * Recortes com menos de {@link MINIMO_POR_TOPICO} armadilhas ficam de fora:
- * um quiz de 3 perguntas que sempre repete as mesmas não ensina nada.
+ * Tópicos disponíveis, derivados do catálogo e dos roadmaps: nada é declarado
+ * à mão, então categorias e trilhas novas aparecem sozinhas. Recortes com
+ * menos de {@link MINIMO_POR_TOPICO} armadilhas ficam de fora.
  */
 export function topicosDisponiveis(): TopicoQuiz[] {
   const conceitos = listConceitos();
@@ -269,7 +265,7 @@ export function getTopico(id: string): TopicoQuiz | undefined {
   return topicosDisponiveis().find((t) => t.id === id);
 }
 
-/** Semente estável por dia — o "quiz do dia" é o mesmo para todos. */
+/** Semente estável por dia: o "quiz do dia" é o mesmo pra todos. */
 export function sementeDoDia(iso: string): number {
   let h = 0;
   for (const ch of iso) h = (Math.imul(h, 31) + ch.charCodeAt(0)) | 0;

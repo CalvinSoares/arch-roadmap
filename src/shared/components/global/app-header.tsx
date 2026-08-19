@@ -13,7 +13,7 @@ import { temNovidadeRecente } from "@/shared/lib/novidades";
 import { cn } from "@/shared/utils/cn";
 
 /**
- * `false` no servidor, valor real no cliente — “recente” depende do relógio
+ * `false` no servidor, valor real no cliente: “recente” depende do relógio
  * de quem visita; resolver só no cliente evita divergência de hidratação.
  */
 const semInscricao = () => () => {};
@@ -105,7 +105,7 @@ export function AppHeader() {
       </div>
 
       <div className="flex items-center gap-1.5">
-        {/* Busca — pílula que se expande no hover (desktop) */}
+        {/* Busca: pílula que se expande no hover (desktop) */}
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -130,7 +130,7 @@ export function AppHeader() {
         </button>
         <Link
           href="/novidades"
-          aria-label={avisar ? "Novidades — há entregas recentes" : "Novidades"}
+          aria-label={avisar ? "Novidades (há entregas recentes)" : "Novidades"}
           title="Novidades"
           className={cn(
             "relative rounded-lg p-2 text-muted transition-all duration-200 hover:bg-foreground/5 hover:text-primary active:scale-90",

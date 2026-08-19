@@ -16,7 +16,7 @@ export default function CompararPage() {
     <PageTemplate
       icon={Scale}
       title="Comparar arquiteturas"
-      subtitle="Duas pilhas lado a lado: o que muda nas cinco métricas, quais peças entram e saem, e quais alertas a variante resolve — ou introduz."
+      subtitle="Duas pilhas lado a lado: o que muda nas cinco métricas, quais peças entram e saem, e quais alertas a variante resolve ou introduz."
       breadcrumb={[
         { label: "Construtor", href: "/construtor" },
         { label: "Comparar" },
@@ -24,11 +24,12 @@ export default function CompararPage() {
     >
       <div className="space-y-6">
         <p className="max-w-[68ch] text-[15px] leading-relaxed text-muted">
-          &quot;E se eu tirasse a fila?&quot; é a pergunta que o Construtor
-          deixava em aberto — e ela não se responde de cabeça, porque as cinco
-          métricas se movem juntas: o ganho de uma esconde a piora de outra.
-          Quase nunca há um lado melhor.{" "}
-          <span className="text-foreground">Há uma troca, e ela tem nome.</span>
+          &quot;E se eu tirasse a fila?&quot; é difícil de responder de cabeça,
+          porque as cinco métricas se movem juntas: o ganho de uma esconde a
+          piora de outra. Quase nunca há um lado melhor.{" "}
+          <span className="text-foreground">
+            O que existe é uma troca, e o diff abaixo mostra qual.
+          </span>
         </p>
 
         <ComparadorProjetos />

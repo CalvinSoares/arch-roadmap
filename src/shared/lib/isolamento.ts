@@ -1,14 +1,13 @@
 /**
- * Laboratório de concorrência — o motor, em funções puras.
+ * Laboratório de concorrência: o motor, em funções puras.
  *
- * Simula duas transações intercaladas sobre uma linha e diz **qual anomalia
- * aconteceu**, dado o nível de isolamento escolhido. Determinístico: nenhuma
- * aleatoriedade, nenhum relógio, nenhum DOM — o mesmo roteiro dá sempre o mesmo
- * resultado, e é isso que permite testar.
+ * Simula duas transações intercaladas sobre uma linha e diz qual anomalia
+ * aconteceu, dado o nível de isolamento. Determinístico (sem aleatoriedade,
+ * relógio ou DOM): o mesmo roteiro dá sempre o mesmo resultado, o que permite
+ * testar.
  *
- * O modelo é deliberadamente pequeno. Ele não é um banco: é o suficiente para
- * a anomalia acontecer na frente de quem lê, que é o que texto não consegue
- * fazer.
+ * O modelo é pequeno de propósito, só o suficiente pra anomalia acontecer na
+ * frente de quem lê.
  */
 
 export type Nivel = "READ UNCOMMITTED" | "READ COMMITTED" | "REPEATABLE READ" | "SERIALIZABLE";
@@ -55,7 +54,7 @@ export interface Evento {
   leu?: number;
   /** Valor commitado depois deste passo. */
   commitado: number;
-  /** Explicação do que aconteceu — é o que ensina. */
+  /** Explicação do que aconteceu, mostrada ao usuário. */
   narracao: string;
   /** Anomalia que este passo revelou, se alguma. */
   anomalia?: Anomalia;
@@ -73,22 +72,19 @@ export interface Resultado {
 }
 
 /**
- * O que uma transação enxerga ao ler, dado o nível.
- *
- * É aqui que os níveis se diferenciam de verdade: não no que escrevem, e sim
- * no que deixam ver.
+ * O que uma transação enxerga ao ler, dado o nível. Os níveis se diferenciam
+ * aqui, no que cada um deixa ver.
  */
 function ler(
   tx: "T1" | "T2",
   estado: EstadoLinha,
   nivel: Nivel,
   /**
-   * Valor commitado no instante da **primeira** leitura de cada transação.
-   *
-   * Um mapa só serve aos dois usos, e é por isso que antes havia um bug aqui:
-   * em REPEATABLE READ ele é o valor que as leituras seguintes devolvem
-   * (snapshot congelado); em READ COMMITTED ele é a referência que revela o
-   * *non-repeatable read* quando o commitado se move.
+   * Valor commitado no instante da primeira leitura de cada transação.
+   * O mesmo mapa serve a dois usos (fonte de um bug antigo): em REPEATABLE
+   * READ é o valor que as leituras seguintes devolvem (snapshot congelado);
+   * em READ COMMITTED é a referência que revela o non-repeatable read quando
+   * o commitado muda.
    */
   primeiraLeitura: Partial<Record<"T1" | "T2", number>>
 ): { valor: number; nota: string; anomalia?: Anomalia } {
@@ -144,7 +140,7 @@ export function simular(
   inicial = 100
 ): Resultado {
   const estado: EstadoLinha = { commitado: inicial, pendente: {} };
-  /** Commitado no instante da 1ª leitura de cada transação — ver `ler()`. */
+  /** Commitado no instante da 1ª leitura de cada transação (ver `ler()`). */
   const primeiraLeitura: Partial<Record<"T1" | "T2", number>> = {};
   const ultimaLeitura: Partial<Record<"T1" | "T2", number>> = {};
   const abortada = new Set<"T1" | "T2">();
@@ -263,7 +259,7 @@ export function simular(
   };
 }
 
-/** Roteiros prontos — cada um exibe uma anomalia específica. */
+/** Roteiros prontos; cada um exibe uma anomalia específica. */
 export interface Roteiro {
   id: string;
   nome: string;

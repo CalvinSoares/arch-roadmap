@@ -4,12 +4,8 @@ import { TextoRico } from "@/shared/components/conteudo/texto-rico";
 import { postmortemsDoConceito } from "@/shared/lib/content";
 
 /**
- * "Onde isto já custou caro" — os incidentes públicos que este conceito
- * explica.
- *
- * É a ponte que transforma o padrão de vocabulário em consequência: ler sobre
- * Bulkhead é uma coisa; ver que a falta dele derrubou metade da internet em
- * 2017 é outra. Derivado do registro de postmortems, nunca declarado aqui.
+ * "Onde isto já custou caro": os incidentes públicos que este conceito
+ * explica. Derivado do registro de postmortems, nunca declarado aqui.
  */
 export function EmPostmortems({ slug }: { slug: string }) {
   const incidentes = postmortemsDoConceito(slug);

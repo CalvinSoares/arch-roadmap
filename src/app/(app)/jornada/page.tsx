@@ -18,7 +18,7 @@ export default function JornadaIndexPage() {
     <PageTemplate
       icon={Waypoints}
       title="Jornada"
-      subtitle="Escolha uma trilha e avance fase a fase — cada nó abre o conteúdo e conta pro seu progresso."
+      subtitle="Escolha uma trilha e avance fase a fase. Cada nó abre o conteúdo e conta pro seu progresso."
       breadcrumb={[{ label: "Jornada" }]}
     >
       <div className="grid gap-4 sm:grid-cols-2">

@@ -2,7 +2,7 @@ import { cn } from "@/shared/utils/cn";
 
 /**
  * Selo de conteúdo recém-publicado. A decisão de mostrar vem sempre de
- * `ehNovo`/`slugsNovos` (derivados do changelog) — nunca marcado à mão.
+ * `ehNovo`/`slugsNovos` (derivados do changelog); nunca marcado à mão.
  */
 export function SeloNovo({ className }: { className?: string }) {
   return (

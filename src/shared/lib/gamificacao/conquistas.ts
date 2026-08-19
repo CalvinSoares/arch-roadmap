@@ -1,9 +1,9 @@
 /**
- * Conquistas (badges) — marcos que reconhecem o esforço acumulado.
+ * Conquistas (badges) por esforço acumulado.
  *
- * As definições são estáticas e versionadas em Git (como missões e XP); o que o
- * usuário ganhou vai pro banco (`user_conquistas`). A avaliação é uma função
- * **pura**: dadas as métricas do usuário, diz quais badges ele já merece. Quem
+ * As definições são estáticas e versionadas em Git (como missões e XP); o que
+ * o usuário ganhou vai pro banco (`user_conquistas`). A avaliação é função
+ * pura: dadas as métricas do usuário, diz quais badges ele já merece. Quem
  * concede (idempotente, uma vez por badge) é o serviço no servidor.
  */
 
@@ -20,7 +20,7 @@ export interface MetricasConquista {
 }
 
 export interface Conquista {
-  /** Estável — vira `user_conquistas.conquista_chave`. */
+  /** Estável; vira `user_conquistas.conquista_chave`. */
   chave: string;
   titulo: string;
   descricao: string;
@@ -87,8 +87,8 @@ export function acharConquista(chave: string): Conquista | undefined {
 }
 
 /**
- * As chaves de todas as conquistas que as métricas satisfazem. Determinístico e
- * cumulativo — quem já passou de 5.000 XP ganha também a de 500. Quem concede
+ * Chaves de todas as conquistas que as métricas satisfazem. Determinístico e
+ * cumulativo (quem já passou de 5.000 XP ganha também a de 500). Quem concede
  * filtra as que o usuário ainda não tem.
  */
 export function conquistasGanhas(m: MetricasConquista): string[] {

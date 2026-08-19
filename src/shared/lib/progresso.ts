@@ -1,15 +1,12 @@
 import type { ProgressoNo } from "@/shared/types/roadmap";
 
 /**
- * Mescla de progresso — a lógica da migração local→conta, em função **pura**.
+ * Merge da migração local→conta (função pura). No login, o progresso do
+ * localStorage entra na conta sem sobrescrever o que já existe lá: vence o
+ * status mais avançado, empate mantém o servidor. Um "done" nunca regride.
  *
- * Quando o anônimo (que só tinha `localStorage`) faz login, o progresso do
- * dispositivo precisa entrar na conta sem atropelar o que já houver no servidor.
- * A regra: **vence o estado mais avançado**; empate mantém o servidor. Assim um
- * "concluído" nunca vira "pendente", venha de onde vier.
- *
- * Sem DB e sem relógio: recebe o local e o servidor, devolve só o que o servidor
- * precisa gravar. Testável isolada, no padrão de `xp.ts`/`streak.ts`.
+ * Sem DB e sem relógio: recebe o local e o servidor, devolve só o que o
+ * servidor precisa gravar (mesmo padrão de `xp.ts`/`streak.ts`).
  */
 
 /** Quanto cada status "vale": o maior vence a mescla. */
@@ -59,4 +56,38 @@ export function mesclarProgresso(
     escrever.push({ noId, status });
   }
   return escrever;
+}
+
+/** Uma trilha e os ids dos seus nós (o que o split por roadmap precisa). */
+export interface RoadmapNos {
+  slug: string;
+  noIds: readonly string[];
+}
+
+/**
+ * Divide o estado plano da conta (`noId → status`) nos mapas por trilha que a
+ * UI guarda em `localStorage` (`DevMappa:progress:<slug>`). O servidor grava o
+ * progresso achatado por nó (sem o slug), então semear cada chave exige
+ * reagrupar por roadmap.
+ *
+ * Um mesmo `noId` presente em duas trilhas entra nas duas (o DB não guarda a
+ * que trilha o nó pertence). `noId`s que não existem em nenhuma trilha
+ * (estado velho/inválido) são descartados.
+ *
+ * Função pura: recebe os ids de nó de cada roadmap, não importa o catálogo.
+ */
+export function estadoPorRoadmap(
+  estado: Readonly<Record<string, ProgressoNo>>,
+  roadmaps: readonly RoadmapNos[]
+): Record<string, Record<string, ProgressoNo>> {
+  const porSlug: Record<string, Record<string, ProgressoNo>> = {};
+  for (const { slug, noIds } of roadmaps) {
+    const mapa: Record<string, ProgressoNo> = {};
+    for (const noId of noIds) {
+      const status = estado[noId];
+      if (status !== undefined) mapa[noId] = status;
+    }
+    porSlug[slug] = mapa;
+  }
+  return porSlug;
 }

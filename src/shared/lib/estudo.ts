@@ -21,8 +21,8 @@ function somarDias(iso: string, dias: number): string {
 /**
  * Agenda um conceito depois de uma revisão.
  *
- * Acertar sobe um nível (satura em NIVEL_MAXIMO); errar volta para zero — sem
- * autoavaliação de 0 a 5, porque duas opções bastam e a fricção despenca.
+ * Acertar sobe um nível (satura em NIVEL_MAXIMO); errar volta pra zero. Sem
+ * autoavaliação de 0 a 5: duas opções bastam e dão menos fricção.
  * Função pura: `hoje` entra por parâmetro.
  */
 export function agendar(
@@ -58,11 +58,9 @@ export function devidosHoje(agenda: AgendaEstudo, hoje: string): RevisaoConceito
 }
 
 /**
- * Entra na agenda ao ser concluído no roadmap — e sai se for desmarcado.
- *
- * Sem isto, a revisão espaçada não teria de onde tirar a fila: o progresso do
- * roadmap não guarda data, então a primeira revisão é agendada no momento em
- * que percebemos a conclusão.
+ * Entra na agenda ao ser concluído no roadmap; sai se for desmarcado.
+ * O progresso do roadmap não guarda data, então a primeira revisão é agendada
+ * no momento em que percebemos a conclusão.
  */
 export function sincronizarComProgresso(
   agenda: AgendaEstudo,
@@ -74,16 +72,14 @@ export function sincronizarComProgresso(
     // preserva quem já tinha agenda; estreia quem acabou de ser concluído
     proxima[slug] = agenda[slug] ?? agendar(slug, undefined, true, hoje);
   }
-  // quem saiu de `concluidos` não é copiado — desmarcar no roadmap tira da fila
+  // quem saiu de `concluidos` não é copiado: desmarcar no roadmap tira da fila
   return proxima;
 }
 
 /**
- * Todos os itens de roadmap que apontam para um conceito.
- *
- * **72 dos 142 itens não têm `conceito`** — são tópicos como "HTTP a sério",
- * que não têm página. Sugerir estudá-los levaria a lugar nenhum, então eles
- * ficam de fora por construção.
+ * Todos os itens de roadmap que apontam pra um conceito.
+ * Cerca de metade dos itens não tem `conceito` (tópicos como "HTTP a sério",
+ * sem página própria); esses ficam de fora, não haveria pra onde mandar.
  */
 export function itensEstudaveis(): ProximoDaTrilha[] {
   const out: ProximoDaTrilha[] = [];
@@ -112,10 +108,8 @@ type ProgressoPorRoadmap = Record<string, Record<string, ProgressoNo>>;
 
 /**
  * Os próximos itens a estudar, na ordem em que aparecem nas trilhas.
- *
  * A ordem da trilha já codifica pré-requisito (fundamentos antes de
- * arquitetura), então respeitá-la é o suficiente — não há grafo de
- * dependências a resolver.
+ * arquitetura), então basta respeitá-la; não há grafo de dependências.
  */
 export function proximosDaTrilha(
   progresso: ProgressoPorRoadmap,
@@ -128,7 +122,7 @@ export function proximosDaTrilha(
     if (out.length >= quantos) break;
     const status = progresso[item.roadmapSlug]?.[item.noId] ?? "pending";
     if (status === "done" || status === "skipped") continue;
-    // o mesmo conceito aparece em várias trilhas — sugerir uma vez só
+    // o mesmo conceito aparece em várias trilhas; sugerir uma vez só
     if (vistos.has(item.conceitoSlug)) continue;
     vistos.add(item.conceitoSlug);
     out.push(item);
@@ -147,7 +141,7 @@ export function conceitosConcluidos(progresso: ProgressoPorRoadmap): string[] {
   return [...out];
 }
 
-/** Quanto de cada trilha já foi concluído — alimenta o resumo da página. */
+/** Quanto de cada trilha já foi concluído; alimenta o resumo da página. */
 export function progressoPorRoadmap(
   progresso: ProgressoPorRoadmap
 ): { slug: string; titulo: string; concluidos: number; total: number }[] {

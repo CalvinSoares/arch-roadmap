@@ -1,8 +1,8 @@
 import { cn } from "@/shared/utils/cn";
 
 /**
- * Fundo decorativo do hero: três manchas de cor desfocadas que derivam
- * lentamente (`.aurora` em globals.css). Puramente ornamental.
+ * Fundo decorativo do hero: três manchas de cor desfocadas e estáticas
+ * (`.aurora` em globals.css). Puramente ornamental.
  */
 export function Aurora({ className }: { className?: string }) {
   return (
@@ -16,11 +16,11 @@ export function Aurora({ className }: { className?: string }) {
       />
       <span
         className="aurora right-[4%] top-[6%] size-[22rem]"
-        style={{ background: "var(--glow-b)", animationDelay: "-6s" }}
+        style={{ background: "var(--glow-b)" }}
       />
       <span
         className="aurora left-[38%] top-[42%] size-[18rem]"
-        style={{ background: "var(--glow-c)", animationDelay: "-12s" }}
+        style={{ background: "var(--glow-c)" }}
       />
     </div>
   );

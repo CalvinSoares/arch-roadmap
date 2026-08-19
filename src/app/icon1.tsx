@@ -2,9 +2,9 @@ import { ImageResponse } from "next/og";
 
 /**
  * Fallback raster do `icon.svg`. O sufixo `1` é a convenção do Next para
- * declarar um segundo ícone — os dois vão para o `<head>`.
+ * declarar um segundo ícone: os dois vão para o `<head>`.
  *
- * Navegadores modernos aceitam favicon em SVG, mas nem todo cliente aceita —
+ * Navegadores modernos aceitam favicon em SVG, mas nem todo cliente aceita:
  * leitores de feed, prévias em apps de mensagem e Safari antigo pedem um
  * bitmap. O Next declara os dois no `<head>` e cada um pega o que entende.
  *

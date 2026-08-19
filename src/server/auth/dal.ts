@@ -6,9 +6,9 @@ import { db } from "@/server/db";
 import { users } from "@/server/db/schema";
 
 /**
- * Data Access Layer da autenticação — o padrão que o próprio guia do Next 16
- * recomenda no lugar de checar auth no middleware/proxy: verificar perto do
- * dado. `cache` memoiza a sessão por render, evitando reler o cookie N vezes.
+ * Data Access Layer da autenticação. O guia do Next 16 recomenda verificar
+ * auth perto do dado em vez de no middleware/proxy. `cache` memoiza a sessão
+ * por render, evitando reler o cookie N vezes.
  */
 export const getSessao = cache(async () => auth());
 
@@ -60,7 +60,7 @@ export async function requireUser() {
   return ativo;
 }
 
-/** Exige papel admin (RBAC) **lido do banco**, não só do JWT. */
+/** Exige papel admin (RBAC) lido do banco, não só do JWT. */
 export async function requireAdmin() {
   const u = await requireUser();
   if (u.role !== "admin") redirect("/");

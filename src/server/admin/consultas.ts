@@ -146,8 +146,8 @@ export interface AnomaliaXp {
 }
 
 /**
- * Anti-cheat: usuários com muitos eventos de XP na última hora — um sinal de
- * farm/automação para o admin investigar. `LIMIAR` é conservador; o ledger
+ * Anti-cheat: usuários com muitos eventos de XP na última hora, sinal de
+ * farm/automação pro admin investigar. `LIMIAR` é conservador; o ledger
  * idempotente já barra duplicatas, então volume alto legítimo é raro.
  */
 const LIMIAR_EVENTOS_HORA = 60;

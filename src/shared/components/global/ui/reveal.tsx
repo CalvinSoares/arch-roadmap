@@ -14,7 +14,7 @@ const DESLOCAMENTO: Record<Direcao, { x?: number; y?: number }> = {
 };
 
 interface OpcoesReveal {
-  /** Índice na lista — vira o atraso da cascata. */
+  /** Índice na lista; vira o atraso da cascata. */
   indice?: number;
   atraso?: number;
   direcao?: Direcao;

@@ -18,7 +18,7 @@ export default function PostmortemsPage() {
     <PageTemplate
       icon={Siren}
       title="Postmortems anotados"
-      subtitle="Incidentes reais, com relatório público, ligados aos conceitos que eles provam. Em quase todos, a causa raiz não é o erro que disparou — é o sistema que permitiu que ele tivesse aquele tamanho."
+      subtitle="Incidentes reais, com relatório público, ligados aos conceitos que eles provam. Em quase todos, o problema de verdade foi o sistema deixar um erro pequeno crescer daquele jeito."
       breadcrumb={[{ label: "Postmortems" }]}
     >
       <ul className="grid gap-4 lg:grid-cols-2">

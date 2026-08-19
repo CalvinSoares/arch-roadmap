@@ -53,7 +53,7 @@ function Painel({
   );
 }
 
-/** Painel de decisão: quando o padrão paga o próprio custo — e quando não. */
+/** Painel de decisão: quando o padrão paga o próprio custo, e quando não. */
 export function QuandoUsar({ quandoUsar, quandoEvitar }: Props) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">

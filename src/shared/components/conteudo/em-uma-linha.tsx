@@ -37,7 +37,7 @@ export async function EmUmaLinha({ emUmaLinha, custo }: Props) {
             </h2>
           </div>
           <p className="mt-1 text-[13px] text-muted">
-            Sem nome de domínio, sem cerimônia — só a ideia.
+            Sem nome de domínio, sem cerimônia. Só a ideia.
           </p>
           <div
             className="mt-3 max-w-full overflow-x-auto overscroll-x-contain rounded-xl [-webkit-overflow-scrolling:touch] [&_.shiki]:max-w-none [&_.shiki]:text-[12px] sm:[&_.shiki]:text-[13px]"

@@ -1,9 +1,9 @@
 /**
- * Rate limiting (Upstash Redis) — barra farm de XP e abuso de login/registro.
+ * Rate limiting (Upstash Redis): barra farm de XP e abuso de login/registro.
  *
  * Sem Upstash:
- * - **escrita** (XP/progresso) em produção → fail-closed
- * - **auth** (login/registro) → fail-open com aviso (não trava o site inteiro)
+ * - escrita (XP/progresso) em produção → fail-closed
+ * - auth (login/registro) → fail-open com aviso (não trava o site inteiro)
  * - dev/CI → fail-open
  */
 

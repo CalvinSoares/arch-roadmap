@@ -64,7 +64,10 @@ export function DesafioView({
       );
     case "ordenar":
       return (
+        // key remonta ao trocar de desafio: o estado interno zera sem effect
+        // (o pai já reseta o rascunho em avancar/praticarDeNovo)
         <DesafioOrdenarView
+          key={desafio.id}
           desafio={desafio}
           revelado={revelado}
           onMudar={(ordem) => onRascunho({ tipo: "ordenar", ordem })}
@@ -73,6 +76,7 @@ export function DesafioView({
     case "parear":
       return (
         <DesafioParearView
+          key={desafio.id}
           desafio={desafio}
           revelado={revelado}
           sementeEmbaralhe={hashId(desafio.id)}

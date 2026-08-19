@@ -1,13 +1,12 @@
 import type { RoadmapSection, ProgressoNo } from "@/shared/types/roadmap";
 
 /**
- * Mapa de fases — a camada de jogo por cima do roadmap. Cada seção do roadmap
- * vira uma "fase"; concluir uma fase **desbloqueia** a próxima ("conclua X para
- * abrir Y").
+ * Mapa de fases por cima do roadmap. Cada seção vira uma "fase"; concluir uma
+ * fase desbloqueia a próxima.
  *
- * O desbloqueio é **derivado** do progresso (função pura), não guardado: o mapa
- * é estático (Git), o estado por usuário vem do progresso que já existe. Zero
- * tabela nova — se o progresso muda, o mapa recalcula sozinho.
+ * O desbloqueio é derivado do progresso (função pura), não guardado: o mapa é
+ * estático (Git), o estado por usuário vem do progresso que já existe. Sem
+ * tabela nova; se o progresso muda, o mapa recalcula sozinho.
  */
 
 export interface Fase {

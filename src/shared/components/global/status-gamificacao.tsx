@@ -9,7 +9,7 @@ import { meuStatus, type StatusResumido } from "@/server/gamificacao/status";
 
 /**
  * Indicador persistente de progresso no header: nível (com anel de XP) + streak.
- * Só aparece logado. Rebusca ao autenticar e a cada troca de rota — assim, depois
+ * Só aparece logado. Rebusca ao autenticar e a cada troca de rota; assim, depois
  * de ganhar XP num quiz/nó, o badge já reflete na navegação seguinte.
  *
  * É leve: uma leitura da projeção (`meuStatus`). Fica invisível deslogado, fiel à
@@ -28,7 +28,7 @@ export function StatusGamificacao() {
         if (vivo) setDados(d);
       })
       .catch(() => {
-        /* offline/erro — o indicador só não atualiza */
+        /* offline/erro; o indicador só não atualiza */
       });
     return () => {
       vivo = false;
@@ -36,7 +36,7 @@ export function StatusGamificacao() {
   }, [status, pathname]);
 
   // Deslogado, o guard esconde o indicador mesmo que `dados` tenha ficado de uma
-  // sessão anterior — sem precisar de setState síncrono no efeito.
+  // sessão anterior, sem precisar de setState síncrono no efeito.
   if (status !== "authenticated" || !dados) return null;
 
   const pctLargura = `${Math.round(dados.pct * 100)}%`;
@@ -65,7 +65,7 @@ export function StatusGamificacao() {
         <span className="font-bold text-foreground">{dados.nivel}</span>
       </span>
 
-      {/* Progresso do nível como um filete ao pé da pílula — sem círculos aninhados */}
+      {/* Progresso do nível como um filete ao pé da pílula, sem círculos aninhados */}
       <span
         aria-hidden
         className="absolute inset-x-0 bottom-0 h-[2px] bg-foreground/10"

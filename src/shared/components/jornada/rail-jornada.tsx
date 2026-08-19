@@ -17,8 +17,8 @@ import { MetaDiaria } from "@/shared/components/jornada/meta-diaria";
 import { cn } from "@/shared/utils/cn";
 
 /**
- * Rail lateral da jornada (desktop) — o contexto de jogo ao lado do path, como
- * no Duolingo: meta diária, missões do dia e atalhos de competição. Anônimo vê
+ * Rail lateral da jornada (desktop): o contexto de jogo ao lado do path, como
+ * no Duolingo. Meta diária, missões do dia e atalhos de competição. Anônimo vê
  * o convite de conta no lugar das missões ("login é acréscimo, não portão").
  */
 export function RailJornada() {
@@ -43,7 +43,7 @@ function MissoesDoDia() {
         if (vivo) setMissoes(m);
       })
       .catch(() => {
-        /* offline/erro — o card só não aparece */
+        /* offline/erro; o card só não aparece */
       });
     return () => {
       vivo = false;
@@ -110,7 +110,7 @@ function ConviteConta() {
         Jogue com uma conta
       </h2>
       <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-        XP, streak, missões diárias e liga semanal — e seu progresso te segue em
+        XP, streak, missões diárias e liga semanal. Seu progresso te segue em
         qualquer dispositivo.
       </p>
       <Link

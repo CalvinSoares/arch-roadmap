@@ -74,7 +74,7 @@ type PropsRevisao = CallbacksComuns & {
 export type LicaoModalProps = PropsConceito | PropsCheckpoint | PropsRevisao;
 
 /**
- * Lição fullscreen da jornada — sequencia `Desafio[]` (VF, lacuna, ordenar,
+ * Lição fullscreen da jornada: sequencia `Desafio[]` (VF, lacuna, ordenar,
  * parear, dois códigos, MCQ). Mesma casca de vidas / fila de erro / estrelas.
  */
 export function LicaoModal(props: LicaoModalProps) {
@@ -380,7 +380,7 @@ export function LicaoModal(props: LicaoModalProps) {
                   {emRevisao && (
                     <span className="flex items-center gap-1 rounded-md bg-cat-principio/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-cat-principio">
                       <Undo2 className="size-3" />
-                      Erro anterior — tente de novo
+                      Erro anterior, tente de novo
                     </span>
                   )}
                 </div>
@@ -426,13 +426,13 @@ export function LicaoModal(props: LicaoModalProps) {
             <div className="mx-auto max-w-2xl">
               <p className="text-[13px] leading-relaxed text-foreground">
                 <span className="font-semibold">
-                  {ultimoOk ? "Isso! " : "Quase — volta no fim da lição. "}
+                  {ultimoOk ? "Isso! " : "Quase. Volta no fim da lição. "}
                 </span>
                 {ultimaExplicacao}
                 {props.modo === "conceito" && (
                   <>
                     {" "}
-                    —{" "}
+                    ·{" "}
                     <Link
                       href={`/conceitos/${props.conceito}`}
                       className="font-medium text-primary hover:underline"
@@ -574,7 +574,7 @@ function TelaFinal({
       </h2>
       <p className="text-sm text-muted">
         {erros === 0
-          ? "Rodada limpa — sem nenhum erro."
+          ? "Rodada limpa, sem nenhum erro."
           : `${erros} ${erros === 1 ? "erro corrigido" : "erros corrigidos"} no caminho.`}
       </p>
 

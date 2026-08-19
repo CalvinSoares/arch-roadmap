@@ -9,8 +9,8 @@ import {
 import { A_SEGUIR } from "@/content/novidades/registro";
 
 /**
- * Ícone por id do item planejado. O conteúdo não conhece lucide de propósito
- * — um id sem ícone mapeado cai no telescópio, e nada quebra.
+ * Ícone por id do item planejado. O conteúdo não conhece lucide de propósito:
+ * um id sem ícone mapeado cai no telescópio e nada quebra.
  */
 const ICONE: Record<string, LucideIcon> = {
   adr: FileDown,
@@ -41,7 +41,7 @@ export function ASeguir() {
         </h2>
       </div>
       <p className="mt-1.5 text-[13px] leading-relaxed text-muted sm:text-sm">
-        Em que estamos trabalhando — sem data marcada, na ordem que fizer
+        Em que estamos trabalhando, sem data marcada e na ordem que fizer
         sentido.
       </p>
 

@@ -15,7 +15,7 @@ const VAZIO: DesempenhoQuiz = {};
 export type OpcoesRegistroQuiz = {
   /**
    * Concede XP no servidor (default: true).
-   * Desligar em replay da jornada — `tentativaId` novo farmava XP a cada acerto.
+   * Desligar em replay da jornada: `tentativaId` novo farmava XP a cada acerto.
    */
   creditarXp?: boolean;
   /**
@@ -26,7 +26,7 @@ export type OpcoesRegistroQuiz = {
   toastXp?: boolean;
   /**
    * Grava no mapa local de desempenho por conceito (default: true).
-   * Desligar para chaves `checkpoint:…` — não são verbetes.
+   * Desligar para chaves `checkpoint:…`, que não são verbetes.
    */
   desempenhoLocal?: boolean;
   /**
@@ -40,7 +40,7 @@ export type OpcoesRegistroQuiz = {
  * Histórico de acertos/erros do quiz.
  *
  * Híbrido: o localStorage segue como fonte imediata da UI (vazio na chegada,
- * funciona anônimo). Havendo sessão e `prova`, cada resposta vai ao servidor —
+ * funciona anônimo). Havendo sessão e `prova`, cada resposta vai ao servidor,
  * que **regenera** a pergunta/desafio e decide o acerto. O cliente nunca manda
  * `acertou` para pagar XP.
  */
@@ -75,7 +75,7 @@ export function useDesempenhoQuiz() {
           }
         })
         .catch(() => {
-          /* offline/erro — o histórico local já refletiu quando aplicável */
+          /* offline/erro; o histórico local já refletiu quando aplicável */
         });
     },
     [desempenho, persistir, logado]

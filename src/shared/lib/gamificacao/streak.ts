@@ -1,10 +1,10 @@
 /**
- * Streak — dias consecutivos de atividade, o motor de retenção.
+ * Streak: dias consecutivos de atividade.
  *
- * Função **pura**: o "hoje" entra por parâmetro (ISO `YYYY-MM-DD`), nunca
- * `new Date()`, para a spec dar o mesmo resultado hoje e daqui a dez anos. Um
- * "dia" é uma data-calendário; qual é o "hoje" do usuário (fuso horário) é
- * responsabilidade de quem chama, não desta lógica.
+ * Função pura: o "hoje" entra por parâmetro (ISO `YYYY-MM-DD`), nunca
+ * `new Date()`, pra spec dar sempre o mesmo resultado. Um "dia" é uma
+ * data-calendário; resolver o "hoje" do usuário (fuso horário) é
+ * responsabilidade de quem chama.
  */
 
 const MS_DIA = 86_400_000;
@@ -21,7 +21,7 @@ export interface EstadoStreak {
   dias: number;
   /** ISO `YYYY-MM-DD` da última atividade, ou null se nunca houve. */
   ultimoDia: string | null;
-  /** Congelamentos disponíveis — cada um cobre um único dia perdido. */
+  /** Congelamentos disponíveis; cada um cobre um único dia perdido. */
   freezes: number;
   /** Maior streak já alcançado. */
   maior: number;

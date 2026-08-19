@@ -49,7 +49,7 @@ import type { CategoriaTech } from "@/shared/types/construtor";
 
 interface VisualCamada {
   icon: LucideIcon;
-  /** classes de acento (texto / fundo suave) — tokens do tema. */
+  /** classes de acento (texto / fundo suave), tokens do tema. */
   text: string;
   bg: string;
   border: string;

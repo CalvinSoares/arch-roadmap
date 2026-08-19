@@ -330,7 +330,7 @@ export function Paleta({ estado, onAddCamada, onAddPadrao, onAddTech }: PaletaPr
       )}
 
       <p className="px-1 text-[11px] leading-relaxed text-muted">
-        Arraste para a camada certa — as recomendadas se acendem. Ou use{" "}
+        Arraste para a camada certa: as recomendadas se acendem. Ou use{" "}
         <Plus className="inline size-3" /> para aplicar no lugar típico.
       </p>
     </aside>

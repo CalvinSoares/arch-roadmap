@@ -35,7 +35,7 @@ function formatarCronometro(segundos: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-/** Acertos seguidos no fim da lista — o que alimenta a chama. */
+/** Acertos seguidos no fim da lista (alimenta o ícone de chama). */
 function sequenciaAtual(respostas: boolean[]): number {
   let n = 0;
   for (let i = respostas.length - 1; i >= 0 && respostas[i]; i--) n++;
@@ -108,7 +108,7 @@ const PERGUNTA_DO_FORMATO: Record<FormatoQuiz, string> = {
   "explique-erro": "Qual princípio foi violado?",
 };
 interface Props {
-  /** ISO do dia — define a semente, então o quiz do dia é estável. */
+  /** ISO do dia; define a semente, então o quiz do dia é estável. */
   hoje: string;
   /**
    * Registra o resultado. O 3º arg carrega a `prova` para o servidor
@@ -145,10 +145,9 @@ export function Quiz({
 }: Props) {
   const [rodada, setRodada] = useState(0);
   const [escolha, setEscolha] = useState<string | null>(null);
-  /** Um boolean por pergunta já respondida — dela derivam placar e sequência. */
+  /** Um boolean por pergunta já respondida; placar e sequência derivam daqui. */
   const [respostas, setRespostas] = useState<boolean[]>([]);
   const [restante, setRestante] = useState(ENTREVISTA_SEGUNDOS);
-  const [tempoEsgotado, setTempoEsgotado] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -168,6 +167,9 @@ export function Quiz({
   // enquanto há escolha em aberto, o índice é a última resposta dada
   const indice = escolha === null ? respostas.length : respostas.length - 1;
   const pergunta = perguntas[indice];
+  // derivado, não estado: some quando o relógio zera. Evita setState em effect
+  // (o timer só precisa decrementar `restante`; `terminou` cuida de parar).
+  const tempoEsgotado = entrevista && restante <= 0;
   const terminou =
     (perguntas.length > 0 &&
       respostas.length >= perguntas.length &&
@@ -177,26 +179,17 @@ export function Quiz({
   const acertos = respostas.filter(Boolean).length;
   const sequencia = sequenciaAtual(respostas);
 
-  useEffect(() => {
-    if (!entrevista) return;
-    setRestante(ENTREVISTA_SEGUNDOS);
-    setTempoEsgotado(false);
-  }, [entrevista, rodada]); // reinicia o relógio a cada rodada
-
+  // O relógio só decrementa; quando `restante` zera, `tempoEsgotado` (derivado)
+  // torna `terminou` verdadeiro e o próprio guard abaixo para o timer.
   useEffect(() => {
     if (!entrevista || terminou) return;
-    if (restante <= 0) {
-      setTempoEsgotado(true);
-      setEscolha(null);
-      return;
-    }
     const id = window.setTimeout(() => setRestante((s) => s - 1), 1000);
     return () => window.clearTimeout(id);
   }, [entrevista, terminou, restante]);
 
   /**
-   * Ao avançar, o feedback desmonta e o foco morreria no body — leitor de
-   * tela e teclado se perdem. Devolve o foco ao card e garante que o topo da
+   * Ao avançar, o feedback desmonta e o foco morreria no body (leitor de
+   * tela e teclado se perdem). Devolve o foco ao card e garante que o topo da
    * pergunta nova esteja visível (`nearest` rola só o necessário).
    */
   useEffect(() => {
@@ -241,10 +234,9 @@ export function Quiz({
     setEscolha(null);
     setRespostas([]);
     setRestante(ENTREVISTA_SEGUNDOS);
-    setTempoEsgotado(false);
   };
 
-  /* ——— Tela final ——— */
+  /* Tela final */
   if (terminou) {
     const erradas = perguntas.filter((_, i) => respostas[i] === false);
     const naoRespondidas = tempoEsgotado
@@ -356,7 +348,7 @@ export function Quiz({
           </span>
         </div>
       )}
-      {/* ——— Cabeçalho: progresso da rodada + sequência ——— */}
+      {/* Cabeçalho: progresso da rodada + sequência */}
       <div className="flex items-center gap-3">
         <BarraDaRodada
           total={perguntas.length}
@@ -375,10 +367,9 @@ export function Quiz({
         </span>
       </div>
 
-      {/* ——— Enunciado, com o formato rotulado ———
-          O rótulo não é decoração: com cinco formatos misturados na mesma
-          rodada, sem ele o leitor não sabe se está diante de uma armadilha,
-          de um trecho de biblioteca ou de um incidente real. ——— */}
+      {/* Enunciado, com o formato rotulado. Com cinco formatos misturados na
+          rodada, sem o rótulo o leitor não sabe se está vendo uma armadilha,
+          código de biblioteca ou um incidente real. */}
       <figure className="mt-4">
         <figcaption className="mb-2 flex items-center gap-2">
           <span
@@ -407,7 +398,7 @@ export function Quiz({
         </figcaption>
       </figure>
 
-      {/* ——— Alternativas: grid 2×2 (os rótulos são curtos) ——— */}
+      {/* Alternativas: grid 2×2 (os rótulos são curtos) */}
       <ul className="mt-3 grid grid-cols-2 gap-2">
         {pergunta.alternativas.map((slug) => {
           const c = getConceito(slug);
@@ -453,7 +444,7 @@ export function Quiz({
         })}
       </ul>
 
-      {/* ——— Feedback + avanço ——— */}
+      {/* Feedback + avanço */}
       {revelado && escolha && (
         <div
           aria-live="polite"
@@ -469,7 +460,7 @@ export function Quiz({
               {acertou ? "Isso. " : ""}
               {pergunta.explicacao}
             </span>{" "}
-            — de{" "}
+            · de{" "}
             <Link
               href={`/conceitos/${pergunta.correta}`}
               className="font-medium text-primary hover:underline"
@@ -489,15 +480,14 @@ export function Quiz({
               <span>
                 Confundiu com{" "}
                 <b className="font-semibold">{getConceito(escolha)?.titulo}</b>?
-                É um duelo clássico — veja os dois lado a lado.
+                É um duelo clássico. Veja os dois lado a lado.
               </span>
             </Link>
           )}
 
           {/*
             autoFocus: o navegador rola até o elemento focado, então o botão
-            nunca nasce fora da tela — era preciso rolar à mão para achá-lo.
-            De brinde, Enter avança.
+            não nasce fora da tela. Enter também avança.
           */}
           <Button size="sm" className="mt-3" onClick={avancar} autoFocus>
             {respostas.length === perguntas.length ? "Ver resultado" : "Próxima"}
@@ -508,7 +498,7 @@ export function Quiz({
   );
 }
 
-/** Cabeçalho da seção — separado para a página compor sem duplicar estilo. */
+/** Cabeçalho da seção, separado para a página compor sem duplicar estilo. */
 export function TituloQuiz() {
   return (
     <h2 className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">

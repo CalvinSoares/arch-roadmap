@@ -133,7 +133,7 @@ function perguntaParaMcq(
 }
 
 /* ------------------------------------------------------------------ *
- * Geradores por tipo (conceito) — sem eco de resumo/título             *
+ * Geradores por tipo (conceito): sem eco de resumo/título             *
  * ------------------------------------------------------------------ */
 
 function vfDoConceito(c: Conceito, rnd: () => number): DesafioVf[] {
@@ -153,7 +153,7 @@ function vfDoConceito(c: Conceito, rnd: () => number): DesafioVf[] {
       id: `vf:${c.slug}:custo`,
       afirmacao: `Ainda vale adotar este conceito mesmo quando ${c.custo.naoValeSe}`,
       correta: false,
-      explicacao: `O próprio verbete avisa: não vale se ${c.custo.naoValeSe}`,
+      explicacao: `A própria página do conceito avisa: não vale se ${c.custo.naoValeSe}`,
     });
   }
   // Afirmação falsa com contexto: "sobre ESTE conceito, vale dizer que…"
@@ -234,7 +234,7 @@ function palavraChave(texto: string): string | null {
   return palavras[0] ?? null;
 }
 
-/** Lacuna só em trechos de código / onde-aparece — nunca no título do conceito. */
+/** Lacuna só em trechos de código / onde-aparece; nunca no título do conceito. */
 function lacunaDoConceito(c: Conceito, rnd: () => number): DesafioLacuna[] {
   const out: DesafioLacuna[] = [];
   const candidatos: { frase: string; explicacao: string }[] = [];
@@ -342,7 +342,7 @@ function ordenarDoConceito(c: Conceito): DesafioOrdenar[] {
   return out;
 }
 
-/** Só parear aparições reais — não título↔resumo. */
+/** Só parear aparições reais, não título↔resumo. */
 function parearDoConceito(c: Conceito): DesafioParear[] {
   const out: DesafioParear[] = [];
   if (c.ondeAparece && c.ondeAparece.length >= 2) {
@@ -541,7 +541,7 @@ export function gerarDesafiosLicao(o: {
 }
 
 /* ------------------------------------------------------------------ *
- * Checkpoints — só curadoria em content/jornada/checkpoints/           *
+ * Checkpoints: só curadoria em content/jornada/checkpoints/           *
  * ------------------------------------------------------------------ */
 
 /**

@@ -28,7 +28,7 @@ export function useConnectorLayout(links: ConnectorLink[]) {
   /**
    * Ref por callback: guardar o elemento em estado faz o observer ser
    * reinstalado quando o container é remontado (ex.: entrar/sair da tela
-   * cheia) — com `useRef` o ResizeObserver seguia observando o nó antigo e
+   * cheia); com `useRef` o ResizeObserver seguia observando o nó antigo e
    * as linhas ficavam com a geometria da visão anterior.
    */
   const [container, setContainer] = useState<HTMLDivElement | null>(null);

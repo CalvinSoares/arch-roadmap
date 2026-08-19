@@ -7,7 +7,7 @@ import { pageMetadata } from "@/shared/lib/seo";
 export const metadata = pageMetadata({
   title: "Construtor de Projeto",
   description:
-    "Monte sua arquitetura com camadas e padrões, simule a requisição e exporte um ADR em Markdown — sem cadastro.",
+    "Monte sua arquitetura com camadas e padrões, simule a requisição e exporte um ADR em Markdown, sem cadastro.",
   path: "/construtor",
 });
 
@@ -16,7 +16,7 @@ export default function ConstrutorPage() {
     <PageTemplate
       icon={Blocks}
       title="Construtor de Projeto"
-      subtitle="Monte sua arquitetura com camadas e padrões — e entenda, a cada escolha, o que ela muda."
+      subtitle="Monte sua arquitetura com camadas e padrões e entenda o que cada escolha muda."
       breadcrumb={[{ label: "Construtor" }]}
     >
       <ConstrutorApp />

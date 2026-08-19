@@ -109,7 +109,7 @@ export function FluxoControles({
 
   return (
     <div className="rounded-xl border border-card-border bg-card">
-      {/* Barra principal — sempre visível e numa única linha */}
+      {/* Barra principal: sempre visível e numa única linha */}
       <div className="flex flex-wrap items-center gap-2 p-2.5">
         <Button size="sm" onClick={onEnviar} disabled={rodando}>
           <Play /> {rodando ? "Percorrendo…" : iniciado ? "Rodar de novo" : "Enviar requisição"}
@@ -196,7 +196,7 @@ export function FluxoControles({
         )}
       </div>
 
-      {/* Painel de ajustes — colapsado por padrão */}
+      {/* Painel de ajustes, colapsado por padrão */}
       {aberto && (
         <div className="space-y-2.5 border-t border-card-border p-2.5">
           <div className="flex flex-wrap items-center gap-1.5">

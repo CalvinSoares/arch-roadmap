@@ -3,9 +3,8 @@ import { db } from "@/server/db";
 import { users, userStats, amizades } from "@/server/db/schema";
 
 /**
- * Consultas sociais (read-only). O ranking entre amigos é a competição "rasa"
- * da Fase 2: compara XP vitalício de você + seus amigos aceitos, sem o peso de
- * um ranking global eterno.
+ * Consultas sociais (read-only). O ranking entre amigos compara o XP vitalício
+ * de você + seus amigos aceitos; não existe ranking global.
  */
 
 export interface LinhaRanking {
@@ -43,7 +42,7 @@ export async function rankingAmigos(userId: string): Promise<LinhaRanking[]> {
     .where(inArray(users.id, ids));
 
   return linhas
-    // Integridade do ranking: banido/shadow somem — mas você sempre se vê.
+    // banido/shadow somem do ranking, mas você sempre se vê
     .filter((l) => l.userId === userId || (!l.banido && !l.shadowBan))
     .map((l) => ({
       userId: l.userId,

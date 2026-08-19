@@ -1,82 +1,97 @@
 # DevMappa
 
-Sistema de **estudo e visualização** (front-only) de design patterns, princípios
-e arquitetura. Hoje: **79 conceitos**, **5 trilhas**, **16 duelos**, **4
-postmortems**.
+Plataforma de estudo de design patterns, princípios e arquitetura de software.
+Hoje: **79 conceitos**, **5 trilhas**, **16 duelos**, **4 postmortems**, além de
+jornada gamificada com XP, streak, ligas e ranking entre amigos.
 
 ## Frentes
 
-- **`/conceitos`** — os **23 GoF**, **SOLID**, resiliência, mensageria, dados
-  distribuídos, estilos de arquitetura e DDD tático. Em **todos**: TL;DR,
-  `ondeAparece`, `custo`, `emUmaLinha`, casos e armadilhas. Vários têm
+- **`/conceitos`** — os 23 padrões GoF, SOLID, resiliência, mensageria, dados
+  distribuídos, estilos de arquitetura e DDD tático. Cada página tem TL;DR,
+  `ondeAparece`, `custo`, `emUmaLinha`, casos de uso e armadilhas. Vários têm
   anti-exemplo e refatoração passo a passo.
 - **`/roadmaps`** — Padrões, Backend, Frontend, Arquitetura e *Sistemas que
-  aguentam produção*, com conectores, **pré-requisitos** (grafo) e filtro
-  **só o essencial**.
-- **`/construtor`** — monte a pilha; o motor critica, explica por que não
-  sugeriu X, simula a requisição e exporta ADR. Também:
+  aguentam produção*. Trilhas em grafo com pré-requisitos e filtro
+  "só o essencial".
+- **`/jornada`** — cada roadmap vira uma trilha de fases com lições jogáveis,
+  estrelas, baús e revisão. Funciona sem conta; com conta, o progresso
+  sincroniza entre dispositivos.
+- **`/construtor`** — monte a pilha do seu projeto; o motor critica as escolhas,
+  explica por que não sugeriu X, simula a requisição e exporta ADR. Também:
   **`/construtor/desafios`**, **`/construtor/comparar`**,
   **`/construtor/escala`**, **`/construtor/entrevista`**.
-- **`/quiz`** — seis formatos (armadilha, onde aparece, duelo, jeito errado,
-  incidente, explique o erro) + placar de desempenho.
-- **`/comparar`** — duelos critério a critério.
-- **`/postmortems`** — incidentes públicos anotados com conceitos do catálogo.
-- **`/novidades`** — histórico de entregas e “A seguir”.
+- **`/quiz`** — seis formatos de pergunta (armadilha, onde aparece, duelo,
+  jeito errado, incidente, explique o erro) com placar de desempenho.
+- **`/comparar`** — duelos entre padrões que se confundem, critério a critério.
+- **`/postmortems`** — incidentes públicos reais anotados com conceitos do
+  catálogo.
+- **`/liga`, `/amigos`, `/perfil`** — ligas semanais, ranking entre amigos e
+  perfil público com conquistas.
+- **`/novidades`** — histórico de entregas.
 
 ## Onde fica o quê
 
-- **O que já entrou** — `/novidades` ← `content/novidades/registro.ts`
-  (histórico, badge “novo”, A seguir).
-- **O que vem depois** — [PLANEJAMENTO.md](./PLANEJAMENTO.md). Tese: crescer
-  **por dentro**. O plano de conteúdo está em grande parte entregue; o resto é
-  expansão sob demanda (mais duelos, mais explique-erro).
+- **O que já entrou** — `/novidades` ← `content/novidades/registro.ts`.
+- **O que vem depois** — [PLANEJAMENTO.md](./PLANEJAMENTO.md) (conteúdo),
+  [PLANEJAMENTO-PLATAFORMA.md](./PLANEJAMENTO-PLATAFORMA.md) (contas e
+  gamificação) e [PLANEJAMENTO-JORNADA.md](./PLANEJAMENTO-JORNADA.md).
 
 ## Stack
 
-Next.js 16 (App Router, SSG) · TypeScript · Tailwind v4 · React Flow ·
-Mermaid · Shiki · dnd-kit · next-themes · Sonner · Radix.
+Next.js 16 (App Router) · TypeScript · Tailwind v4 · Auth.js v5 ·
+Drizzle + Neon Postgres · Upstash Redis · React Flow · Mermaid · Shiki ·
+dnd-kit · framer-motion · next-themes · Sonner · Radix.
 
-Sem backend — conteúdo **TypeScript tipado** no repo (sem MDX/CMS). Persistência
-do usuário em `localStorage`; compartilhamento por URL (`?p=<base64>`).
+O conteúdo é TypeScript tipado no repo (sem MDX/CMS). O app funciona sem conta:
+progresso fica em `localStorage` e compartilhamento é por URL (`?p=<base64>`).
+Criar conta adiciona XP, streak, ligas e sincronização — a conta soma, não
+bloqueia nada.
 
 ## Desenvolvimento
 
 ```bash
 pnpm install
-cp .env.example .env.local   # opcional — ajuste NEXT_PUBLIC_SITE_URL
+cp .env.example .env.local   # veja as variáveis necessárias no arquivo
 pnpm dev                     # http://localhost:3000
 pnpm build
 pnpm test
 ```
 
-`pnpm test` = Vitest unitário (`node`) + UI (`happy-dom` + Testing Library).
+Sem as variáveis de banco/auth o site estático funciona normalmente; login,
+XP e ranking precisam de `DATABASE_URL`, `AUTH_SECRET` e afins (documentado
+no `.env.example`).
+
+`pnpm test` roda Vitest unitário (`node`) e de UI (`happy-dom` + Testing
+Library).
 
 ### Testes
 
-- **unit** (`*.spec.ts`) — motor do construtor, conteúdo, quiz, pré-requisitos
+- **unit** (`*.spec.ts`) — motor do construtor, conteúdo, quiz, pré-requisitos,
+  gamificação (XP, streak, missões, ligas)
 - **ui** (`*.spec.tsx`) — smoke do Quiz
 
-Barra de qualidade: TL;DR, casos, armadilhas, `ondeAparece`, `custo`,
-`emUmaLinha`, links íntegros, tecnologias do Construtor com slugs válidos.
+Barra de qualidade do conteúdo: TL;DR, casos, armadilhas, `ondeAparece`,
+`custo`, `emUmaLinha`, links íntegros e slugs válidos no Construtor.
 
 ## Estrutura
 
 ```
 src/
 ├── app/(app)/
-│   ├── conceitos/ · roadmaps/ · construtor/
+│   ├── conceitos/ · roadmaps/ · jornada/ · construtor/
 │   ├── quiz/ · comparar/ · postmortems/ · novidades/
-├── content/
-│   ├── conceitos/ · roadmaps/ · construtor/
-│   ├── comparacoes/ · postmortems/ · quiz/ · entrevistas/ · novidades/
+│   └── liga/ · amigos/ · perfil/ · admin/
+├── content/          # conteúdo tipado (conceitos, trilhas, quiz…)
+├── server/           # server actions, auth, db, gamificação
 └── shared/
     ├── components/ · context/ · hook/ · lib/ · config/ · types/ · utils/
 ```
 
-Motor do construtor e simulador são **funções puras** (não importam React).
+Motor do construtor, simulador e toda a lógica de gamificação são funções
+puras, testadas sem React nem banco.
 
 ## Deploy (Vercel)
 
-Importar o repo. Copie `.env.example` → variáveis do projeto se quiser canônico
-/ OG corretos (`NEXT_PUBLIC_SITE_URL`, sem barra no final). `next build` gera
-tudo estático.
+Importar o repo e configurar as variáveis do `.env.example` no projeto.
+`NEXT_PUBLIC_SITE_URL` define canônico e OG (sem barra no final). Os crons de
+liga e lembretes estão em `vercel.json`.

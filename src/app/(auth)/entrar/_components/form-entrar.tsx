@@ -9,7 +9,7 @@ import { Mail } from "lucide-react";
 const campo =
   "w-full rounded-lg border border-card-border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-primary/15";
 
-/** Mark do GitHub inline — o lucide desta versão não traz o ícone de marca. */
+/** Mark do GitHub inline; o lucide desta versão não traz o ícone de marca. */
 function IconeGithub({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
@@ -19,7 +19,7 @@ function IconeGithub({ className }: { className?: string }) {
 }
 
 /**
- * Corpo do login — feito para viver dentro do cartão da página `/entrar` (sem
+ * Corpo do login, feito para viver dentro do cartão da página `/entrar` (sem
  * cartão próprio). Email/senha (Credentials); GitHub e magic link só aparecem
  * quando provisionados, pra não haver botão que quebra.
  */

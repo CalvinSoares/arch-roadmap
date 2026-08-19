@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 
 /**
- * Ícone do atalho em iOS. Precisa ser opaco e sem cantos próprios — o sistema
- * aplica a máscara. Mesma marca do `icon.svg`, redesenhada com divs porque o
+ * Ícone do atalho em iOS. Precisa ser opaco e sem cantos próprios, porque o
+ * sistema aplica a máscara. Mesma marca do `icon.svg`, redesenhada com divs porque o
  * Satori (next/og) não renderiza `<svg>` arbitrário.
  */
 export const size = { width: 180, height: 180 };

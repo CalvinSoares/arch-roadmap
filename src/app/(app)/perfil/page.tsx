@@ -10,7 +10,7 @@ export const metadata = pageMetadata({
   title: "Seu perfil",
   description: "Seu XP, nível, streak e missões do dia.",
   path: "/perfil",
-  // Perfil é privado — não deve ser indexado.
+  // Perfil é privado; não deve ser indexado.
   noIndex: true,
 });
 

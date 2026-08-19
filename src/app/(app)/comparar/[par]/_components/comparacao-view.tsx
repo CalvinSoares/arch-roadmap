@@ -52,7 +52,7 @@ export function ComparacaoView({
         </p>
       </section>
 
-      {/* Tabela de critérios — o coração da página */}
+      {/* Tabela de critérios, a parte principal da página */}
       <section>
         <h2 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
           Critério a critério
@@ -100,7 +100,7 @@ export function ComparacaoView({
           </table>
         </div>
 
-        {/* Mobile: a mesma informação empilhada — tabela de 3 colunas é ilegível */}
+        {/* Mobile: a mesma informação empilhada; tabela de 3 colunas é ilegível */}
         <ul className="mt-4 space-y-3 sm:hidden">
           {comparacao.criterios.map((cr) => (
             <li

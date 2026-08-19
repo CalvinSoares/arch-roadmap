@@ -35,7 +35,7 @@ import { cn } from "@/shared/utils/cn";
 type MapaEstrelas = Record<string, number>;
 const ESTRELAS_VAZIO: MapaEstrelas = {};
 
-/** Cores de unidade — ciclo pelas categorias do tema, dá vida sem ruído. */
+/** Cores de unidade: ciclo pelas categorias do tema. */
 const CORES_UNIDADE = [
   "var(--cat-seguranca)",
   "var(--cat-estrutural)",
@@ -49,7 +49,7 @@ const W = 100; // largura lógica (%)
 const DISCO = 70; // diâmetro do nó (px)
 /**
  * Distância vertical entre centros de nós. Precisa caber: disco (70) + rótulo
- * de 2 linhas (~34) + respiro — senão o rótulo de um nó encosta no disco do
+ * de 2 linhas (~34) + respiro; senão o rótulo de um nó encosta no disco do
  * seguinte (era a sobreposição vista no print). 150 dá folga confortável.
  */
 const ROW_H = 150;
@@ -62,7 +62,7 @@ const FASE = 0.62;
 /**
  * Respiro no topo de cada unidade. Os nós são ancorados pelo TOPO DO DISCO
  * (`top: y - DISCO/2`), então a bolha "COMEÇAR" (40px acima do disco) do 1º nó
- * fica em `y - 75` — precisa sobrar espaço pra ela não sumir sob o banner.
+ * fica em `y - 75`; precisa sobrar espaço pra ela não sumir sob o banner.
  */
 const PAD_UNIT_TOP = 118;
 const PAD_UNIT_BOTTOM = 34;
@@ -76,9 +76,9 @@ interface NoPlano {
   estado: EstadoNo;
   estrelas: number;
   x: number; // % dentro da unidade
-  y: number; // px — centro do disco dentro da unidade
-  indice: number; // global — dá o desenho contínuo da curva
-  /** Marco dentro da unidade (1, 2, 3…) — o "km" da trilha. */
+  y: number; // px, centro do disco dentro da unidade
+  indice: number; // global, dá o desenho contínuo da curva
+  /** Marco dentro da unidade (1, 2, 3…). */
   numeroNaUnidade: number;
 }
 
@@ -100,7 +100,7 @@ interface UnidadePlano {
   completa: boolean;
   concluidos: number;
   bau?: Decoracao;
-  /** Revisão de pontos fracos — acende quando a unidade fecha. */
+  /** Revisão de pontos fracos; acende quando a unidade fecha. */
   revisao?: Decoracao;
   trofeu: Decoracao;
 }
@@ -168,7 +168,7 @@ export function JornadaPath({
   const { unidades, contagem } = useMemo(() => {
     const cruas = montarJornada(roadmap.sections, statusDe);
     const contagem = progressoJornada(roadmap.sections, statusDe);
-    let g = 0; // índice global — curva contínua através das unidades
+    let g = 0; // índice global, curva contínua através das unidades
 
     const unidades: UnidadePlano[] = cruas.map((u, ui) => {
       const nos: NoPlano[] = u.nos.map((no, ni) => {
@@ -197,8 +197,8 @@ export function JornadaPath({
       /**
        * Decoração sempre a 34% de distância do nó de referência, pro lado
        * oposto ao centro. O espelho ingênuo (100 − x) caía EM CIMA do nó
-       * quando ele estava perto do centro — era o baú/troféu atravessando o
-       * disco. Clamp mantém dentro do canvas.
+       * quando ele estava perto do centro (baú/troféu atravessando o disco).
+       * Clamp mantém dentro do canvas.
        */
       const ladoOposto = (x: number) => {
         const alvo = x >= W / 2 ? x - 34 : x + 34;
@@ -233,7 +233,7 @@ export function JornadaPath({
                 ativa: completa,
               }
             : undefined,
-        // Troféu ao lado do último nó — acende quando a unidade fecha.
+        // Troféu ao lado do último nó; acende quando a unidade fecha.
         trofeu: ultimo
           ? { x: ladoOposto(ultimo.x), y: ultimo.y, ativa: completa }
           : { x: W / 2, y: PAD_UNIT_TOP, ativa: false },
@@ -297,7 +297,7 @@ export function JornadaPath({
       if (r.jaAberto) toast.success("Baú já coletado ✓");
       else toast.success("+25 XP e +1 freeze de streak! 🎁");
     } else if (r?.erro === "ainda não alcançado") {
-      toast.error("Sua conta ainda não registrou este trecho — refaça o nó logado.");
+      toast.error("Sua conta ainda não registrou este trecho. Refaça o nó logado.");
     } else {
       toast.error("Não deu pra abrir o baú agora.");
     }
@@ -308,7 +308,7 @@ export function JornadaPath({
     setEstrelas(ESTRELAS_VAZIO);
     setRecemConcluido(null);
     setConfirmandoReset(false);
-    toast.success("Trilha zerada — bora de novo!");
+    toast.success("Trilha zerada, bora de novo!");
   };
 
   const concluirLicao = (no: NoPlano, estrelasGanhas: number) => {
@@ -317,7 +317,7 @@ export function JornadaPath({
     definir(no.id, "done");
     if (logado) {
       void registrarEstrelasNo(no.id, estrelasGanhas).catch(() => {
-        /* offline/erro — o local já refletiu */
+        /* offline/erro; o local já refletiu */
       });
     }
     setRecemConcluido(no.id);
@@ -382,9 +382,8 @@ export function JornadaPath({
         {unidades.map((u) => (
           <section key={u.id}>
             {/*
-              Banner sticky: cartão tingido pela cor da unidade — legível nos
-              dois temas (nada de texto branco sobre pastel), e cada unidade
-              varia pelo chip + título tingidos.
+              Banner sticky: cartão tingido pela cor da unidade, legível nos
+              dois temas (nada de texto branco sobre pastel).
             */}
             <div
               className="sticky top-16 z-10 flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 shadow-[var(--shadow-sm)] backdrop-blur-md"
@@ -426,7 +425,7 @@ export function JornadaPath({
               </span>
             </div>
 
-            {/* Canvas da unidade — sem linhas: os nós carregam o ritmo (Duolingo). */}
+            {/* Canvas da unidade, sem linhas ligando os nós (estilo Duolingo). */}
             <div
               className="relative overflow-x-clip"
               style={{ height: u.altura }}
@@ -515,7 +514,7 @@ export function JornadaPath({
         <LicaoModal
           modo="revisao"
           slugs={revisaoSlugs}
-          titulo="Revisão — pontos fracos"
+          titulo="Revisão de pontos fracos"
           revisao
           onResponder={registrarNaJornada}
           onConcluir={() => {
@@ -546,7 +545,7 @@ function entradaPorScroll(reduzir: boolean, atraso = 0) {
   };
 }
 
-/** Checkpoint de revisão — revisita erros / conceitos fracos da trilha. */
+/** Checkpoint de revisão: revisita erros e conceitos fracos da trilha. */
 function RevisaoBotao({
   dec,
   onAbrir,
@@ -563,7 +562,7 @@ function RevisaoBotao({
       aria-label={
         dec.ativa
           ? "Abrir revisão de pontos fracos"
-          : "Revisão ainda bloqueada — complete a unidade"
+          : "Revisão ainda bloqueada. Complete a unidade"
       }
       title={dec.ativa ? "Revisar pontos fracos" : "Complete a unidade"}
       className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-2xl transition-transform hover:scale-105 active:scale-95"
@@ -599,7 +598,7 @@ function RevisaoBotao({
   );
 }
 
-/** Baú de recompensa no meio da unidade — abre uma vez (+XP e +freeze). */
+/** Baú de recompensa no meio da unidade. Abre uma vez (+XP e +freeze). */
 function Bauzinho({
   dec,
   aberto,
@@ -660,7 +659,7 @@ function Bauzinho({
   );
 }
 
-/** Confete one-shot — dispara ao fechar a unidade (e no clique do troféu). */
+/** Confete one-shot: dispara ao fechar a unidade (e no clique do troféu). */
 function Confete({ cor }: { cor: string }) {
   const cores = [cor, "var(--glow-c)", "var(--primary)"];
   return (
@@ -689,7 +688,7 @@ function Confete({ cor }: { cor: string }) {
   );
 }
 
-/** Troféu ao lado do último nó — acende quando a unidade fecha, com confete. */
+/** Troféu ao lado do último nó. Acende quando a unidade fecha, com confete. */
 function TrofeuUnidade({
   dec,
   cor,
@@ -818,7 +817,7 @@ function NoBotao({
 
   const conteudo = (
     <>
-      {/* glow ambiente do nó atual — a linguagem de brilho do DevMappa */}
+      {/* glow ambiente do nó atual */}
       {no.estado === "current" && !reduzir && (
         <span
           aria-hidden
@@ -845,9 +844,8 @@ function NoBotao({
       {celebrar && !reduzir && <Burst />}
 
       {/*
-        O disco-botão — squircle, não círculo: é a forma da marca do DevMappa
-        (logo e medalhão de nível são quadrados arredondados), o que afasta o
-        path do "clone de Duolingo" sem perder o tato de botão 3D.
+        Disco-botão em squircle, a mesma forma do logo e do medalhão de nível.
+        Diferencia o path do visual do Duolingo sem perder o tato de botão 3D.
       */}
       <span
         className={cn(
@@ -864,7 +862,7 @@ function NoBotao({
           <span className="absolute -inset-1 animate-ping rounded-[24px] border-2 border-primary opacity-30" />
         )}
         {icone}
-        {/* marco da trilha — numeração mono, jeito mapa de engenharia */}
+        {/* marco da trilha, numeração mono */}
         <span
           className={cn(
             "absolute -bottom-1.5 -right-1.5 z-[1] rounded-md border border-card-border bg-card px-1 font-mono text-[10px] font-semibold leading-4",
@@ -908,7 +906,7 @@ function NoBotao({
 
   /**
    * Ancorado pelo DISCO (top = centro − raio), não pelo botão inteiro: a altura
-   * variável do rótulo não desloca mais nada — era a causa da bolha "COMEÇAR"
+   * variável do rótulo não desloca mais nada. Era a causa da bolha "COMEÇAR"
    * invadir o banner e dos desalinhamentos verticais.
    */
   const anim = {
@@ -928,7 +926,7 @@ function NoBotao({
         onClick={() => onTocar(no)}
         className="group absolute flex cursor-not-allowed flex-col items-center rounded-2xl outline-none"
         aria-disabled
-        aria-label={`${no.titulo} — bloqueado`}
+        aria-label={`${no.titulo} (bloqueado)`}
         title="Conclua o nó anterior para desbloquear"
         whileTap={reduzir ? undefined : { rotate: [0, -3, 3, 0] }}
         {...anim}
@@ -940,9 +938,9 @@ function NoBotao({
 
   const rotulo =
     no.estado === "current"
-      ? " — começar lição"
+      ? ": começar lição"
       : no.estado === "done"
-        ? " — praticar de novo"
+        ? ": praticar de novo"
         : "";
 
   return (

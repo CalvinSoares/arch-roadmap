@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { virarTemporada } from "@/server/gamificacao/temporada";
 
 /**
- * Cron da plataforma — virada semanal de temporada/liga.
+ * Cron da plataforma: virada semanal de temporada/liga.
  *
  * Protegido por `CRON_SECRET`: o Vercel Cron envia `Authorization: Bearer
  * <CRON_SECRET>` quando a env está definida. Sem o segredo configurado, a rota
- * recusa tudo (fail-closed) — um endpoint que promove/rebaixa gente não pode
+ * recusa tudo (fail-closed); um endpoint que promove/rebaixa gente não pode
  * ficar aberto. Roda no Node (toca o banco), nunca no edge.
  */
 export const dynamic = "force-dynamic";

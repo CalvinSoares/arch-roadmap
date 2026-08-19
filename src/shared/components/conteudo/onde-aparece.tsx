@@ -3,12 +3,11 @@ import { TextoRico } from "@/shared/components/conteudo/texto-rico";
 import type { OndeAparece as Item } from "@/shared/types/conceito";
 
 /**
- * "Onde isto aparece de verdade" — a ponte entre a abstração e o código que a
- * pessoa já usa.
+ * "Onde isto aparece de verdade": liga a abstração ao código que a pessoa
+ * já usa.
  *
  * Fica depois do conteúdo e antes dos relacionados de propósito: primeiro se
- * aprende o padrão, depois se descobre que já se convivia com ele. A ordem
- * inversa estragaria a surpresa, que é justamente o valor da seção.
+ * aprende o padrão, depois se descobre que já se convivia com ele.
  */
 export function OndeAparece({ itens }: { itens: Item[] }) {
   if (itens.length === 0) return null;
@@ -34,7 +33,7 @@ export function OndeAparece({ itens }: { itens: Item[] }) {
             Onde isto aparece de verdade
           </h2>
           <p className="text-[13px] text-muted">
-            Você já usa isto — talvez sem saber o nome.
+            Você já usa isto, talvez sem saber o nome.
           </p>
         </div>
       </div>

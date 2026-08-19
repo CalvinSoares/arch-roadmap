@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { classesOpcaoDesafio } from "@/shared/components/jornada/desafios/opcao-estilo";
 import type { DesafioOrdenar } from "@/shared/types/desafio";
 
 /**
  * Ordenar por toque: toca os itens na ordem desejada; toque de novo desfaz.
- * Sem drag — funciona bem no mobile.
+ * Sem drag; funciona bem no mobile.
  */
 export function DesafioOrdenarView({
   desafio,
@@ -19,14 +19,8 @@ export function DesafioOrdenarView({
   /** Ordem montada pelo usuário (ids). */
   onMudar: (ordem: string[]) => void;
 }) {
+  // Sem effect de reset: o pai remonta com key={desafio.id} ao trocar.
   const [ordem, setOrdem] = useState<string[]>([]);
-
-  useEffect(() => {
-    setOrdem([]);
-    onMudar([]);
-    // reset ao trocar de desafio
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [desafio.id]);
 
   const labelDe = (id: string) =>
     desafio.itens.find((x) => x.id === id)?.label ?? id;

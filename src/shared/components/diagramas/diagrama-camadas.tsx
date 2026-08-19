@@ -19,7 +19,7 @@ import { cn } from "@/shared/utils/cn";
 const NODE_W = 280;
 const NODE_H = 64;
 
-/** Handles pré-definidos (topo=target, base=source) — dispensa medição de DOM. */
+/** Handles pré-definidos (topo=target, base=source); dispensa medição de DOM. */
 const HANDLES = [
   {
     id: null,
@@ -49,7 +49,7 @@ export function DiagramaCamadas({ camadas }: { camadas: Camada[] }) {
   return (
     <Expandivel
       titulo="Camadas"
-      descricao="Onde o conceito se encaixa na pilha — role ou pinçe no diagrama."
+      descricao="Onde o conceito se encaixa na pilha. Role ou pinçe no diagrama."
       expandido={<CamadasCanvas camadas={camadas} expandido />}
     >
       <CamadasCanvas camadas={camadas} />

@@ -15,9 +15,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "brilho-varredura bg-gradient-to-br from-primary to-[color-mix(in_srgb,var(--primary)_78%,var(--glow-c))] text-primary-foreground shadow-[var(--shadow-md)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]",
+          "bg-primary text-primary-foreground shadow-[var(--shadow-md)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]",
         accent:
-          "brilho-varredura bg-accent text-accent-foreground shadow-[var(--shadow-md)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]",
+          "bg-accent text-accent-foreground shadow-[var(--shadow-md)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]",
         outline:
           "border border-card-border bg-card/70 text-foreground hover:-translate-y-0.5 hover:border-primary/45 hover:bg-card hover:shadow-[var(--shadow-md)]",
         ghost: "text-muted hover:bg-foreground/5 hover:text-foreground",

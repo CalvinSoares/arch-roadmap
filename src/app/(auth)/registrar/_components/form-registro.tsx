@@ -8,7 +8,7 @@ const campo =
   "w-full rounded-lg border border-card-border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-primary/15";
 
 /**
- * Corpo do cadastro — feito para viver dentro do cartão da página `/registrar`.
+ * Corpo do cadastro, feito para viver dentro do cartão da página `/registrar`.
  * Cria a conta por email/senha (server action `registrar`, hash argon2id).
  */
 export function FormRegistro() {

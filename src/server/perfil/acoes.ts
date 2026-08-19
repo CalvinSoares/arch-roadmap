@@ -16,7 +16,7 @@ export interface ResultadoPerfil {
 /**
  * Define (ou troca) o `@handle` público do usuário. O handle é o endereço do
  * perfil público (`/u/<handle>`); único e case-insensitive. A unicidade tem
- * índice no banco — checamos antes para uma mensagem amigável, e o índice é a
+ * índice no banco; checamos antes só pra dar mensagem amigável, o índice é a
  * garantia final contra a corrida de dois cadastros simultâneos.
  */
 export async function definirHandle(bruto: string): Promise<ResultadoPerfil> {
@@ -40,7 +40,7 @@ export async function definirHandle(bruto: string): Promise<ResultadoPerfil> {
   try {
     await db.update(users).set({ handle }).where(eq(users.id, u.id));
   } catch {
-    // corrida perdida no índice único — outro pegou o handle no mesmo instante
+    // corrida perdida no índice único: outro pegou o handle no mesmo instante
     return { ok: false, erro: "Esse handle já está em uso." };
   }
 
@@ -49,7 +49,7 @@ export async function definirHandle(bruto: string): Promise<ResultadoPerfil> {
 }
 
 /**
- * Liga/desliga o perfil público (opt-in — LGPD). Sem handle não há endereço
+ * Liga/desliga o perfil público (opt-in, LGPD). Sem handle não há endereço
  * público, então tornar público exige ter um handle antes.
  */
 export async function alternarPerfilPublico(
@@ -77,7 +77,7 @@ export async function alternarPerfilPublico(
   return { ok: true };
 }
 
-/** Liga/desliga os e-mails de lembrete de streak (opt-out — ética/LGPD). */
+/** Liga/desliga os e-mails de lembrete de streak (opt-out, LGPD). */
 export async function alternarLembretes(
   ligado: boolean
 ): Promise<ResultadoPerfil> {

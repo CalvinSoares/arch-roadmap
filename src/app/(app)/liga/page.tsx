@@ -34,7 +34,7 @@ export default async function LigaPage() {
       title="Liga"
       subtitle={
         nivel
-          ? `Liga ${ROTULO_NIVEL[nivel] ?? nivel} — o placar reinicia toda semana. Top 5 sobem, os últimos 5 descem.`
+          ? `Liga ${ROTULO_NIVEL[nivel] ?? nivel}: o placar reinicia toda semana. Top 5 sobem, os últimos 5 descem.`
           : "A temporada começa quando você ganha o primeiro XP da semana."
       }
       breadcrumb={[{ label: "Liga" }]}

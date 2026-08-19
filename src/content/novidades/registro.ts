@@ -53,7 +53,7 @@ export const NOVIDADES: Novidade[] = [
       {
         tipo: "conteudo",
         texto:
-          "Padrões: dezenas de verbetes ganham anti-exemplo e passos concretos — a lição deixa de ser só resumo.",
+          "Padrões: dezenas de conceitos ganham anti-exemplo e passos concretos. A lição deixa de ser só resumo.",
       },
       {
         tipo: "correcao",
@@ -78,7 +78,7 @@ export const NOVIDADES: Novidade[] = [
       {
         tipo: "conteudo",
         texto:
-          "Fundamentos OOP na trilha de Padrões: Encapsulamento e Polimorfismo viram verbetes jogáveis (antes eram só checkpoints de texto).",
+          "Fundamentos OOP na trilha de Padrões: Encapsulamento e Polimorfismo viram páginas completas e jogáveis (antes eram só checkpoints de texto).",
       },
       {
         tipo: "novo",
@@ -389,7 +389,7 @@ export const NOVIDADES: Novidade[] = [
       {
         tipo: "melhoria",
         texto:
-          "Os roadmaps de Backend e Arquitetura ganharam paradas novas ligando esses conceitos — inclusive ganchos que já existiam sem página, como 'Idempotência e retry', agora com verbete completo.",
+          "Os roadmaps de Backend e Arquitetura ganharam paradas novas ligando esses conceitos, inclusive tópicos que existiam sem página, como 'Idempotência e retry', que agora tem página completa.",
       },
       {
         tipo: "novo",

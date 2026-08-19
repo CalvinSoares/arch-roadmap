@@ -143,7 +143,7 @@ export function ZoomPanSurface({
 
       <div
         role="region"
-        aria-label={`Diagrama com zoom ${pct}% — arraste para mover, pinçe ou use os botões`}
+        aria-label={`Diagrama com zoom ${pct}%. Arraste para mover, pinçe ou use os botões`}
         tabIndex={0}
         onWheel={onWheel}
         onPointerDown={onPointerDown}

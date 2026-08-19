@@ -12,7 +12,7 @@ import { cn } from "@/shared/utils/cn";
  * do próprio botão e cobrindo a tela toda. Faz fallback para troca direta
  * quando a API não existe ou o usuário prefere menos movimento.
  */
-/** `false` no servidor, `true` no cliente — evita mismatch de hidratação. */
+/** `false` no servidor, `true` no cliente; evita mismatch de hidratação. */
 const semInscricao = () => () => {};
 function useMontado() {
   return useSyncExternalStore(
@@ -74,7 +74,7 @@ export function ThemeToggle() {
       );
       await transition.finished;
     } catch {
-      /* transição abortada — ignora */
+      /* transição abortada; ignora */
     } finally {
       emTransicao.current = false;
     }
@@ -89,7 +89,7 @@ export function ThemeToggle() {
       onClick={alternar}
       className="overflow-hidden hover:text-primary"
     >
-      {/* Sol e lua coexistem e giram na troca — evita "pulo" de layout. */}
+      {/* Sol e lua coexistem e giram na troca; evita "pulo" de layout. */}
       <span className="relative grid size-[18px] place-items-center">
         <Sun
           className={cn(

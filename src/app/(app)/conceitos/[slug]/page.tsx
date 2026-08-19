@@ -34,8 +34,8 @@ export default async function ConceitoPage({
   const conceito = getConceito(slug);
   if (!conceito) notFound();
 
-  // A página do conceito tem cabeçalho próprio (ConceitoHero) — não usa o
-  // PageTemplate, porque hero e trilha de leitura formam uma peça só.
+  // A página do conceito tem cabeçalho próprio (ConceitoHero) e não usa o
+  // PageTemplate: hero e trilha de leitura formam uma peça só.
   return (
     <div className="page-shell">
       <JsonLd

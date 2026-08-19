@@ -13,8 +13,8 @@ import { concederXp } from "@/server/gamificacao/conceder-xp";
  * server action): quem chama são as ações de quiz/nó, que já validaram sessão e
  * rate limit.
  *
- * A recompensa de uma missão é concedida via ledger idempotente com
- * `origem_ref = "missao:<id>:<dia>"` — assim uma missão paga **uma vez por dia**,
+ * A recompensa é concedida via ledger idempotente com
+ * `origem_ref = "missao:<id>:<dia>"`, então uma missão paga uma vez por dia,
  * mesmo que o reprocessamento rode de novo. Não reprojecta: o orquestrador
  * reprojecta uma única vez ao fim.
  *

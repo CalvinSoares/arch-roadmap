@@ -7,7 +7,7 @@ import { pageMetadata } from "@/shared/lib/seo";
 export const metadata = pageMetadata({
   title: "Quiz",
   description:
-    "Seis formatos tirados do catálogo: armadilha, onde aparece, duelo, jeito errado, incidente e explique o erro — código quebrado, qual princípio foi violado.",
+    "Seis formatos de pergunta tirados do catálogo: armadilha, onde aparece, duelo, jeito errado, incidente e explique o erro.",
   path: "/quiz",
 });
 

@@ -69,11 +69,11 @@ export function AdapterPlayground() {
       >
         {ligado ? (
           <>
-            <Check className="size-4" /> Entregue — o Adapter traduziu {chamadaCliente} → {chamadaSdk}
+            <Check className="size-4" /> Entregue: o Adapter traduziu {chamadaCliente} → {chamadaSdk}
           </>
         ) : (
           <>
-            <X className="size-4" /> Interface incompatível — o cliente não fala a língua do SDK
+            <X className="size-4" /> Interface incompatível: o cliente não fala a língua do SDK
           </>
         )}
       </div>

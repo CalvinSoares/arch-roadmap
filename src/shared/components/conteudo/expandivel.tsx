@@ -12,7 +12,7 @@ import { Button } from "@/shared/components/global/ui/button";
 import { cn } from "@/shared/utils/cn";
 
 /**
- * Embrulha ilustrações/diagramas com um atalho de expandir — no mobile o
+ * Embrulha ilustrações/diagramas com um atalho de expandir; no mobile o
  * conteúdo embutido costuma ficar pequeno demais; o dialog abre quase em
  * tela cheia com rolagem.
  */

@@ -16,9 +16,8 @@ import type { Conceito } from "@/shared/types/conceito";
 /**
  * Formatos de pergunta além da armadilha.
  *
- * Quatro são **derivados** de conteúdo que já existe. O quinto —
- * `explique-erro` — é registro à mão: código quebrado plausível não se
- * inventa sozinho a partir do catálogo.
+ * Quatro são derivados de conteúdo que já existe; `explique-erro` é registro
+ * à mão, porque código quebrado plausível não dá pra gerar do catálogo.
  */
 
 export type FormatoQuiz =
@@ -80,16 +79,13 @@ const noEscopo = (slug: string, escopo?: readonly string[]) =>
   !escopo || escopo.includes(slug);
 
 /**
- * O nome do conceito aparece **embutido** num identificador maior?
+ * Detecta se o nome do conceito aparece embutido num identificador maior.
  *
  * `mascarar()` usa limite de palavra, então `Repository` dentro de
- * `JpaRepository` escapa — e é justamente onde os melhores exemplos vivem:
- * `JpaRepository`, `XState`, `statement_timeout`. Três dos ~65 enunciados de
- * "onde aparece" entregavam a resposta assim.
- *
- * A saída é **descartar a pergunta**, não reescrever o conteúdo: na página do
- * conceito, dizer "JpaRepository" é exatamente o que se quer. O vazamento só
- * existe no contexto do quiz.
+ * `JpaRepository` escapa (idem `XState`, `statement_timeout`), e alguns
+ * enunciados de "onde aparece" entregavam a resposta assim. A solução é
+ * descartar a pergunta, não reescrever o conteúdo: na página do conceito,
+ * citar "JpaRepository" é desejável; o vazamento só existe no quiz.
  */
 function vazaResposta(texto: string, c: Conceito): boolean {
   const alvo = texto.toLowerCase();
@@ -99,10 +95,8 @@ function vazaResposta(texto: string, c: Conceito): boolean {
   return primeira.length > 4 && alvo.includes(primeira);
 }
 
-/* ------------------------------------------------------------------ *
- * Onde isto aparece — o formato mais bonito, porque testa              *
- * reconhecimento no código real em vez de memória de definição.        *
- * ------------------------------------------------------------------ */
+/* Onde isto aparece: testa reconhecimento no código real, não memória de
+ * definição. */
 export function perguntasDeOndeAparece(
   rnd: () => number,
   escopo?: readonly string[]
@@ -128,10 +122,8 @@ export function perguntasDeOndeAparece(
   return out;
 }
 
-/* ------------------------------------------------------------------ *
- * Duelo — dois candidatos e um critério. Binário de propósito: o que   *
- * se testa é a distinção, não o reconhecimento.                        *
- * ------------------------------------------------------------------ */
+/* Duelo: dois candidatos e um critério. Binário de propósito, o que se testa
+ * é a distinção. */
 export function perguntasDeDuelo(
   rnd: () => number,
   escopo?: readonly string[]
@@ -163,9 +155,7 @@ export function perguntasDeDuelo(
   return out;
 }
 
-/* ------------------------------------------------------------------ *
- * Anti-exemplo — o cheiro do padrão mal feito.                         *
- * ------------------------------------------------------------------ */
+/* Anti-exemplo: o padrão mal implementado. */
 export function perguntasDeAntiExemplo(
   rnd: () => number,
   escopo?: readonly string[]
@@ -194,9 +184,7 @@ export function perguntasDeAntiExemplo(
   return out;
 }
 
-/* ------------------------------------------------------------------ *
- * Incidente — o conceito que o postmortem prova.                       *
- * ------------------------------------------------------------------ */
+/* Incidente: o conceito que o postmortem prova. */
 export function perguntasDePostmortem(
   rnd: () => number,
   escopo?: readonly string[]
@@ -222,9 +210,7 @@ export function perguntasDePostmortem(
   return out;
 }
 
-/* ------------------------------------------------------------------ *
- * Explique o erro — código quebrado → princípio. Registro à mão.      *
- * ------------------------------------------------------------------ */
+/* Explique o erro: código quebrado → princípio. Registro à mão. */
 export function perguntasDeExpliqueErro(
   rnd: () => number,
   escopo?: readonly string[]
@@ -253,9 +239,7 @@ export function perguntasDeExpliqueErro(
   return out;
 }
 
-/* ------------------------------------------------------------------ *
- * A rodada                                                            *
- * ------------------------------------------------------------------ */
+/* A rodada */
 
 export interface OpcoesRodada {
   semente: number;
@@ -278,9 +262,8 @@ export const TODOS_OS_FORMATOS: FormatoQuiz[] = [
 /**
  * Monta a rodada misturando os formatos pedidos.
  *
- * Intercala em vez de concatenar: com concatenação, uma rodada de 10 sairia
- * com as 8 primeiras do mesmo formato, e a variedade — que é o ponto de ter
- * vários — só apareceria no fim.
+ * Intercala em vez de concatenar: concatenando, uma rodada de 10 sairia com
+ * as 8 primeiras do mesmo formato e a variedade só apareceria no fim.
  */
 export function gerarRodada(o: OpcoesRodada): Pergunta[] {
   const habilitados =
@@ -336,7 +319,7 @@ export function gerarRodada(o: OpcoesRodada): Pergunta[] {
 
 /**
  * Modo entrevista: 5 explique-erro + 2 duelos da trilha (ou catálogo).
- * Ordem fixa — primeiro o código quebrado, depois o julgamento A/B.
+ * Ordem fixa: primeiro o código quebrado, depois o julgamento A/B.
  */
 export function gerarRodadaEntrevista(
   semente: number,
@@ -360,8 +343,8 @@ export function gerarRodadaEntrevista(
   return [...explique, ...duelos];
 }
 
-/** PRNG local — o do motor principal é privado, e duplicar 6 linhas é melhor
- * que exportar estado interno só para isto. */
+/** PRNG local: o do motor principal é privado, e duplicar 6 linhas é melhor
+ * que exportar estado interno só pra isto. */
 function prngLocal(semente: number): () => number {
   let a = semente >>> 0;
   return () => {
@@ -388,7 +371,7 @@ export function disponibilidadePorFormato(
   };
 }
 
-/** Conceitos que um formato consegue cobrir — usado pelos testes. */
+/** Conceitos que um formato consegue cobrir (usado pelos testes). */
 export function conceitosComFormato(formato: FormatoQuiz): Conceito[] {
   const rnd = () => 0.5;
   const gerar: Record<string, () => Pergunta[]> = {

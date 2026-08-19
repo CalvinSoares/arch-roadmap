@@ -59,7 +59,7 @@ function leituraDaSessao(
     if (!falhas.cache && falhas.banco) {
       return "Banco fora, mas o hit ainda responde. Quando a chave expirar, o miss vira incidente.";
     }
-    return "Redis e banco fora. Não tem de onde ler. Falta isolamento, não só mais cache.";
+    return "Redis e banco fora. Não tem de onde ler. Falta isolamento; cache sozinho não resolve.";
   }
   if (protecoes.has("circuit-breaker")) {
     return "Disjuntor aberto. A borda recusa na hora e a thread não fica presa.";
@@ -75,7 +75,7 @@ function leituraDaSessao(
 
 /**
  * Laboratório: injete a falha → acrescente proteção → sinta o custo mudar.
- * Reusa `montarSimulacao` — a matemática do Construtor.
+ * Reusa `montarSimulacao`, a mesma matemática do Construtor.
  */
 export function FalhaPlayground({ variante }: { variante: Variante }) {
   const [redisDown, setRedisDown] = useState(false);
@@ -134,7 +134,7 @@ export function FalhaPlayground({ variante }: { variante: Variante }) {
       const next = new Set(atual);
       if (next.has(id)) next.delete(id);
       else next.add(id);
-      // retry sem timeout não faz sentido pedagógico — exige timeout
+      // retry sem timeout não faz sentido pedagógico; exige timeout
       if (id === "timeout" && !next.has("timeout")) next.delete("retry");
       if (id === "retry" && next.has("retry") && !next.has("timeout")) {
         next.add("timeout");
@@ -297,7 +297,7 @@ export function FalhaPlayground({ variante }: { variante: Variante }) {
             </span>
             <span className="min-w-0 flex-1">
               <span className="font-medium">{p.rotulo}</span>
-              <span className="text-muted"> — {p.detalhe}</span>
+              <span className="text-muted"> · {p.detalhe}</span>
             </span>
             <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted">
               {p.assincrono ? "async" : formatarLatencia(p.ms)}

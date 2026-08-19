@@ -73,7 +73,7 @@ export function StrategyPlayground() {
       </div>
 
       <p className="mt-4 text-center text-xs text-muted">
-        O cálculo (algoritmo) é trocável em runtime — o cliente só conhece a interface
+        O cálculo (algoritmo) é trocável em runtime. O cliente só conhece a interface
         <code className="mx-1">calcularFrete(peso)</code>.
       </p>
     </div>

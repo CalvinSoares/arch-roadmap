@@ -1,9 +1,9 @@
 /**
- * A matemática da escala de latência — pura, sem DOM.
+ * Matemática da escala de latência (pura, sem DOM).
  *
- * A transformação entra por parâmetro (`log` × `linear`) em vez de estar
- * embutida, porque a comparação entre as duas **é** a lição: em escala linear,
- * tudo abaixo de 1ms colapsa num pixel, e é exatamente isso que se quer mostrar.
+ * A transformação entra por parâmetro (`log` × `linear`) em vez de embutida:
+ * a página compara as duas, e em escala linear tudo abaixo de 1ms colapsa num
+ * pixel, que é justamente o que se quer mostrar.
  */
 
 export type Transformacao = "log" | "linear";
@@ -17,9 +17,8 @@ export interface PontoEscala {
 /**
  * Posição de 0 a 1 no eixo.
  *
- * Em `log`, usa log10 — que é o único jeito de um ciclo de CPU (0,3ns) e uma
- * travessia do Pacífico (250ms) caberem no mesmo desenho. Em `linear`, é a
- * proporção crua, e o amontoado à esquerda é o argumento.
+ * Em `log`, usa log10: é o que faz um ciclo de CPU (0,3ns) e uma travessia do
+ * Pacífico (250ms) caberem no mesmo desenho. Em `linear`, proporção crua.
  */
 export function posicao(
   ms: number,
@@ -42,12 +41,7 @@ function clamp(n: number): number {
   return Math.min(1, Math.max(0, n));
 }
 
-/**
- * Quantas vezes `lento` é mais lento que `rapido`.
- *
- * É o número que faz a página valer: RAM contra travessia de região não é
- * "bem mais lento" — é mais de um milhão de vezes.
- */
+/** Quantas vezes `lento` é mais lento que `rapido`. */
 export function razao(rapido: number, lento: number): number {
   if (rapido <= 0) throw new RangeError("divisão por latência não positiva");
   return lento / rapido;
@@ -65,10 +59,9 @@ export function formatarRazao(r: number): string {
 }
 
 /**
- * As décadas (potências de 10) que o eixo atravessa, para as linhas de grade.
- *
- * Só faz sentido em escala logarítmica — em linear, as décadas ficariam todas
- * empilhadas na origem, e desenhá-las lá seria ruído.
+ * As décadas (potências de 10) que o eixo atravessa, pras linhas de grade.
+ * Só faz sentido em escala logarítmica; em linear ficariam todas empilhadas
+ * na origem.
  */
 export function decadas(min: number, max: number): number[] {
   const de = Math.floor(Math.log10(min));
@@ -82,11 +75,9 @@ export function decadas(min: number, max: number): number[] {
 }
 
 /**
- * Empurra rótulos que colidem para faixas diferentes.
- *
- * Sem isto, os cinco pontos entre 0,5ms e 15ms viram uma mancha ilegível. A
- * saída é o índice da faixa vertical de cada ponto — quem está perto do
- * anterior sobe uma faixa.
+ * Empurra rótulos que colidem pra faixas diferentes (senão os pontos entre
+ * 0,5ms e 15ms viram uma mancha ilegível). A saída é o índice da faixa
+ * vertical de cada ponto; quem está perto do anterior sobe uma faixa.
  */
 export function faixas(
   pontos: PontoEscala[],

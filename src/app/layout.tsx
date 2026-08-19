@@ -53,6 +53,11 @@ export const metadata: Metadata = {
     title: SITE.title,
     description: SITE.description,
   },
+  // Verificação do Google Search Console (método "HTML tag"). Só entra na
+  // página quando o env existe; sem ele o campo é ignorado.
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
   robots: {
     index: true,
     follow: true,

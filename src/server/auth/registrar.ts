@@ -13,8 +13,8 @@ export interface EstadoRegistro {
 
 /**
  * Cria uma conta por email/senha (hash argon2id). O Auth.js/Credentials só
- * *verifica* a senha; criar o usuário é responsabilidade nossa (é o preço de
- * ter email/senha em vez de só OAuth). Em sucesso, manda pra tela de entrada.
+ * verifica a senha; criar o usuário é responsabilidade nossa. Em sucesso,
+ * manda pra tela de entrada.
  */
 export async function registrar(
   _estado: EstadoRegistro,

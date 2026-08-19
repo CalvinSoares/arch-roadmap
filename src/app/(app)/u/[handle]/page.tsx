@@ -5,7 +5,7 @@ import { pageMetadata } from "@/shared/lib/seo";
 import { normalizarHandle } from "@/shared/lib/handle";
 import { perfilPublicoPorHandle } from "@/server/gamificacao/consultas";
 
-/** Perfil de outra conta — depende de dado, nunca estático. */
+/** Perfil de outra conta: depende de dado, nunca estático. */
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: PageProps<"/u/[handle]">) {
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PageProps<"/u/[handle]">) {
   }
   return pageMetadata({
     title: `@${perfil.handle}`,
-    description: `Perfil público de @${perfil.handle} — nível ${perfil.nivel}, ${perfil.xpTotal} XP.`,
+    description: `Perfil público de @${perfil.handle}: nível ${perfil.nivel}, ${perfil.xpTotal} XP.`,
     path: `/u/${perfil.handle}`,
   });
 }

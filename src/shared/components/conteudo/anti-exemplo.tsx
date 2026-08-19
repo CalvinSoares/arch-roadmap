@@ -5,7 +5,7 @@ import type { LinguagemCodigo } from "@/shared/types/conceito";
 import { TextoRico } from "@/shared/components/conteudo/texto-rico";
 
 type Props = Omit<Extract<Bloco, { tipo: "anti-exemplo" }>, "codigo"> & {
-  /** Já destacado pelo Shiki — o highlight roda no servidor, como nos demais. */
+  /** Já destacado pelo Shiki; o highlight roda no servidor, como nos demais. */
   exemplos: { lang: LinguagemCodigo; code: string; html: string }[];
 };
 
@@ -54,7 +54,7 @@ export function AntiExemplo({
             {titulo ?? "O jeito errado"}
           </h2>
           <p className="text-[13px] text-muted">
-            Compila, roda, passa no code review — e quebra depois.
+            Compila, roda, passa no code review. E quebra depois.
           </p>
         </div>
       </div>

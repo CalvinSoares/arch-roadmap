@@ -61,14 +61,14 @@ function Bloco({ bloco, nivel }: { bloco: EstruturaBloco; nivel: number }) {
 }
 
 /**
- * Caixas aninhadas/empilhadas — o arquétipo "estrutura" do sistema de
+ * Caixas aninhadas/empilhadas, o arquétipo "estrutura" do sistema de
  * ilustrações. Onde `fluxo` mostra uma sequência no tempo, este mostra
- * **contenção**: quem embrulha quem, quem esconde o quê, o que está dentro
- * da fronteira do conceito.
+ * **contenção**: quem embrulha quem e o que está dentro da fronteira do
+ * conceito.
  *
  * O aninhamento é puramente semântico (listas dentro de listas), então
  * leitores de tela anunciam a hierarquia sem precisar de ARIA extra, e o
- * layout nunca rola horizontalmente — as caixas internas encolhem.
+ * layout nunca rola horizontalmente (as caixas internas encolhem).
  */
 export function IlustracaoEstrutura({ blocos, legenda }: Props) {
   return (

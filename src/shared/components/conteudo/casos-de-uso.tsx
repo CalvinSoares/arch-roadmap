@@ -11,9 +11,9 @@ function Rotulo({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Casos de uso reais. Cada card segue sempre a mesma narrativa em três
- * tempos — cenário → como o padrão entra → o que se paga por isso — para o
- * leitor comparar casos sem reler a estrutura toda vez.
+ * Casos de uso reais. Cada card segue a mesma estrutura (cenário → como o
+ * padrão entra → o que se paga por isso), pro leitor comparar casos sem
+ * reler a estrutura toda vez.
  */
 export function CasosDeUso({ casos }: { casos: CasoDeUso[] }) {
   return (
@@ -59,7 +59,7 @@ export function CasosDeUso({ casos }: { casos: CasoDeUso[] }) {
   );
 }
 
-/** Erros comuns — numerados, para virar checklist de revisão de código. */
+/** Erros comuns, numerados para virar checklist de revisão de código. */
 export function Armadilhas({ itens }: { itens: { titulo: string; texto: string }[] }) {
   return (
     <ol className="overflow-hidden rounded-2xl border border-card-border bg-card">

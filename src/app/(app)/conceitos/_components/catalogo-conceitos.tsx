@@ -244,14 +244,14 @@ export function CatalogoConceitos({ conceitos, novos = [] }: Props) {
                         </span>
                       </div>
                       {/* h2: a lista é filha direta do h1 da página, sem
-                          agrupamento intermediário — h3 pulava um nível. */}
+                          agrupamento intermediário; h3 pulava um nível. */}
                       <h2 className="mt-3.5 font-semibold tracking-tight">
                         {c.titulo}
                       </h2>
                       <p className="mt-1.5 line-clamp-3 flex-1 text-sm leading-relaxed text-muted">
                         {c.resumo}
                       </p>
-                      {/* nível na cor da rampa — mesma do filtro */}
+                      {/* nível na cor da rampa (mesma do filtro) */}
                       <div className="mt-4 flex items-center gap-2 border-t border-card-border pt-3 text-xs">
                         <span
                           aria-hidden

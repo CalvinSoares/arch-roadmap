@@ -1,11 +1,11 @@
 /**
- * Missões diárias — objetivos curtos que dão direção ("acerte 5 perguntas",
- * "conclua 1 nó"). A **definição** é estática e versionada em Git (como o resto
- * do conteúdo); só o *progresso* do usuário vai pro banco (`missao_progresso`).
+ * Missões diárias ("acerte 5 perguntas", "conclua 1 nó"). A definição é
+ * estática e versionada em Git; só o progresso do usuário vai pro banco
+ * (`missao_progresso`).
  *
- * Tudo aqui é função **pura**: recebe estado + gatilho, devolve o novo estado.
- * Nada de `new Date()` nem DB — o dia entra por parâmetro. Testável isolada, no
- * padrão de `xp.ts`/`streak.ts`.
+ * Tudo aqui é função pura: recebe estado + gatilho, devolve o novo estado.
+ * Nada de `new Date()` nem DB, o dia entra por parâmetro (mesmo padrão de
+ * `xp.ts`/`streak.ts`).
  */
 
 /** O evento que faz uma missão avançar. Mais amplo que `AcaoXP` de propósito:
@@ -17,7 +17,7 @@ export type GatilhoMissao =
   | "desafioResolvido";
 
 export interface Missao {
-  /** Estável — vira chave em `missao_progresso.missao_id`. */
+  /** Estável; vira chave em `missao_progresso.missao_id`. */
   id: string;
   titulo: string;
   descricao: string;
@@ -29,10 +29,10 @@ export interface Missao {
 }
 
 /**
- * O **pool** de missões diárias. A cada dia, um subconjunto é sorteado de forma
- * determinística pela data (ver `missoesDoDia`) — assim a variedade não vira
- * moagem, e o mesmo dia rende sempre as mesmas missões (a spec e o `missao_progresso`
- * dependem disso). Manter alcançável — missão é direção, não farm.
+ * Pool de missões diárias. A cada dia, um subconjunto é sorteado de forma
+ * determinística pela data (ver `missoesDoDia`): o mesmo dia rende sempre as
+ * mesmas missões, e a spec e o `missao_progresso` dependem disso. Manter as
+ * metas alcançáveis.
  */
 export const MISSOES_DIARIAS: readonly Missao[] = [
   {
@@ -98,9 +98,9 @@ function semente(dia: string): number {
 }
 
 /**
- * As missões ativas em `dia` (ISO YYYY-MM-DD) — um subconjunto rotativo do pool,
- * escolhido de forma determinística pela data. Sem `dia`, devolve o pool inteiro
- * (útil para telas de referência). O mesmo dia sempre rende as mesmas missões.
+ * Missões ativas em `dia` (ISO YYYY-MM-DD): subconjunto rotativo do pool,
+ * escolhido de forma determinística pela data. Sem `dia`, devolve o pool
+ * inteiro (útil pra telas de referência).
  */
 export function missoesDoDia(dia?: string): readonly Missao[] {
   if (!dia) return MISSOES_DIARIAS;
@@ -125,7 +125,7 @@ export interface ProgressoMissao {
 
 export interface ResultadoMissao {
   estado: ProgressoMissao;
-  /** A missão foi concluída **agora** (dispara a recompensa uma única vez). */
+  /** A missão foi concluída agora (dispara a recompensa uma única vez). */
   recemConcluida: boolean;
 }
 

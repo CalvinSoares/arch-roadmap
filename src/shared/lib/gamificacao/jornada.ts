@@ -5,14 +5,14 @@ import type {
 } from "@/shared/types/roadmap";
 
 /**
- * Jornada (P1) — a trilha de jogo derivada de um roadmap. Seções viram
- * **unidades** e itens viram **nós**; o desbloqueio é **sequencial** (estilo
- * Duolingo): tudo concluído até o primeiro nó pendente, que é o **atual**; o
- * resto fica **bloqueado**.
+ * Jornada (P1): a trilha de jogo derivada de um roadmap. Seções viram
+ * unidades e itens viram nós; o desbloqueio é sequencial (estilo Duolingo):
+ * tudo concluído até o primeiro nó pendente, que é o atual; o resto fica
+ * bloqueado.
  *
- * Função **pura**: recebe as seções + o status por id de nó (o mesmo progresso
- * que o roadmap já usa) e devolve as unidades com o estado de cada nó. Sem DB,
- * sem tabela nova — o estado é derivado do progresso existente.
+ * Função pura: recebe as seções + o status por id de nó (o mesmo progresso
+ * que o roadmap já usa) e devolve as unidades com o estado de cada nó. Sem DB
+ * e sem tabela nova; o estado é derivado do progresso existente.
  */
 
 export type EstadoNo = "done" | "current" | "locked";
@@ -22,7 +22,7 @@ export interface NoJornada {
   titulo: string;
   /** slug do conceito, quando o nó abre uma página de conceito. */
   conceito?: string;
-  /** Contexto do nó de checkpoint (sem conceito) — mostrado antes de concluir. */
+  /** Contexto do nó de checkpoint (sem conceito), mostrado antes de concluir. */
   descricao?: string;
   /** Links curados de um checkpoint de leitura (sem conceito). */
   recursos?: RecursoRoadmap[];
@@ -69,7 +69,7 @@ export function montarJornada(
   }));
 }
 
-/** Contagem concluídos/total — alimenta o cabeçalho e o seletor de jornadas. */
+/** Contagem concluídos/total; alimenta o cabeçalho e o seletor de jornadas. */
 export function progressoJornada(
   sections: readonly RoadmapSection[],
   statusDe: (id: string) => ProgressoNo

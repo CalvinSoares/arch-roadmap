@@ -19,7 +19,7 @@ const MAX_QUANTAS = 30;
 const MAX_ESCOPO = 200;
 const MAX_INDICE = 40;
 
-/** Prova enviada pelo cliente — o servidor regenera o gabarito e decide. */
+/** Prova enviada pelo cliente; o servidor regenera o gabarito e decide. */
 export type ProvaRespostaQuiz =
   | {
       kind: "mcq-rodada";

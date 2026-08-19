@@ -36,7 +36,7 @@ export function QuizDoConceito({
         <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-card-border bg-card p-5">
           <CircleHelp className="size-4 shrink-0 text-primary" />
           <p className="min-w-0 flex-1 text-sm leading-relaxed text-muted">
-            {total} armadilhas de {titulo} viram perguntas — com o nome do
+            {total} armadilhas de {titulo} viram perguntas, com o nome do
             padrão escondido, misturadas com padrões parecidos.
           </p>
           <Button size="sm" variant="outline" onClick={() => setAberto(true)}>

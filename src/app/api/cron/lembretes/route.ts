@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { enviarLembretesDeStreak } from "@/server/email/lembretes";
 
 /**
- * Cron diário — lembretes de streak (Resend). Mesma proteção do cron de
+ * Cron diário de lembretes de streak (Resend). Mesma proteção do cron de
  * temporada: `Authorization: Bearer <CRON_SECRET>`, fail-closed sem o segredo.
  * Sem `RESEND_API_KEY`, o envio é no-op (o helper degrada), então roda sem
  * quebrar mesmo antes de o e-mail estar provisionado.
