@@ -14,7 +14,7 @@ import { cn } from "@/shared/utils/cn";
 const techNome = (id: string) =>
   TECNOLOGIAS_DEF.find((t) => t.id === id)?.nome ?? id;
 
-/** A pilha montada, só de leitura — o objeto da investigação. */
+/** A pilha montada, só de leitura; é o que o usuário investiga. */
 function Pilha({ desafio }: { desafio: Desafio }) {
   return (
     <ol className="space-y-1.5">

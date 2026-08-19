@@ -71,7 +71,7 @@ function normalizarEstado(e: EstadoProjeto): EstadoProjeto {
   };
 }
 
-/** Serializa o estado para a URL (base64 de JSON — ids são ASCII). */
+/** Serializa o estado para a URL (base64 de JSON; ids são ASCII). */
 export function codificarEstado(estado: EstadoProjeto): string {
   return btoa(JSON.stringify(estado));
 }
@@ -84,7 +84,7 @@ function decodificarEstado(b64: string): EstadoProjeto | null {
   }
 }
 
-/** Lê o projeto da query `?p=` — leitura pura, sem efeito colateral. */
+/** Lê o projeto da query `?p=`. Leitura pura, sem efeito colateral. */
 function projetoDoLink(): EstadoProjeto | null {
   if (typeof window === "undefined") return null;
   const compartilhado = new URLSearchParams(window.location.search).get("p");
@@ -93,11 +93,11 @@ function projetoDoLink(): EstadoProjeto | null {
 
 /**
  * Semeia o localStorage com o projeto da URL, se houver, e devolve a narração
- * correspondente. Roda no inicializador preguiçoso do `useState` — antes,
- * portanto, de o `useArmazenamentoLocal` abaixo ler a chave.
+ * correspondente. Roda no inicializador preguiçoso do `useState`, antes de o
+ * `useArmazenamentoLocal` abaixo ler a chave.
  *
- * É idempotente de propósito: gravar o mesmo projeto duas vezes (StrictMode
- * renderiza o inicializador duas vezes em desenvolvimento) não muda nada.
+ * Idempotente: o StrictMode roda o inicializador duas vezes em dev, e gravar
+ * o mesmo projeto duas vezes não muda nada.
  */
 function adotarProjetoDoLink(): UltimaAcao | null {
   const doLink = projetoDoLink();
@@ -105,11 +105,11 @@ function adotarProjetoDoLink(): UltimaAcao | null {
   try {
     localStorage.setItem(CHAVE, JSON.stringify(doLink));
   } catch {
-    /* storage indisponível — o projeto vive só nesta sessão */
+    /* storage indisponível; o projeto vive só nesta sessão */
   }
   return {
     titulo: "Projeto carregado do link",
-    descricao: "Este é um projeto compartilhado — edite à vontade, a cópia é sua.",
+    descricao: "Este é um projeto compartilhado. Edite à vontade, a cópia é sua.",
   };
 }
 
@@ -127,7 +127,7 @@ export function useConstrutor() {
   const estado = useMemo(() => normalizarEstado(guardado), [guardado]);
 
   const [ultimaAcao, setUltimaAcao] = useState<UltimaAcao | null>(narracaoDoLink);
-  /** score do último modelo carregado — referência para comparar evolução. */
+  /** score do último modelo carregado; referência para comparar evolução. */
   const [referencia, setReferencia] = useState<ScoreProjeto | null>(null);
 
   // Só efeito colateral externo: limpa a query para as edições seguintes não
@@ -199,7 +199,7 @@ export function useConstrutor() {
         titulo: `${def.nome} aplicado em ${alvoDef.nome}`,
         descricao: recomendado
           ? def.descricao
-          : `${def.descricao} — atenção: esta não é a camada típica deste padrão (veja os alertas).`,
+          : `${def.descricao} Atenção: esta não é a camada típica deste padrão (veja os alertas).`,
       });
     },
     [estado, persistir]
@@ -241,7 +241,7 @@ export function useConstrutor() {
         titulo: `${def.nome} em ${alvoDef.nome}`,
         descricao: recomendado
           ? def.diferencaQueFaz
-          : `${def.diferencaQueFaz} — atenção: ${def.nome} tipicamente vive em ${def.viveEm.join(", ")}, não aqui.`,
+          : `${def.diferencaQueFaz} Atenção: ${def.nome} tipicamente vive em ${def.viveEm.join(", ")}, não aqui.`,
       });
     },
     [estado, persistir]
@@ -350,7 +350,7 @@ export function useConstrutor() {
   /**
    * Baixa o projeto como Architecture Decision Record.
    *
-   * O relógio é lido aqui, na borda, e passado para `gerarADR` — a geração em
+   * O relógio é lido aqui, na borda, e passado para `gerarADR`: a geração em
    * si é pura e testável sem mockar tempo.
    */
   const exportarADR = useCallback(() => {

@@ -1,7 +1,7 @@
 import { hash, verify } from "@node-rs/argon2";
 
 /**
- * Hash de senha com argon2id — parâmetros recomendados pelo OWASP.
+ * Hash de senha com argon2id, parâmetros recomendados pelo OWASP.
  *
  * Roda só no servidor (Node), nunca no edge/cliente. O `@node-rs/argon2` traz
  * binários prontos, sem node-gyp.

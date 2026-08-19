@@ -51,7 +51,7 @@ const ROTULO_FAIXA: Record<FaixaGrandeza, string> = {
 };
 
 /**
- * Escala de latência — uma job: sentir a proporção entre dois tempos.
+ * Escala de latência. O objetivo é sentir a proporção entre dois tempos.
  *
  * O eixo é esparso (dots + rótulos só do par selecionado). O inventário
  * legível fica na lista por ordem de grandeza. Log × linear continua sendo
@@ -99,7 +99,7 @@ export function EscalaPlayground() {
 
   return (
     <div className="space-y-8">
-      {/* ——— Hero: comparador ——— */}
+      {/* Hero: comparador */}
       <section
         aria-labelledby="comparar"
         className="rounded-2xl border border-card-border bg-card p-5 sm:p-6"
@@ -148,7 +148,7 @@ export function EscalaPlayground() {
               >
                 {PONTOS.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.rotulo} — {formatarLatencia(p.ms)}
+                    {p.rotulo} · {formatarLatencia(p.ms)}
                   </option>
                 ))}
               </select>
@@ -186,7 +186,7 @@ export function EscalaPlayground() {
         </p>
       </section>
 
-      {/* ——— Eixo esparso ——— */}
+      {/* Eixo esparso */}
       <section aria-labelledby="eixo-titulo" className="space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -252,7 +252,7 @@ export function EscalaPlayground() {
               className="absolute bottom-7 left-0 right-0 h-px bg-card-border"
             />
 
-            {/* rótulos só do par — acima dos dots, em duas alturas se ambos selecionados */}
+            {/* rótulos só do par, acima dos dots, em duas alturas se ambos selecionados */}
             {[pa, pb]
               .filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i)
               .map((p, i) => {
@@ -296,7 +296,7 @@ export function EscalaPlayground() {
                   key={p.id}
                   type="button"
                   onClick={() => escolher(p.id)}
-                  title={`${p.rotulo} — ${formatarLatencia(p.ms)}`}
+                  title={`${p.rotulo} · ${formatarLatencia(p.ms)}`}
                   aria-label={`${p.rotulo}, ${formatarLatencia(p.ms)}${destacado ? ", selecionado" : ""}`}
                   aria-pressed={destacado}
                   className={cn(
@@ -344,7 +344,7 @@ export function EscalaPlayground() {
         </div>
       </section>
 
-      {/* ——— Inventário por ordem de grandeza ——— */}
+      {/* Inventário por ordem de grandeza */}
       <section aria-labelledby="inventario" className="space-y-3">
         <div>
           <h2 id="inventario" className="text-sm font-semibold tracking-tight">

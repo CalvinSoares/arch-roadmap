@@ -29,7 +29,7 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   exact?: boolean;
-  /** Cor de acento do item (token CSS) — pinta ícone e realce ativos. */
+  /** Cor de acento do item (token CSS); pinta ícone e realce ativos. */
   cor: string;
   /** Sub-itens: transformam este item num acordeão (ex.: Construtor). */
   filhos?: NavItem[];
@@ -76,7 +76,7 @@ const GRUPOS: Grupo[] = [
     itens: [
       // Construtor vira um acordeão: o pai leva ao Construtor e os modos
       // (quebre isto, comparar, entrevista, escala) moram dentro, recolhidos
-      // por padrão — assim os quatro deixam de dominar o rail.
+      // por padrão, assim os quatro deixam de dominar o rail.
       {
         href: "/construtor",
         label: "Construtor",
@@ -156,7 +156,7 @@ function Marca({
   return (
     <Link
       href="/"
-      aria-label="DevMappa — início"
+      aria-label="DevMappa, início"
       onClick={onNavigate}
       className={cn(
         "group/marca flex items-center gap-2.5 rounded-xl px-1 py-1",
@@ -164,7 +164,7 @@ function Marca({
       )}
     >
       <span className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-[0.7rem] bg-gradient-to-br from-primary to-[var(--glow-c)] shadow-[var(--shadow-md)] transition-transform duration-500 group-hover/marca:rotate-[8deg] group-hover/marca:scale-105">
-        {/* anéis concêntricos — "atlas" desenhado, sem depender de ícone */}
+        {/* anéis concêntricos desenhados em CSS, sem depender de ícone */}
         <span className="absolute size-6 rounded-full border-[1.5px] border-primary-foreground/70" />
         <span className="absolute h-6 w-3 rounded-full border-[1.5px] border-primary-foreground/70" />
         <span className="absolute h-[1.5px] w-6 bg-primary-foreground/70" />
@@ -214,7 +214,7 @@ function ItemNav({
           : "text-muted hover:translate-x-0.5 hover:text-foreground",
       )}
     >
-      {/* superfície levantada do item ativo — desliza entre os itens */}
+      {/* superfície levantada do item ativo; desliza entre os itens */}
       {ativo && (
         <motion.span
           layoutId="nav-superficie"
@@ -234,7 +234,7 @@ function ItemNav({
         />
       )}
 
-      {/* ladrilho do ícone — "acende" na cor do item quando ativo */}
+      {/* ladrilho do ícone; acende na cor do item quando ativo */}
       <span
         aria-hidden
         className={cn(
@@ -283,7 +283,7 @@ function ItemNav({
   );
 }
 
-/* ——— Acordeão: um item-pai (Construtor) com os modos dentro ——— */
+/* Acordeão: um item-pai (Construtor) com os modos dentro */
 
 /** Filho do acordeão: linha compacta e indentada, sob o trilho de árvore. */
 function ItemFilho({
@@ -407,15 +407,15 @@ function Conteudo({ colapsada }: { colapsada: boolean }) {
     <div className="flex h-full flex-col gap-4 p-3">
       <Marca colapsada={colapsada} onNavigate={fechar} />
 
-      {/* min-h-0 + overflow-y-auto: só a nav rola, e só quando passa da tela —
-          a marca fica pinada no topo. Sem isto, o acordeão aberto voltaria a
+      {/* min-h-0 + overflow-y-auto: só a nav rola, e só quando passa da tela;
+          a marca fica pinada no topo. Sem isso, o acordeão aberto voltaria a
           ser cortado quando a lista cresce. */}
       <LayoutGroup id="sidebar-nav">
         <nav
           aria-label="Menu principal"
           className={cn(
             "flex min-h-0 flex-1 flex-col gap-5",
-            // só rola quando expandida — no rail de ícones o overflow cortaria
+            // só rola quando expandida; no rail de ícones o overflow cortaria
             // os tooltips (label) que saem para a direita
             !colapsada && "-mr-1 overflow-y-auto overflow-x-hidden pr-1",
           )}

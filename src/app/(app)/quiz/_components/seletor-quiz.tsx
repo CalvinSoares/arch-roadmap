@@ -28,7 +28,7 @@ import { pontosFracos, totais, slugsFracos } from "@/shared/lib/desempenho";
 /** A partir de quantos pontos fracos vale oferecer o modo "praticar". */
 const MIN_FRACOS = 3;
 
-/** Tópico "tudo" — o catálogo inteiro, sem escopo. */
+/** Tópico "tudo": o catálogo inteiro, sem escopo. */
 const TUDO: TopicoQuiz = {
   id: "tudo",
   titulo: "Catálogo inteiro",
@@ -39,7 +39,7 @@ const TUDO: TopicoQuiz = {
 
 const TAMANHOS = [5, 10, 20] as const;
 
-/** Pílula de opção — o mesmo desenho para formato, assunto e tamanho. */
+/** Pílula de opção; o mesmo desenho para formato, assunto e tamanho. */
 function Pilula({
   ativo,
   onClick,
@@ -113,9 +113,9 @@ export function SeletorQuiz() {
   return (
     <div className="space-y-4">
       {/*
-        O quiz vem primeiro, de propósito. Antes havia 14 botões de filtro
-        acima dele: a pergunta — o produto — ficava abaixo da dobra, atrás de
-        um formulário de configuração que quase ninguém precisa mexer.
+        O quiz vem primeiro de propósito: antes havia 14 botões de filtro
+        acima dele e a pergunta ficava abaixo da dobra, atrás de um formulário
+        de configuração que quase ninguém precisa mexer.
       */}
       <section aria-live="polite">
         <Quiz
@@ -130,10 +130,9 @@ export function SeletorQuiz() {
       </section>
 
       {/*
-        Seu desempenho — só aparece quando há histórico. Vazio na chegada: a
-        página funciona igual sem ele, e o painel é acréscimo, não a razão de
-        a página existir. O ciclo que fecha: o quiz alimenta o histórico, e o
-        botão "Praticar" devolve ao quiz um sorteio concentrado no que dói.
+        Desempenho: só aparece quando há histórico. O quiz alimenta o
+        histórico e o botão "Praticar" devolve um sorteio focado nos
+        conceitos com mais erros.
       */}
       {resumo.respostas > 0 && (
         <section className="rounded-2xl border border-card-border bg-card p-4 sm:p-5">
@@ -201,7 +200,7 @@ export function SeletorQuiz() {
             </div>
           ) : (
             <p className="mt-2 text-[13px] text-muted">
-              Sem erros registrados ainda — mandou bem.
+              Sem erros registrados ainda. Mandou bem.
             </p>
           )}
         </section>

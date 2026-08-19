@@ -8,12 +8,12 @@ import {
 } from "@/shared/lib/gamificacao/ligas";
 
 /**
- * Temporadas e ligas — o I/O em volta da lógica pura de `ligas.ts`.
+ * Temporadas e ligas: o I/O em volta da lógica pura de `ligas.ts`.
  *
  * O XP da temporada (`liga_membros.xp_na_temporada`) é separado do XP vitalício
- * (`user_stats.xp_total`): a temporada reinicia a corrida toda semana, evitando
- * o ranking global eterno que desmotiva. A virada (cron) fecha a temporada
- * ativa, aplica promoção/rebaixamento por tier e abre a próxima.
+ * (`user_stats.xp_total`); a corrida reinicia toda semana. A virada (cron)
+ * fecha a temporada ativa, aplica promoção/rebaixamento por tier e abre a
+ * próxima.
  */
 
 /** A temporada ativa, ou `null` se ainda não há nenhuma. */
@@ -30,7 +30,7 @@ export async function temporadaAtiva() {
 /**
  * A temporada ativa, criando uma se não existir. A criação preguiçosa cobre o
  * bootstrap; o cron é o dono real do ciclo. (Uma corrida rara pode criar duas
- * ativas no primeiríssimo XP de vida do sistema — o cron normaliza na virada.)
+ * ativas no primeiro XP da vida do sistema; o cron normaliza na virada.)
  */
 export async function garantirTemporada() {
   const atual = await temporadaAtiva();

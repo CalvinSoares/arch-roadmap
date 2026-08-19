@@ -15,7 +15,7 @@ const NIVEL_ROTULO: Record<NivelRubrica, string> = {
   bonus: "Bônus",
 };
 
-/** Acento por nível — reaproveita os tokens de categoria do catálogo. */
+/** Acento por nível; reaproveita os tokens de categoria do catálogo. */
 const NIVEL_COR: Record<NivelRubrica, string> = {
   essencial: "var(--cat-principio)",
   importante: "var(--cat-arquitetura)",
@@ -83,9 +83,8 @@ export function EntrevistaSala({ entrevistas }: { entrevistas: Entrevista[] }) {
         </div>
       </section>
 
-      {/* ——— A rubrica, escondida até você desenhar ———
-          Revelar de imediato viraria leitura passiva; o valor está em pensar
-          o desenho primeiro e só então se corrigir. ——— */}
+      {/* ——— Rubrica, escondida até o usuário pedir ———
+          revelar de imediato viraria leitura passiva. */}
       {!revelada ? (
         <div className="rounded-2xl border border-dashed border-card-border p-6 text-center">
           <p className="text-sm text-muted">

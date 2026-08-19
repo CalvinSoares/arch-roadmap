@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { classesOpcaoDesafio } from "@/shared/components/jornada/desafios/opcao-estilo";
 import type { DesafioParear } from "@/shared/types/desafio";
@@ -23,7 +23,7 @@ export function DesafioParearView({
 }) {
   const direitas = useMemo(() => {
     const dirs = desafio.pares.map((p) => p.direita);
-    // mulberry32 curto — só para UI
+    // mulberry32 curto, só para UI
     let a = sementeEmbaralhe >>> 0;
     const rnd = () => {
       a = (a + 0x6d2b79f5) >>> 0;
@@ -39,15 +39,9 @@ export function DesafioParearView({
     return out;
   }, [desafio.pares, sementeEmbaralhe]);
 
+  // Sem effect de reset: o pai remonta com key={desafio.id} ao trocar.
   const [ligacoes, setLigacoes] = useState<Record<string, string>>({});
   const [selecionadaEsq, setSelecionadaEsq] = useState<string | null>(null);
-
-  useEffect(() => {
-    setLigacoes({});
-    setSelecionadaEsq(null);
-    onMudar({});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [desafio.id]);
 
   const usadasDir = new Set(Object.values(ligacoes));
   const feitas = Object.keys(ligacoes).length;

@@ -32,7 +32,7 @@ import {
 } from "@/shared/config/construtor-visual";
 import type { CamadaNoProjeto, EstadoProjeto } from "@/shared/types/construtor";
 
-/** bloco da paleta em arraste (padrão ou tecnologia) — liga o destaque de alvo. */
+/** bloco da paleta em arraste (padrão ou tecnologia); liga o destaque de alvo. */
 export interface BlocoArrastado {
   tipo: "padrao" | "tech";
   id: string;

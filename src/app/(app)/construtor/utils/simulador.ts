@@ -47,7 +47,7 @@ export interface Simulacao {
   resultado: ResultadoSim;
   /** o que a configuração atual revela (impacto das falhas/ausências). */
   avisos: string[];
-  /** peças presentes — habilita os toggles corretos na UI. */
+  /** peças presentes; habilita os toggles corretos na UI. */
   disponivel: { cache: boolean; banco: boolean; fila: boolean; busca: boolean; storage: boolean };
 }
 
@@ -67,7 +67,7 @@ export const LABEL_TIPO: Record<TipoRequisicao, string> = {
 };
 
 /**
- * Monta o caminho de uma requisição pela arquitetura do usuário — com
+ * Monta o caminho de uma requisição pela arquitetura do usuário, com
  * narração, latências ilustrativas e impacto de falhas. Função pura.
  */
 export function montarSimulacao(
@@ -132,14 +132,12 @@ export function montarSimulacao(
   };
 
   /**
-   * O que uma falha custa, conforme o que protege a borda.
+   * O que uma falha custa, conforme o que protege a borda. Sem prazo, a
+   * chamada pendura e prende a conexão; com prazo, falha e libera; com retry,
+   * falha três vezes; com disjuntor aberto, nem sai (a mesma dependência
+   * quebrada custa quatro tempos, separados por ~5 ordens de grandeza).
    *
-   * É a coisa mais difícil de ensinar em prosa: a **mesma** dependência
-   * quebrada custa quatro tempos diferentes, separados por cinco ordens de
-   * grandeza. Sem prazo, a chamada pendura e prende a conexão; com prazo, ela
-   * falha e libera; com retry, falha três vezes; com disjuntor aberto, nem sai.
-   *
-   * A ordem dos testes é a de precedência real: um disjuntor aberto vence o
+   * A ordem dos testes segue a precedência real: disjuntor aberto vence o
    * timeout, porque a chamada não acontece.
    */
   const custoDaFalha = (): {
@@ -151,7 +149,7 @@ export function montarSimulacao(
     if (temPadrao("circuit-breaker")) {
       return {
         ms: LATENCIA.falhaRapida.ms,
-        nota: "o disjuntor já estava aberto — recusa imediata, sem tocar a dependência",
+        nota: "o disjuntor já estava aberto: recusa imediata, sem tocar a dependência",
         aviso:
           "Com o disjuntor aberto, a falha custa microssegundos em vez de segundos: o prazo do pedido é devolvido a quem chamou, e a dependência ganha a folga que precisa para se levantar.",
         conceito: "circuit-breaker",
@@ -162,7 +160,7 @@ export function montarSimulacao(
         ms: LATENCIA.prazoComRetry.ms,
         nota: "três tentativas, cada uma esperando o prazo até estourar",
         aviso:
-          "Retry multiplica a espera pelo número de tentativas. Vale quando a falha é passageira — e é exatamente por isso que ele pede um disjuntor ao lado, para parar de insistir quando não é.",
+          "Retry multiplica a espera pelo número de tentativas. Vale quando a falha é passageira; por isso ele pede um disjuntor ao lado, para parar de insistir quando não é.",
         conceito: "retry",
       };
     }
@@ -171,24 +169,24 @@ export function montarSimulacao(
         ms: LATENCIA.prazoConfigurado.ms,
         nota: "o prazo estoura, a chamada é abortada e a conexão volta ao pool",
         aviso:
-          "O timeout não conserta a dependência — ele transforma espera indefinida em erro tratável, e devolve a conexão antes de o pool esgotar.",
+          "O timeout não conserta a dependência: transforma espera indefinida em erro tratável e devolve a conexão antes de o pool esgotar.",
         conceito: "timeout",
       };
     }
     return {
       ms: LATENCIA.esperaSemPrazo.ms,
-      nota: "sem prazo, a chamada pendura até o cliente desistir — e a conexão fica presa até lá",
+      nota: "sem prazo, a chamada pendura até o cliente desistir e a conexão fica presa até lá",
       aviso:
-        "Sem timeout, esta falha custa 30 segundos de conexão presa. Com prazo configurado seriam 2 segundos; com um disjuntor aberto, microssegundos. É a mesma dependência quebrada — o que muda é o que protege a borda.",
+        "Sem timeout, esta falha custa 30 segundos de conexão presa. Com prazo configurado seriam 2 segundos; com um disjuntor aberto, microssegundos. A dependência quebrada é a mesma; o que muda é o que protege a borda.",
       conceito: "timeout",
     };
   };
 
   const pedido: Record<TipoRequisicao, string> = {
-    leitura: "abre a tela — GET /produtos",
-    escrita: "confirma a ação — POST /pedidos",
-    busca: 'digita na busca — GET /busca?q="tênis"',
-    upload: "envia um arquivo — POST /arquivo",
+    leitura: "abre a tela: GET /produtos",
+    escrita: "confirma a ação: POST /pedidos",
+    busca: 'digita na busca: GET /busca?q="tênis"',
+    upload: "envia um arquivo: POST /arquivo",
   };
   passos.push({ no: "usuario", rotulo: "Usuário", detalhe: pedido[tipo], ms: 0 });
 
@@ -271,7 +269,7 @@ export function montarSimulacao(
 
       if (!temRate && temAuth && temUi) {
         avisos.push(
-          "Há autenticação, mas sem rate limit na borda — força bruta no login não encontra freio."
+          "Há autenticação, mas sem rate limit na borda: força bruta no login não encontra freio."
         );
       }
     } else if (c.camadaId === "aplicacao") {
@@ -281,7 +279,7 @@ export function montarSimulacao(
         def.nome,
         temPadrao("cqrs")
           ? leituraPura
-            ? "CQRS: roteia para o lado de LEITURA — sem passar por regras de escrita"
+            ? "CQRS: roteia para o lado de LEITURA, sem passar por regras de escrita"
             : "CQRS: roteia o comando para o lado de ESCRITA"
           : "caso de uso orquestra a operação",
         temPadrao("cqrs") ? 1 : 2
@@ -307,7 +305,7 @@ export function montarSimulacao(
         passo(
           "read-store",
           "Cache fora",
-          `${nomeTech(cacheTech)} indisponível — nenhuma leitura é absorvida; tudo vai ao banco`,
+          `${nomeTech(cacheTech)} indisponível: nenhuma leitura é absorvida, tudo vai ao banco`,
           0.2,
           { falha: true }
         );
@@ -319,14 +317,14 @@ export function montarSimulacao(
         passo(
           "read-store",
           "Leitura",
-          `${nomeTech(cacheTech)}: HIT — resposta direto da memória. O banco nem fica sabendo.`,
+          `${nomeTech(cacheTech)}: HIT, resposta direto da memória. O banco nem fica sabendo.`,
           LATENCIA.memoria.ms
         );
       } else {
         passo(
           "read-store",
           "Leitura",
-          `${nomeTech(cacheTech)}: MISS — a chave não está no cache`,
+          `${nomeTech(cacheTech)}: MISS, a chave não está no cache`,
           LATENCIA.memoria.ms
         );
       }
@@ -354,7 +352,7 @@ export function montarSimulacao(
           passo(
             noBancoFundo,
             "Banco fora",
-            `${nomeTech(bancoFundo)} não responde — ${custo.nota}`,
+            `${nomeTech(bancoFundo)} não responde: ${custo.nota}`,
             custo.ms,
             { falha: true }
           );
@@ -362,7 +360,7 @@ export function montarSimulacao(
           avisos.push(custo.aviso);
           avisos.push(
             cacheTech
-              ? `Banco fora + cache ${cacheCaiu ? "fora" : "frio"} = erro 503. Com o cache QUENTE, essa mesma leitura seria servida da memória — é isso que cache traz de resiliência.`
+              ? `Banco fora + cache ${cacheCaiu ? "fora" : "frio"} = erro 503. Com o cache QUENTE, essa mesma leitura seria servida da memória; é isso que cache traz de resiliência.`
               : "Banco fora e nenhum cache: toda leitura falha. Um cache quente absorveria parte do tráfego durante o incidente."
           );
         } else {
@@ -376,7 +374,7 @@ export function montarSimulacao(
             passo(
               "read-store",
               "Cache",
-              `resultado gravado no ${nomeTech(cacheTech)} — a próxima leitura vira HIT`,
+              `resultado gravado no ${nomeTech(cacheTech)}; a próxima leitura vira HIT`,
               LATENCIA.memoria.ms
             );
           }
@@ -385,7 +383,7 @@ export function montarSimulacao(
         passo(
           writeL ? "write-store" : infraL ? "infra" : anterior,
           "Dados",
-          "nenhuma tecnologia de dados no projeto — a consulta não tem onde parar",
+          "nenhuma tecnologia de dados no projeto: a consulta não tem onde parar",
           0,
           { falha: true }
         );
@@ -402,14 +400,14 @@ export function montarSimulacao(
         15
       );
     } else if (buscaTech && bancoCaiu) {
-      passo("read-store", "Busca", `${nomeTech(buscaTech)} responde do índice — é uma projeção, sobrevive ao banco fora`, LATENCIA.indiceBusca.ms);
+      passo("read-store", "Busca", `${nomeTech(buscaTech)} responde do índice: é uma projeção e sobrevive ao banco fora`, LATENCIA.indiceBusca.ms);
       resultado = "degradado";
-      avisos.push("O índice de busca é derivado: continua servindo consultas mesmo com o banco fora — mas sem receber atualizações.");
+      avisos.push("O índice de busca é derivado: continua servindo consultas mesmo com o banco fora, mas sem receber atualizações.");
     } else if (bancoFundo && !bancoCaiu) {
       passo(
         noBancoFundo,
         "Banco (LIKE)",
-        `${nomeTech(bancoFundo)} faz LIKE '%termo%' — full table scan, sem relevância nem tolerância a typo`,
+        `${nomeTech(bancoFundo)} faz LIKE '%termo%': full table scan, sem relevância nem tolerância a typo`,
         LATENCIA.bancoScan.ms,
         { falha: true }
       );
@@ -436,7 +434,7 @@ export function montarSimulacao(
       passo(
         noBancoFundo,
         "Banco (BLOB)",
-        `arquivo gravado como BLOB no ${nomeTech(bancoFundo)} — infla o banco, encarece backup e satura a conexão`,
+        `arquivo gravado como BLOB no ${nomeTech(bancoFundo)}: infla o banco, encarece backup e satura a conexão`,
         LATENCIA.blobNoBanco.ms,
         { falha: true }
       );
@@ -458,7 +456,7 @@ export function montarSimulacao(
         passo(
           "fila",
           "Aceito (202)",
-          `banco fora — o comando entra na ${nomeTech(brokerTech)} e será processado quando voltar. O usuário recebe "em processamento", não erro.`,
+          `banco fora: o comando entra na ${nomeTech(brokerTech)} e será processado quando voltar. O usuário recebe "em processamento", não erro.`,
           6,
           { falha: true }
         );
@@ -471,7 +469,7 @@ export function montarSimulacao(
         passo(
           noEscrita,
           "Escrita falhou",
-          `${nomeTech(bancoFundo)} não responde — ${custo.nota}`,
+          `${nomeTech(bancoFundo)} não responde: ${custo.nota}`,
           custo.ms,
           { falha: true }
         );
@@ -486,10 +484,10 @@ export function montarSimulacao(
         noEscrita,
         "Escrita",
         esCamada
-          ? `grava o EVENTO no log${bancoFundo ? ` (${nomeTech(bancoFundo)} append-only)` : ""} — o histórico é a verdade`
+          ? `grava o EVENTO no log${bancoFundo ? ` (${nomeTech(bancoFundo)} append-only)` : ""}; o histórico é a fonte da verdade`
           : bancoFundo
             ? `${nomeTech(bancoFundo)} grava com transação ACID`
-            : "persiste a mudança (nenhum banco concreto definido — veja a paleta)",
+            : "persiste a mudança (nenhum banco concreto definido; veja a paleta)",
         bancoFundo ? LATENCIA.escritaAcid.ms : LATENCIA.bancoIndex.ms
       );
     }
@@ -500,21 +498,21 @@ export function montarSimulacao(
         passo(
           "fila",
           "Fila fora",
-          `${nomeTech(brokerTech) ?? "broker"} indisponível — o evento não é publicado`,
+          `${nomeTech(brokerTech) ?? "broker"} indisponível: o evento não é publicado`,
           0,
           { assincrono: true, falha: true }
         );
         resultado = resultado === "ok" ? "degradado" : resultado;
         avisos.push(
-          "Escrita concluída, mas sem evento publicado: o read model congela no estado anterior. 'Consistência eventual' vira 'eventual demais' — e a UI mostra dado velho sem ninguém perceber."
+          "Escrita concluída, mas sem evento publicado: o read model congela no estado anterior e a UI passa a mostrar dado velho sem ninguém perceber."
         );
       } else {
         passo(
           "fila",
           "Evento",
           brokerTech
-            ? `${nomeTech(brokerTech)}: evento publicado — a resposta NÃO espera por isso`
-            : "evento publicado na fila (sem broker concreto — arraste Kafka ou RabbitMQ)",
+            ? `${nomeTech(brokerTech)}: evento publicado; a resposta NÃO espera por isso`
+            : "evento publicado na fila (sem broker concreto; arraste Kafka ou RabbitMQ)",
           5,
           { assincrono: true }
         );
@@ -522,7 +520,7 @@ export function montarSimulacao(
           passo(
             "read-store",
             "Projeção",
-            `read model atualizado a partir do evento — consistência eventual${
+            `read model atualizado a partir do evento: consistência eventual${
               cacheTech && !cacheCaiu ? ` (${nomeTech(cacheTech)} aquecido)` : ""
             }`,
             8,
@@ -540,13 +538,13 @@ export function montarSimulacao(
   const fecho: Record<ResultadoSim, string> = {
     ok: `o usuário recebe em ~${totalMs.toFixed(1).replace(".0", "")}ms`,
     degradado: `o usuário recebe em ~${totalMs.toFixed(1).replace(".0", "")}ms, mas o sistema está degradado`,
-    erro: "a requisição falhou — o usuário recebe erro",
+    erro: "a requisição falhou: o usuário recebe erro",
   };
   passos.push({
     no: "usuario",
     rotulo: resultado === "erro" ? "Erro" : "Resposta",
     detalhe: `${fecho[resultado]}${
-      passos.some((p) => p.assincrono) ? " — os passos assíncronos continuam em segundo plano" : ""
+      passos.some((p) => p.assincrono) ? "; os passos assíncronos continuam em segundo plano" : ""
     }`,
     ms: 0,
     falha: resultado === "erro",

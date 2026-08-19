@@ -17,14 +17,14 @@ export interface StatusResumido {
   nivel: number;
   xpTotal: number;
   streakDias: number;
-  /** 0 a 1 — progresso dentro do nível atual (para o anel/barra do header). */
+  /** 0 a 1: progresso dentro do nível atual (anel/barra do header). */
   pct: number;
 }
 
 /**
- * Status enxuto para o indicador do header — uma única leitura da projeção.
+ * Status enxuto pro indicador do header, uma única leitura da projeção.
  * Leve de propósito: roda em toda página quando logado. `null` sem sessão (o
- * indicador simplesmente não aparece).
+ * indicador não aparece).
  */
 export async function meuStatus(): Promise<StatusResumido | null> {
   const u = await getUsuario();
@@ -48,7 +48,7 @@ export async function meuStatus(): Promise<StatusResumido | null> {
   };
 }
 
-/** Meta diária de XP — o quanto ganhar por dia (retenção com respeito).
+/** Meta diária de XP.
  *  Não exportado: num arquivo "use server" só funções async podem ser exports. */
 const META_DIARIA_XP = 50;
 
@@ -97,8 +97,8 @@ export interface MissaoHoje {
 }
 
 /**
- * As missões de hoje com o progresso do usuário — leitura enxuta para o rail
- * da jornada (uma query, sem o peso do resumo completo do perfil). `null` sem
+ * Missões de hoje com o progresso do usuário: leitura enxuta pro rail da
+ * jornada (uma query, sem o peso do resumo completo do perfil). `null` sem
  * sessão (o rail mostra o convite de conta no lugar).
  */
 export async function missoesDeHoje(): Promise<MissaoHoje[] | null> {

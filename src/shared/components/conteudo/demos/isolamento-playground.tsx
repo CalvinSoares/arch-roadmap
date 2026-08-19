@@ -20,7 +20,7 @@ import { cn } from "@/shared/utils/cn";
  * inerentemente temporal: texto explica a definição, e só a execução mostra
  * onde o dinheiro desaparece.
  *
- * Todo o cálculo vem de `lib/isolamento.ts`, que é puro e testado — aqui só
+ * Todo o cálculo vem de `lib/isolamento.ts`, que é puro e testado; aqui só
  * há apresentação e o índice do passo atual.
  */
 export function IsolamentoPlayground() {
@@ -215,7 +215,7 @@ export function IsolamentoPlayground() {
                   {resultado.anomalias.map((a) => NOME_ANOMALIA[a]).join(" + ")}
                 </span>{" "}
                 em <code className="font-mono text-[12px]">{nivel}</code>. Nenhuma
-                transação recebeu erro — é isso que faz a anomalia ser difícil de
+                transação recebeu erro. É isso que faz a anomalia ser difícil de
                 achar em produção.
               </span>
             </p>
@@ -230,7 +230,7 @@ export function IsolamentoPlayground() {
                 Nenhuma anomalia em{" "}
                 <code className="font-mono text-[12px]">{nivel}</code>
                 {resultado.eventos.some((e) => e.abortou)
-                  ? " — porque o banco abortou uma transação. Sem retry, isso viraria erro para o usuário."
+                  ? ", porque o banco abortou uma transação. Sem retry, isso viraria erro para o usuário."
                   : "."}
               </span>
             </p>

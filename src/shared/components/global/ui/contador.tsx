@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-/** easeOutCubic — rápido no começo, assentando no fim. */
+/** easeOutCubic: rápido no começo, assentando no fim. */
 const suavizar = (p: number) => 1 - Math.pow(1 - p, 3);
 
 /**
@@ -10,7 +10,7 @@ const suavizar = (p: number) => 1 - Math.pow(1 - p, 3);
  *
  * O estado começa **no valor final** e só é reduzido dentro do primeiro
  * quadro: sem JS, com movimento reduzido ou se os quadros nunca chegarem
- * (aba em segundo plano), o que fica na tela é o número certo — nunca zero.
+ * (aba em segundo plano), o que fica na tela é o número certo, nunca zero.
  */
 export function Contador({
   valor,

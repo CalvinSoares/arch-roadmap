@@ -18,7 +18,7 @@ export default async function EntrarPage({
       : "/";
   const jaRegistrado = sp.registrado === "1";
 
-  // Só oferece o que está provisionado — sem botão que quebra.
+  // Só oferece o que está provisionado, pra não mostrar botão que quebra.
   const githubAtivo = Boolean(process.env.AUTH_GITHUB_ID);
   const magicLinkAtivo = Boolean(process.env.RESEND_API_KEY);
 

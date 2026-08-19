@@ -1,5 +1,5 @@
 /**
- * Feedback sonoro leve da jornada — Web Audio API (sem arquivos).
+ * Feedback sonoro leve da jornada via Web Audio API (sem arquivos).
  * Mute persiste em localStorage; reduced-motion encurta o acorde de conclusão.
  */
 

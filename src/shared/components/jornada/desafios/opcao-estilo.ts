@@ -1,7 +1,7 @@
 import { cn } from "@/shared/utils/cn";
 
 /**
- * Chrome compartilhado das opções de desafio — hover/focus bem legíveis
+ * Chrome compartilhado das opções de desafio, com hover/focus bem legíveis
  * no tema escuro (o border-card-border sozinho some no canvas).
  */
 export function classesOpcaoDesafio(o: {

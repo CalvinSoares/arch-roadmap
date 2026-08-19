@@ -46,7 +46,7 @@ export function CamadasInterativas({ camadas }: { camadas: CamadaNav[] }) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-card-border bg-card">
-      {/* ——— Barra de controle ——— */}
+      {/* Barra de controle */}
       <div className="flex items-center gap-3 border-b border-card-border px-4 py-3">
         <p className="min-w-0 flex-1 truncate text-sm text-muted">
           Camada{" "}
@@ -86,7 +86,7 @@ export function CamadasInterativas({ camadas }: { camadas: CamadaNav[] }) {
       </div>
 
       <div className="lg:grid lg:grid-cols-[minmax(0,15.5rem)_minmax(0,1fr)]">
-        {/* ——— Pilha de camadas ——— */}
+        {/* Pilha de camadas */}
         <div
           role="tablist"
           aria-orientation="vertical"
@@ -147,7 +147,7 @@ export function CamadasInterativas({ camadas }: { camadas: CamadaNav[] }) {
           })}
         </div>
 
-        {/* ——— Detalhe da camada focada ——— */}
+        {/* Detalhe da camada focada */}
         <div
           role="tabpanel"
           id={`camada-painel-${atual?.id}`}
@@ -159,7 +159,7 @@ export function CamadasInterativas({ camadas }: { camadas: CamadaNav[] }) {
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--acento)]">
               Camada {ativa + 1}
             </p>
-            {/* h3: o container é uma SecaoConteudo com h2 — pular para h4
+            {/* h3: o container é uma SecaoConteudo com h2; pular para h4
                 quebrava a ordem de cabeçalhos para leitores de tela. */}
             <h3 className="mt-1 text-lg font-semibold tracking-tight">
               {atual?.titulo}

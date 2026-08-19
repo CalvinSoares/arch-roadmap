@@ -18,7 +18,7 @@ export function ehUuid(id: string): boolean {
   return UUID_RE.test(id);
 }
 
-/** Slug de verbete real — rejeita `checkpoint:` / `revisao:` / invenções. */
+/** Slug de verbete real: rejeita `checkpoint:` / `revisao:` / invenções. */
 export function conceitoValidoParaQuiz(slug: string): boolean {
   if (!slug || slug.includes(":")) return false;
   return !!getConceito(slug);

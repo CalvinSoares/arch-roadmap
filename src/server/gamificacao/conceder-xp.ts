@@ -10,18 +10,18 @@ import {
 } from "@/shared/lib/gamificacao/streak";
 
 /**
- * A cozinha da gamificação servidor-autoritativa. O cliente reporta a **ação**
- * ("acertei a pergunta X"); aqui o servidor **concede** o XP. É a materialização
- * dos princípios do plano:
+ * Concessão de XP no servidor. O cliente reporta a ação ("acertei a pergunta
+ * X") e o servidor decide quanto XP pagar.
  *
- *  - **Ledger append-only** (`xp_events`): nunca se dá UPDATE num evento.
- *  - **Idempotência**: `origem_ref` tem índice único; o segundo award com a
- *    mesma chave não insere nada (mata duplo clique, retry e reprocessamento).
- *  - **Projeção (CQRS)**: `user_stats` (xp/nível/streak) é derivada e
- *    reconstruível a partir do ledger — se corromper, reprocessa.
+ *  - Ledger append-only (`xp_events`): evento nunca recebe UPDATE.
+ *  - Idempotência: `origem_ref` tem índice único, então duplo clique, retry e
+ *    reprocessamento com a mesma chave não inserem nada.
+ *  - `user_stats` (xp/nível/streak) é projeção derivada do ledger; se
+ *    corromper, reprocessa.
  *
  * O driver HTTP da Neon não faz transação interativa; por isso as escritas são
- * sequenciais e a projeção é reconstruível de propósito (não depende de atomicidade).
+ * sequenciais e a projeção é reconstruível de propósito (não depende de
+ * atomicidade).
  */
 
 export interface ConcederXpEntrada {
@@ -34,7 +34,7 @@ export interface ConcederXpEntrada {
 }
 
 export interface ConcederXpResultado {
-  /** `false` quando a chave já existia — nada foi pago (idempotência). */
+  /** `false` quando a chave já existia e nada foi pago (idempotência). */
   concedido: boolean;
   /** XP efetivamente creditado neste evento (0 se duplicado). */
   xp: number;
@@ -42,7 +42,7 @@ export interface ConcederXpResultado {
 
 /**
  * Credita XP no ledger de forma idempotente. `onConflictDoNothing` +
- * `returning`: se nada volta, a `origemRef` já existia — não paga de novo.
+ * `returning`: se nada volta, a `origemRef` já existia e não paga de novo.
  * Não reprojecta sozinho; quem orquestra chama `reprojetarXp` depois.
  */
 export async function concederXp(
@@ -70,14 +70,14 @@ export async function concederXp(
 }
 
 /**
- * Recalcula a projeção de XP/nível a partir do **ledger inteiro** do usuário.
- * Fonte da verdade = soma dos eventos; nível é derivado (nunca guardado à mão).
- * Idempotente por construção: rodar N vezes dá o mesmo resultado.
+ * Recalcula a projeção de XP/nível somando o ledger inteiro do usuário.
+ * O nível é derivado do total, nunca gravado à mão. Rodar N vezes dá o mesmo
+ * resultado.
  */
 export async function reprojetarXp(userId: string): Promise<{
   xpTotal: number;
   nivel: number;
-  /** Nível antes desta reprojeção — permite detectar "subiu de nível". */
+  /** Nível antes desta reprojeção, pra detectar "subiu de nível". */
   nivelAnterior: number;
 }> {
   const [antes] = await db
@@ -109,8 +109,8 @@ export async function reprojetarXp(userId: string): Promise<{
 
 /**
  * Registra que o usuário esteve ativo em `hoje` (ISO YYYY-MM-DD) e atualiza o
- * streak na projeção. A lógica de "subiu / usou freeze / quebrou" é a função
- * pura `registrarAtividade`; aqui é só o I/O em volta. Idempotente no mesmo dia
+ * streak na projeção. A regra de subir/usar freeze/quebrar fica na função pura
+ * `registrarAtividade`; aqui é só o I/O em volta. Idempotente no mesmo dia
  * (a função pura não mexe em nada se `hoje` já é o último dia ativo).
  */
 export async function registrarDiaAtivo(
@@ -160,8 +160,8 @@ export async function registrarDiaAtivo(
 }
 
 /**
- * "Hoje" do usuário como ISO YYYY-MM-DD, ciente do fuso. Streak é uma questão
- * de data-calendário; sem o fuso, quem vive em -03 viraria o dia às 21h.
+ * "Hoje" do usuário em ISO YYYY-MM-DD, respeitando o fuso. Sem isso, quem está
+ * em -03 viraria o dia às 21h e o streak quebraria errado.
  */
 export function hojeDoUsuario(timezone?: string | null): string {
   const agora = new Date();
@@ -172,7 +172,7 @@ export function hojeDoUsuario(timezone?: string | null): string {
         agora
       );
     } catch {
-      // fuso inválido — cai para UTC
+      // fuso inválido, cai pra UTC
     }
   }
   return agora.toISOString().slice(0, 10);

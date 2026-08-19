@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 /**
- * Shell das telas de conta (entrar/registrar) — **fora** do chrome do app: sem
+ * Shell das telas de conta (entrar/registrar), fora do chrome do app: sem
  * sidebar, sem header. Só o essencial: um botão "Voltar", a marca, e o cartão
  * centrado sobre um fundo com brilho suave. Continua dentro do `<Providers>` da
  * raiz, então tema e sessão funcionam normalmente.
@@ -10,7 +10,7 @@ import { ArrowLeft } from "lucide-react";
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="textura-grao relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-canvas px-4 py-12">
-      {/* brilhos de fundo — dão vida sem competir com o formulário */}
+      {/* brilhos de fundo, suaves pra não competir com o formulário */}
       <div
         aria-hidden
         className="pointer-events-none absolute -top-32 left-1/2 size-[36rem] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]"

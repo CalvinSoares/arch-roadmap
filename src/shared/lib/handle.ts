@@ -1,9 +1,9 @@
 /**
- * Regras de `@handle` — o identificador público opt-in. Função **pura**, para o
- * cliente e o servidor validarem com a mesma régua (e a spec fixar o contrato).
+ * Regras do `@handle` (identificador público opt-in). Função pura, pro
+ * cliente e o servidor validarem com a mesma régua e a spec fixar o contrato.
  *
  * Formato: 3–20 caracteres, `a–z`, `0–9` e `_`, começando por letra. Minúsculo
- * canônico (o handle é case-insensitive: "Calvin" e "calvin" são o mesmo).
+ * canônico (case-insensitive: "Calvin" e "calvin" são o mesmo).
  */
 
 export const HANDLE_MIN = 3;

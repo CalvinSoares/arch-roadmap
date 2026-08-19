@@ -18,7 +18,6 @@ import { Aurora } from "@/shared/components/global/ui/aurora";
 import { Reveal, RevealItem } from "@/shared/components/global/ui/reveal";
 import { SpotlightCard } from "@/shared/components/global/ui/spotlight-card";
 import { SeloNovo } from "@/shared/components/global/ui/selo-novo";
-import { Contador } from "@/shared/components/global/ui/contador";
 import { JsonLd } from "@/shared/components/seo/json-ld";
 import { CATEGORIAS } from "@/shared/config/categorias";
 import { listConceitos, listRoadmaps } from "@/shared/lib/content";
@@ -38,19 +37,19 @@ const PILARES = [
   {
     icon: Map,
     titulo: "Roadmaps navegáveis",
-    desc: "Trilhas em grafo — do básico ao avançado, com dependências claras e progresso salvo no navegador.",
+    desc: "Trilhas do básico ao avançado, com os pré-requisitos de cada tópico à mostra. Seu progresso fica salvo no navegador.",
     cor: "var(--cat-estrutural)",
   },
   {
     icon: Layers,
-    titulo: "Camadas & diagramas",
-    desc: "Veja onde cada peça atua na arquitetura, camada por camada, não só a teoria em prosa.",
+    titulo: "Camadas e diagramas",
+    desc: "Veja onde cada peça atua na arquitetura, camada por camada, em vez de só ler a teoria.",
     cor: "var(--cat-criacional)",
   },
   {
     icon: Code2,
-    titulo: "Código real",
-    desc: "Exemplos em TypeScript, Python e Java lado a lado, prontos para copiar.",
+    titulo: "Código de verdade",
+    desc: "Exemplos em TypeScript, Python e Java lado a lado, prontos pra copiar.",
     cor: "var(--primary)",
   },
 ];
@@ -60,49 +59,49 @@ const FAMILIAS: { id: Categoria; pergunta: string; desc: string }[] = [
   {
     id: "criacional",
     pergunta: "Como objetos nascem?",
-    desc: "Quem decide o que instanciar — e como esconder essa decisão de quem usa.",
+    desc: "Quem decide o que instanciar, e como esconder essa decisão de quem usa.",
   },
   {
     id: "estrutural",
     pergunta: "Como as peças se encaixam?",
-    desc: "Composição, tradução e embrulho: juntar coisas que não nasceram juntas.",
+    desc: "Como juntar coisas que não foram feitas uma pra outra.",
   },
   {
     id: "comportamental",
     pergunta: "Como os objetos conversam?",
-    desc: "Quem avisa quem, quem decide o quê, e como trocar comportamento em execução.",
+    desc: "Quem avisa quem, quem decide o quê, e como trocar um comportamento sem parar o programa.",
   },
   {
     id: "principio",
     pergunta: "Que regra atravessa tudo?",
-    desc: "Diretrizes que não são padrão nenhum, mas guiam a escolha de todos eles.",
+    desc: "Diretrizes gerais que ajudam a escolher entre os padrões.",
   },
   {
     id: "arquitetura",
     pergunta: "Como o sistema inteiro se organiza?",
-    desc: "Decisões de fronteira: o que fica no núcleo e o que é detalhe plugável.",
+    desc: "O que fica no núcleo do sistema e o que é detalhe que dá pra trocar depois.",
   },
   {
     id: "infra",
     pergunta: "Onde isso roda?",
-    desc: "Containers, orquestração e servidores — o caminho do código até produção.",
+    desc: "Containers, orquestração, servidores. O caminho do código até produção.",
   },
   {
     id: "seguranca",
     pergunta: "Quem pode fazer o quê?",
-    desc: "Identidade, permissão e abuso — provar quem é e limitar o dano quando alguém mente.",
+    desc: "Provar quem o usuário é e limitar o estrago quando alguém mente.",
   },
 ];
 
-/** A trilha de leitura de um verbete — mostra a profundidade do conteúdo. */
+/** As seções da página de um conceito, na ordem em que aparecem. */
 const ANATOMIA = [
   { icon: Zap, titulo: "Em 10 segundos", desc: "A resposta curta, antes de qualquer teoria." },
-  { icon: Sparkles, titulo: "Analogia", desc: "O gancho no mundo real que faz a ideia grudar." },
-  { icon: BookOpen, titulo: "O problema", desc: "Por que o padrão existe — com aprofundamento opcional." },
-  { icon: MousePointerClick, titulo: "Interativo", desc: "Uma demo onde a teoria vira comportamento." },
-  { icon: Layers, titulo: "Anatomia", desc: "As camadas navegáveis, uma de cada vez." },
-  { icon: Code2, titulo: "Código", desc: "Três linguagens, o mesmo desenho." },
-  { icon: Scale, titulo: "Decisão", desc: "Quando usar, quando evitar e as armadilhas." },
+  { icon: Sparkles, titulo: "Analogia", desc: "Um exemplo do mundo real pra ideia fazer sentido." },
+  { icon: BookOpen, titulo: "O problema", desc: "Por que o padrão existe. Dá pra se aprofundar se quiser." },
+  { icon: MousePointerClick, titulo: "Interativo", desc: "Uma demo pra mexer e ver o padrão funcionando." },
+  { icon: Layers, titulo: "Anatomia", desc: "As camadas do desenho, uma de cada vez." },
+  { icon: Code2, titulo: "Código", desc: "O mesmo exemplo em três linguagens." },
+  { icon: Scale, titulo: "Decisão", desc: "Quando usar, quando evitar, onde costuma dar errado." },
 ];
 
 function TituloSecao({
@@ -194,15 +193,15 @@ export default function HomePage() {
           <Reveal aoAparecer={false} indice={1}>
             <h1 className="mt-5 text-4xl font-semibold leading-[1.1] tracking-[-0.03em] sm:text-6xl">
               Entenda padrões e arquitetura{" "}
-              <span className="texto-gradiente">visualmente</span>
+              <span className="text-primary">visualmente</span>
             </h1>
           </Reveal>
 
           <Reveal aoAparecer={false} indice={2}>
             <p className="mx-auto mt-5 max-w-xl text-[15px] leading-relaxed text-muted sm:text-base">
-              Roadmaps enxutos e verbetes com diagramas, camadas navegáveis e
-              código em três linguagens. Sem cadastro, sem ruído — só o
-              essencial para aprender.
+              Roadmaps curtos e conceitos explicados com diagrama, camadas
+              navegáveis e código em TypeScript, Python e Java. Não precisa
+              criar conta pra usar.
             </p>
           </Reveal>
 
@@ -221,10 +220,10 @@ export default function HomePage() {
 
           <Reveal aoAparecer={false} indice={4}>
             <dl className="mx-auto mt-12 grid max-w-lg grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-4">
-              {numeros.map(({ valor, label }, i) => (
+              {numeros.map(({ valor, label }) => (
                 <div key={label} className="flex flex-col items-center">
                   <dt className="font-mono text-2xl font-semibold tabular-nums text-primary">
-                    <Contador valor={valor} atraso={0.4 + i * 0.08} />
+                    {valor}
                   </dt>
                   <dd className="mt-1 text-[11px] uppercase tracking-[0.14em] text-muted">
                     {label}
@@ -243,7 +242,7 @@ export default function HomePage() {
         <TituloSecao
           etiqueta="O que você encontra"
           titulo="Três formas de olhar a mesma ideia"
-          descricao="Cada conceito é atacado pela trilha, pelo desenho e pelo código — porque entender de um jeito só costuma não bastar."
+          descricao="Cada conceito aparece na trilha, no desenho e no código. Se um jeito não fizer sentido pra você, o outro faz."
         />
         <div className="grid gap-4 sm:grid-cols-3">
           {PILARES.map(({ icon: Icon, titulo, desc, cor }, i) => (
@@ -274,8 +273,8 @@ export default function HomePage() {
       <section>
         <TituloSecao
           etiqueta="Como o catálogo é organizado"
-          titulo="Cinco famílias, cinco perguntas"
-          descricao="Todo conceito responde a uma destas perguntas. Saber qual delas você está fazendo já elimina metade das opções."
+          titulo="Cada conceito responde a uma pergunta"
+          descricao="Antes de escolher um padrão, descubra qual destas perguntas você está tentando responder. Isso já corta boa parte das opções."
           acao={
             <Link
               href="/conceitos"
@@ -337,9 +336,9 @@ export default function HomePage() {
       {/* ================================================================ */}
       <section className="borda-gradiente relative overflow-hidden rounded-3xl bg-card/40 p-6 sm:p-9">
         <TituloSecao
-          etiqueta="Anatomia de um verbete"
-          titulo="Sete paradas, do resumo à decisão"
-          descricao="Todo conceito segue a mesma trilha. Você pode parar na primeira parada e já sair sabendo — ou descer até o fim."
+          etiqueta="Como cada página é montada"
+          titulo="Sete seções, do resumo à decisão"
+          descricao="Toda página de conceito segue a mesma estrutura. Dá pra ler só o começo e já sair sabendo, ou descer até o fim."
         />
         <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {ANATOMIA.map(({ icon: Icon, titulo, desc }, i) => (
@@ -368,7 +367,7 @@ export default function HomePage() {
           >
             <Button asChild variant="outline" className="w-full">
               <Link href={`/conceitos/${conceitos[0]?.slug ?? ""}`}>
-                Ver um verbete <ArrowRight />
+                Ver um exemplo <ArrowRight />
               </Link>
             </Button>
           </RevealItem>
@@ -383,7 +382,7 @@ export default function HomePage() {
           <TituloSecao
             etiqueta="Em movimento"
             titulo="O que entrou por último"
-            descricao="O projeto está sendo escrito em público. Cada entrega fica registrada, com o que mudou e quando."
+            descricao="O projeto é desenvolvido em público. Cada entrega fica registrada, com o que mudou e quando."
             acao={
               <Link
                 href="/novidades"
@@ -432,7 +431,7 @@ export default function HomePage() {
         <TituloSecao
           etiqueta="Comece por um"
           titulo="Conceitos em destaque"
-          descricao="Padrões, princípios e arquitetura — cada um com demo, diagrama e código."
+          descricao="Padrões, princípios e arquitetura, cada um com demo, diagrama e código."
           acao={
             <Link
               href="/conceitos"

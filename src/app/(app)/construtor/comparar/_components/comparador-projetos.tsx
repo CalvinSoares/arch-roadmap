@@ -13,9 +13,8 @@ import { cn } from "@/shared/utils/cn";
 /**
  * Comparador de projetos.
  *
- * Responde a pergunta que o Construtor deixava em aberto — "e se eu tirasse a
- * fila?" — que não dá para responder de cabeça, porque as cinco métricas se
- * movem juntas e o ganho de uma esconde a piora de outra.
+ * Responde "e se eu tirasse a fila?", que não dá para responder de cabeça:
+ * as cinco métricas se movem juntas e o ganho de uma esconde a piora de outra.
  *
  * Todo o cálculo vem de `lib/comparar-projetos.ts`, puro e testado.
  */
@@ -118,7 +117,7 @@ export function ComparadorProjetos() {
           </h2>
           <p className="mt-1 text-[13px] text-muted">
             Cinza é a referência; a cor é a variante. Em complexidade e custo,
-            menor é melhor — o sinal já está invertido.
+            menor é melhor (o sinal já está invertido).
           </p>
           <ul className="mt-3 divide-y divide-card-border">
             {diff.metricas.map((m) => (
@@ -243,7 +242,7 @@ export function ComparadorProjetos() {
         <span className="font-semibold text-foreground">Nota: </span>
         as cinco métricas medem propriedades do desenho, não do time. Uma
         variante que ganha em resiliência e perde em custo operacional está
-        pedindo gente para operar — e isso não aparece em nenhuma barra acima.
+        pedindo gente para operar, e isso não aparece em nenhuma barra acima.
       </div>
     </div>
   );

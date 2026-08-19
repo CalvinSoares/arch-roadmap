@@ -6,7 +6,7 @@ export const JANELA_NOVO_DIAS = 21;
 
 const MS_POR_DIA = 86_400_000;
 
-/** Maior primeiro. Duas entregas podem sair no mesmo dia — a versão desempata. */
+/** Maior primeiro. Duas entregas podem sair no mesmo dia; a versão desempata. */
 function compararVersao(a: string, b: string): number {
   const pa = a.split(".").map(Number);
   const pb = b.split(".").map(Number);
@@ -68,8 +68,8 @@ function dentroDaJanela(data: string | undefined, agora: Date): boolean {
  * O conteúdo estreou dentro da janela recente?
  *
  * Chamado em server component: em build estático a referência de tempo
- * congela no build, o que é o comportamento desejado — o badge acompanha a
- * publicação, não o relógio do visitante.
+ * congela no build, o que é o comportamento desejado (o badge acompanha a
+ * publicação, não o relógio do visitante).
  */
 export function ehNovo(
   tipo: TipoConteudo,
@@ -79,7 +79,7 @@ export function ehNovo(
   return dentroDaJanela(dataDeEstreia(tipo, slug), agora);
 }
 
-/** Slugs de um tipo que estão dentro da janela — pronto para o cliente. */
+/** Slugs de um tipo que estão dentro da janela, prontos pro cliente. */
 export function slugsNovos(
   tipo: TipoConteudo,
   agora: Date = new Date()

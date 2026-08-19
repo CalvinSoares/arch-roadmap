@@ -74,12 +74,12 @@ function Painel({
 }
 
 /**
- * Dois painéis "sem o padrão × com o padrão" — o arquétipo "antes-depois".
+ * Dois painéis "sem o padrão × com o padrão", o arquétipo "antes-depois".
  *
  * No desktop os dois aparecem lado a lado (a comparação é o conteúdo). No
  * mobile, onde duas colunas ficariam ilegíveis, vira um alternador: os dois
  * painéis continuam no DOM (busca do navegador e leitor de tela acham ambos)
- * e o CSS decide qual mostrar — o `hidden` só vale abaixo de `sm`.
+ * e o CSS decide qual mostrar; o `hidden` só vale abaixo de `sm`.
  */
 export function IlustracaoAntesDepois({ antes, depois, legenda }: Props) {
   const [lado, setLado] = useState<"antes" | "depois">("depois");
@@ -87,7 +87,7 @@ export function IlustracaoAntesDepois({ antes, depois, legenda }: Props) {
 
   return (
     <figure className="rounded-2xl border border-card-border bg-card p-5 sm:p-6">
-      {/* Alternador — só no mobile; no desktop os dois painéis já estão visíveis */}
+      {/* Alternador só no mobile; no desktop os dois painéis já estão visíveis */}
       <div
         role="tablist"
         aria-label="Comparar antes e depois"

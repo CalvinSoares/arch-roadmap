@@ -1,7 +1,7 @@
 import { TextoRico } from "@/shared/components/conteudo/texto-rico";
 
 /**
- * Analogia do conceito — o "gancho" antes da teoria. Tratada como citação
+ * Analogia do conceito, mostrada antes da teoria. Tratada como citação
  * destacada: emoji grande em ladrilho, etiqueta e texto em corpo maior.
  */
 export function Analogia({

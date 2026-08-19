@@ -23,7 +23,7 @@ interface Props {
  * Refatoração passo a passo.
  *
  * Cliente por causa do controle de etapa. O highlight de cada etapa já vem
- * pronto do servidor — o componente só troca qual HTML está visível, o que
+ * pronto do servidor; o componente só troca qual HTML está visível, o que
  * mantém o custo de interação em zero.
  *
  * A trilha de passos é vertical de propósito: refatoração é uma sequência com

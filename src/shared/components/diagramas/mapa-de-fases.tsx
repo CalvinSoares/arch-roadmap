@@ -10,7 +10,7 @@ import { cn } from "@/shared/utils/cn";
 /**
  * Mapa de fases: as seções do roadmap como uma trilha com desbloqueio. Lê o
  * mesmo progresso do `RoadmapFlow` (localStorage, espelhado na conta quando
- * logado), então os dois ficam sempre em sincronia — aqui é só a leitura de
+ * logado), então os dois ficam sempre em sincronia; aqui é só a leitura de
  * jogo por cima. Fase bloqueada mostra o cadeado; a atual, o quanto falta.
  */
 export function MapaDeFases({ roadmap }: { roadmap: Roadmap }) {

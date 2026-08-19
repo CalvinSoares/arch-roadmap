@@ -56,7 +56,7 @@ export default async function CompararParPage({
     <PageTemplate
       icon={GitCompareArrows}
       title={titulo}
-      subtitle="Dois padrões que costumam ser trocados um pelo outro — e o que de fato os separa."
+      subtitle="Dois padrões que costumam ser trocados um pelo outro, e o que de fato os separa."
       breadcrumb={[
         { label: "Comparações", href: "/comparar" },
         { label: titulo },

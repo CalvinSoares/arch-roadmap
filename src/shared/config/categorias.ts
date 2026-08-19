@@ -6,7 +6,7 @@ interface CategoriaMeta {
   text: string;
   /** classe de fundo suave para badges */
   badge: string;
-  /** cor sólida (para nós de diagrama, bordas) — CSS var */
+  /** cor sólida (para nós de diagrama, bordas), CSS var */
   cssVar: string;
 }
 

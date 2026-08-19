@@ -16,7 +16,7 @@ interface Props {
  * Cadeia linear de atores com setas rotuladas.
  *
  * Inline: a corrente **quebra linha** em telas estreitas (sem scroll
- * horizontal). Expandido: versão maior, sem quebra, com rolagem — pensada
+ * horizontal). Expandido: versão maior, sem quebra, com rolagem, pensada
  * para mobile onde o wrap deixa tudo pequeno demais.
  */
 export function IlustracaoFluxo({
@@ -71,7 +71,7 @@ function FluxoFigura({
     >
       {/*
         Expandido: trilha em w-max dentro de um scroll do dialog (bodyClassName),
-        sem overflow no ol — evita clip nas pontas com scroll “fantasma”.
+        sem overflow no ol; evita clip nas pontas com scroll “fantasma”.
       */}
       <div
         className={cn(
@@ -181,7 +181,7 @@ function FluxoFigura({
         </ol>
       </div>
 
-      {/* Legenda só no inline — no expandido já está no DialogDescription */}
+      {/* Legenda só no inline; no expandido já está no DialogDescription */}
       {!expandido && (
         <figcaption className="mt-5 border-t border-card-border pt-3 text-center text-[13px] leading-relaxed text-muted">
           {legenda}

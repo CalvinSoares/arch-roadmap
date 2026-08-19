@@ -3,11 +3,11 @@ import type { Desafio } from "@/content/construtor/desafios";
 import type { Insight } from "@/shared/types/construtor";
 
 /**
- * Motor do modo "quebre isto" — funções puras, sem DOM e sem relógio.
+ * Motor do modo "quebre isto" (funções puras, sem DOM e sem relógio).
  *
- * Nada aqui transcreve gabarito: as respostas certas saem de `avaliarRegras`,
- * e os distratores saem das regras que **não** dispararam para aquele estado.
- * É a mesma disciplina do quiz: derivar em vez de armazenar.
+ * Não há gabarito transcrito: as respostas certas saem de `avaliarRegras` e
+ * os distratores saem das regras que não dispararam pra aquele estado, mesmo
+ * esquema do quiz.
  */
 
 export interface Alternativa {
@@ -22,7 +22,7 @@ export interface Correcao {
   falsosPositivos: string[];
   /** Deixou passar um defeito real. */
   perdidos: string[];
-  /** 0..1 — acertos sobre o total esperado, penalizado por falso positivo. */
+  /** 0..1: acertos sobre o total esperado, penalizado por falso positivo. */
   nota: number;
 }
 
@@ -32,8 +32,8 @@ export function alertasDe(desafio: Desafio): Insight[] {
 }
 
 /**
- * Embaralhamento determinístico por semente — nada de `Math.random()`, para o
- * mesmo desafio ser idêntico para todo mundo e para o teste.
+ * Embaralhamento determinístico por semente (nada de `Math.random()`), pro
+ * mesmo desafio ser idêntico pra todo mundo e pro teste.
  */
 function embaralhar<T>(itens: T[], semente: number): T[] {
   const saida = [...itens];
@@ -52,7 +52,7 @@ function embaralhar<T>(itens: T[], semente: number): T[] {
  * regras que não dispararam.
  *
  * Distratores vêm só de regras de nível `alerta`, senão a resposta ficaria
- * óbvia pelo tom — um "info" no meio de alertas se denuncia sozinho.
+ * óbvia pelo tom (um "info" no meio de alertas se denuncia sozinho).
  */
 export function alternativasDoDesafio(
   desafio: Desafio,

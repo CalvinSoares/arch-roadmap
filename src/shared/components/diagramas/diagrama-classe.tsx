@@ -26,7 +26,7 @@ export function DiagramaClasse({ source }: { source: string }) {
   );
 }
 
-/** Mermaid coloca max-width:100% no SVG — isso mata o tamanho natural no expand. */
+/** Mermaid coloca max-width:100% no SVG; isso mata o tamanho natural no expand. */
 function liberarSvg(root: HTMLElement) {
   const svg = root.querySelector("svg");
   if (!svg) return;

@@ -89,7 +89,7 @@ function BarraScore({
   valor: number;
   icone: LucideIcon;
   ajuda: string;
-  /** valor do modelo carregado — vira marca-fantasma na barra. */
+  /** valor do modelo carregado; vira a marca de referência na barra. */
   referencia?: number;
   invertida?: boolean;
 }) {
@@ -185,10 +185,10 @@ interface Props {
   ultimaAcao: UltimaAcao | null;
   insights: Insight[];
   score: ScoreProjeto;
-  /** score do modelo carregado — marca de referência nas barras. */
+  /** score do modelo carregado; marca de referência nas barras. */
   referencia: ScoreProjeto | null;
   sugestoes: Sugestao[];
-  /** O outro lado do motor: o que NÃO foi sugerido, e por quê. */
+  /** sugestões que o motor avaliou e descartou, com o motivo. */
   ausentes: SugestaoAusente[];
   revisao: RevisaoProjeto;
   temCamadas: boolean;
@@ -227,7 +227,7 @@ export function PainelAnalise({
   const tabsRef = useRef<HTMLDivElement>(null);
 
   /**
-   * Cada nova narração nasce expandida — é o retorno da ação do usuário.
+   * Cada nova narração começa expandida, já que é o retorno da ação do usuário.
    * Ajuste durante o render (e não em efeito) para não encadear re-renders.
    */
   const [narracao, setNarracao] = useState({
@@ -276,7 +276,7 @@ export function PainelAnalise({
       aria-label="Análise do projeto"
       className="flex flex-col gap-3 lg:sticky lg:top-20 lg:h-[calc(100dvh-6rem)] lg:min-h-[520px] lg:self-start"
     >
-      {/* ═══ Cabeçalho fixo: narração + abas — nunca some com o scroll ═══ */}
+      {/* ═══ Cabeçalho fixo: narração + abas, nunca some com o scroll ═══ */}
       {ultimaAcao && !narracaoOculta && (
         /* max-h em % do painel: a narração nunca passa de ~1/4 da coluna. */
         <div className="flex shrink-0 flex-col overflow-hidden rounded-xl border border-primary/40 bg-primary/8 lg:max-h-[28%]">
@@ -421,7 +421,7 @@ export function PainelAnalise({
                     referencia={referencia?.complexidade}
                     icone={Gauge}
                     invertida
-                    ajuda="Quantidade de camadas, padrões e tecnologias — cada peça precisa pagar o próprio custo."
+                    ajuda="Quantidade de camadas, padrões e tecnologias: cada peça adiciona custo de entendimento e manutenção."
                   />
                   <BarraScore
                     label="Custo operacional"
@@ -466,8 +466,8 @@ export function PainelAnalise({
               </Secao>
             ) : (
               <p className="rounded-xl border border-dashed border-card-border p-4 text-center text-xs leading-relaxed text-muted">
-                Monte o projeto — ou carregue um modelo na aba{" "}
-                <b className="text-foreground">Modelos</b> — e as consequências de
+                Monte o projeto ou carregue um modelo na aba{" "}
+                <b className="text-foreground">Modelos</b>. As consequências de
                 cada escolha aparecem aqui.
               </p>
             )}
@@ -625,8 +625,7 @@ export function PainelAnalise({
                 aberta={verAusentes}
                 onToggle={() => setVerAusentes((v) => !v)}
               >
-                {/* O motor já sabia a resposta e a guardava para si: cada
-                    condição não satisfeita é uma explicação de graça. */}
+                {/* cada condição não satisfeita do motor vira uma explicação */}
                 <ul className="space-y-2">
                   {ausentes.map((a) => (
                     <li key={a.id} className="text-xs leading-relaxed">
@@ -634,7 +633,7 @@ export function PainelAnalise({
                         {a.titulo}
                       </span>
                       <span className="text-muted">
-                        {" — não foi sugerido porque "}
+                        {": não foi sugerido porque "}
                         {a.porQueNao}
                       </span>
                     </li>
@@ -716,7 +715,7 @@ export function PainelAnalise({
           <>
             <p className="rounded-lg bg-muted/8 px-3 py-2 text-[11px] leading-relaxed text-muted">
               Carregar um modelo <b className="text-foreground">substitui</b> o
-              projeto atual — a análise passa a narrar as escolhas dele.
+              projeto atual. A análise passa a narrar as escolhas dele.
             </p>
             {TEMPLATES.map((t) => (
               <button

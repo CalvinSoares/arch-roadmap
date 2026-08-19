@@ -1,5 +1,5 @@
 /**
- * Envio de e-mail via API REST do Resend (sem SDK novo — só `fetch`).
+ * Envio de e-mail via API REST do Resend (sem SDK, só `fetch`).
  *
  * Degrada gracioso: sem `RESEND_API_KEY`, não envia nada e avisa uma vez no log.
  * Assim o código compila e roda em dev/CI sem tocar em e-mail de verdade, e

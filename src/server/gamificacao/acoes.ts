@@ -28,9 +28,9 @@ import {
 } from "@/shared/lib/quiz/avaliar-prova";
 
 /**
- * Ações de gamificação — a **fronteira confiável**. O cliente reporta a ação;
- * aqui o servidor valida, grava e **concede** o XP (nunca o cliente diz quanto
- * ganhou). Cada concessão é idempotente por `(user_id, origem_ref)`.
+ * Ações de gamificação. O servidor valida tudo aqui e decide quanto XP pagar;
+ * o cliente só reporta a ação. Cada concessão é idempotente por
+ * `(user_id, origem_ref)`.
  */
 
 async function fusoDoUsuario(userId: string): Promise<string | null> {
@@ -77,8 +77,8 @@ export interface ResultadoAcao {
 /**
  * Registra uma resposta do quiz.
  *
- * O cliente manda **contexto + resposta**; o servidor regenera o gabarito,
- * decide `acertou` e só então paga XP (UUID, rate limit, teto diário e
+ * O cliente manda contexto + resposta; o servidor regenera o gabarito, decide
+ * `acertou` e só então paga XP (checando UUID, rate limit, teto diário e
  * conceito real no catálogo). O boolean do cliente não entra na conta.
  */
 export async function registrarAcertoQuiz(entrada: {
@@ -151,7 +151,7 @@ export async function registrarAcertoQuiz(entrada: {
 }
 
 /**
- * Grava progresso e, se `done`, concede XP **só** se o nó existir no roadmap.
+ * Grava progresso e, se `done`, concede XP (só se o nó existir no roadmap).
  */
 export async function definirProgresso(entrada: {
   roadmapSlug: string;

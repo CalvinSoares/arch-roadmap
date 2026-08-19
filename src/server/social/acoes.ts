@@ -9,9 +9,9 @@ import { limitadores, limitar } from "@/server/rate-limit";
 import { normalizarHandle } from "@/shared/lib/handle";
 
 /**
- * Ações sociais — seguir/aceitar/remover + moderação (bloquear/denunciar) desde
- * o dia 1. Amizade é modelada como duas linhas direcionadas em `accepted`; um
- * bloqueio mora do lado de quem bloqueou e derruba a amizade do outro lado.
+ * Ações sociais: seguir/aceitar/remover + moderação (bloquear/denunciar).
+ * Amizade é modelada como duas linhas direcionadas em `accepted`; um bloqueio
+ * mora do lado de quem bloqueou e derruba a amizade do outro lado.
  */
 
 export interface ResultadoSocial {

@@ -100,7 +100,7 @@ import { roadmapResiliencia } from "@/content/roadmaps/resiliencia";
 
 /**
  * Camada de conteúdo (substitui a camada tRPC do PaaS).
- * Registro estático — trocável por loader de MDX na Fase 1 sem mudar a API.
+ * Registro estático, trocável por loader de MDX na Fase 1 sem mudar a API.
  */
 const CONCEITOS: Conceito[] = [
   factoryMethod,
@@ -230,8 +230,8 @@ export function getComparacao(
 }
 
 /**
- * Com quais conceitos este costuma ser confundido — derivado do registro de
- * comparações, nunca declarado no conceito.
+ * Com quais conceitos este costuma ser confundido; derivado do registro de
+ * comparações, não declarado no conceito.
  */
 export function comparacoesDoConceito(
   slug: string
@@ -255,9 +255,9 @@ export interface OcorrenciaEmRoadmap {
  * Caminho inverso do `conceito` declarado nos itens de roadmap: dado um
  * conceito, em que trilhas ele aparece.
  *
- * É **derivado**, e não um campo no conceito, porque a versão armazenada
- * (`roadmapNodes`) envelheceu sem ninguém notar — apontava para ids de nó que
- * não existiam mais. Aqui a fonte da verdade é uma só: o roadmap.
+ * Derivado em vez de campo no conceito: a versão armazenada (`roadmapNodes`)
+ * envelheceu sem ninguém notar, apontando pra ids de nó que não existiam
+ * mais. A fonte da verdade é o roadmap.
  */
 export function roadmapsDoConceito(slug: string): OcorrenciaEmRoadmap[] {
   const achados: OcorrenciaEmRoadmap[] = [];
@@ -279,9 +279,8 @@ export function roadmapsDoConceito(slug: string): OcorrenciaEmRoadmap[] {
 /**
  * Em que incidentes reais este conceito aparece.
  *
- * **Derivado** do registro de postmortems, como `roadmapsDoConceito` — o
- * conceito não guarda lista de postmortems, senão haveria duas fontes de
- * verdade e uma delas envelheceria errada.
+ * Derivado do registro de postmortems, como `roadmapsDoConceito`: o conceito
+ * não guarda lista de postmortems pra não criar uma segunda fonte de verdade.
  */
 export function postmortemsDoConceito(
   slug: string

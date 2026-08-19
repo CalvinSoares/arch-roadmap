@@ -36,7 +36,7 @@ const FALLBACK: Record<ContentErrorCategory, ResolvedContentError> = {
 /**
  * Categoriza uma falha de conteúdo em `{ title, description }`.
  * Regra herdada do padrão de erros do PaaS: mensagem técnica (stack,
- * parse) NUNCA vai para a UI — apenas categoria + dica de ação.
+ * parse) nunca vai pra UI; só categoria + dica de ação.
  */
 export function resolveContentError(
   error: unknown,

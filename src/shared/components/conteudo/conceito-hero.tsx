@@ -13,7 +13,7 @@ import type { Conceito } from "@/shared/types/conceito";
 import type { Precisao } from "@/shared/types/quando";
 
 /**
- * O que a precisão quer dizer, em uma frase. Vai para o `title` do chip —
+ * O que a precisão quer dizer, em uma frase. Vai para o `title` do chip;
  * "1994" sozinho sugere um rigor que a data não tem.
  */
 const NOTA_PRECISAO: Record<Precisao, string> = {
@@ -21,7 +21,7 @@ const NOTA_PRECISAO: Record<Precisao, string> = {
   aproximada: "Data aproximada",
   seculo: "Século conhecido, ano não",
   intervalo: "Aconteceu ao longo de um período",
-  convencao: "Marco de referência — a ideia é mais velha que a data",
+  convencao: "Marco de referência: a ideia é mais velha que a data",
   disputada: "As fontes divergem sobre a data",
 };
 
@@ -43,7 +43,7 @@ function Chip({
 interface Props {
   conceito: Conceito;
   tldr?: string;
-  /** Nº de paradas na trilha de leitura — dá a dimensão da página. */
+  /** Nº de paradas na trilha de leitura; dá a dimensão da página. */
   totalSecoes?: number;
 }
 
@@ -107,7 +107,7 @@ export function ConceitoHero({ conceito, tldr, totalSecoes }: Props) {
             ) : null}
             {conceito.nasceu && (
               <span
-                title={`${NOTA_PRECISAO[conceito.nasceu.quando.precisao]} — ${conceito.nasceu.fonte}`}
+                title={`${NOTA_PRECISAO[conceito.nasceu.quando.precisao]} · ${conceito.nasceu.fonte}`}
                 className="inline-flex items-center gap-1.5 rounded-full border border-card-border bg-background px-2.5 py-1 text-xs font-medium text-muted"
               >
                 <CalendarDays className="size-3.5" />
@@ -118,7 +118,7 @@ export function ConceitoHero({ conceito, tldr, totalSecoes }: Props) {
                   </span>
                 )}
                 <span className="sr-only">
-                  {` — ${NOTA_PRECISAO[conceito.nasceu.quando.precisao]}`}
+                  {`, ${NOTA_PRECISAO[conceito.nasceu.quando.precisao]}`}
                 </span>
               </span>
             )}
@@ -164,7 +164,7 @@ export function ConceitoHero({ conceito, tldr, totalSecoes }: Props) {
             </div>
           )}
 
-          {/* O que veio antes do nome — é aqui que a data vira aula. */}
+          {/* O que veio antes do nome. */}
           {conceito.nasceu?.precursor && (
             <div className="mt-4 flex gap-3 rounded-xl border border-card-border bg-background/60 p-3.5">
               <History className="mt-0.5 size-4 shrink-0 text-muted" />

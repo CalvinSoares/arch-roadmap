@@ -25,7 +25,7 @@ const nomeTech = (id: string) => tecnologiaDef(id)?.nome ?? id;
 /**
  * Leitura da métrica em texto. No painel o rótulo é "Alto/Médio/Baixo" e a
  * cor diz se isso é bom; em Markdown não há cor, então "complexidade: alto"
- * ficaria ambíguo — aqui o julgamento entra na própria frase.
+ * ficaria ambíguo. Aqui o julgamento entra na própria frase.
  */
 function leitura(valor: number, invertida: boolean): string {
   const nivel = valor >= 66 ? "alto" : valor >= 33 ? "médio" : "baixo";
@@ -50,8 +50,8 @@ const METRICAS: {
  * Serializa o projeto montado como um Architecture Decision Record.
  *
  * O formato segue a estrutura clássica (contexto → decisão → consequências),
- * que é o que times esperam encontrar num ADR — a diferença é que aqui as
- * consequências não são adivinhadas: saem das mesmas regras que o painel usa.
+ * que é o que times esperam encontrar num ADR. As consequências saem das
+ * mesmas regras que o painel usa, em vez de serem escritas à mão.
  *
  * Função pura: sem `new Date()`, sem acesso a `window`. Data e link entram
  * por parâmetro justamente para o teste ser determinístico.

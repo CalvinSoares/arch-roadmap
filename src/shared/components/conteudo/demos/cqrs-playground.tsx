@@ -7,7 +7,7 @@ import { Button } from "@/shared/components/global/ui/button";
 
 /**
  * Demo: um comando escreve no write store e, via projeção (evento), o read
- * model é atualizado — com uma janela de consistência eventual.
+ * model é atualizado, com uma janela de consistência eventual.
  */
 export function CqrsPlayground() {
   const [escritos, setEscritos] = useState(0);
@@ -72,8 +72,8 @@ export function CqrsPlayground() {
       </div>
 
       <p className="mt-4 text-center text-xs text-muted">
-        O comando muda o write store na hora; o read model é atualizado pela projeção —
-        por isso a leitura pode ficar um instante atrás (consistência eventual).
+        O comando muda o write store na hora; o read model é atualizado pela projeção.
+        Por isso a leitura pode ficar um instante atrás (consistência eventual).
       </p>
     </div>
   );

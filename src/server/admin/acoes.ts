@@ -8,10 +8,9 @@ import { users, denuncias } from "@/server/db/schema";
 import { virarTemporada } from "@/server/gamificacao/temporada";
 
 /**
- * Ações administrativas — RBAC no portão. Toda ação chama `requireAdmin` (que
- * redireciona quem não for admin), então a autorização é verificada perto do
- * dado, não no middleware. Guarda contra o admin se auto-sabotar (rebaixar ou
- * banir a própria conta) — o clássico "tijolar o único admin".
+ * Ações administrativas. Toda ação chama `requireAdmin` (que redireciona quem
+ * não for admin), então a autorização é verificada perto do dado, não no
+ * middleware. Também impede o admin de rebaixar ou banir a própria conta.
  */
 
 export type Papel = "user" | "moderator" | "admin";

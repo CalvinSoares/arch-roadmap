@@ -12,12 +12,12 @@ import {
 } from "@/shared/lib/gamificacao/conquistas";
 
 /**
- * Concessão de conquistas — o I/O em volta da lógica pura de `conquistas.ts`.
+ * Concessão de conquistas: o I/O em volta da lógica pura de `conquistas.ts`.
  *
- * Reúne as métricas do usuário, pergunta à função pura quais badges ele merece e
- * insere os que faltam. A PK composta `(userId, chave)` faz a concessão
- * **idempotente** por natureza (`onConflictDoNothing`): rodar a avaliação a cada
- * award não gera duplicata nem "re-ganha" nada.
+ * Reúne as métricas do usuário, pergunta à função pura quais badges ele merece
+ * e insere os que faltam. A PK composta `(userId, chave)` +
+ * `onConflictDoNothing` deixa a concessão idempotente: rodar a avaliação a
+ * cada award não gera duplicata.
  */
 export async function avaliarConquistas(userId: string): Promise<string[]> {
   const [stats] = await db

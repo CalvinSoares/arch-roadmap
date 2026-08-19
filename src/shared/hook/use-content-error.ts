@@ -19,7 +19,7 @@ export function useContentError() {
   );
 
   const log = useCallback((error: unknown, context?: string) => {
-    // Detalhe técnico só em log — nunca na UI.
+    // Detalhe técnico só em log, nunca na UI.
     if (process.env.NODE_ENV !== "production") {
       console.error(`[content-error${context ? `:${context}` : ""}]`, error);
     }

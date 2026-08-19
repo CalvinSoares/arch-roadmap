@@ -6,7 +6,7 @@ import { cn } from "@/shared/utils/cn";
 
 interface AprofundarProps {
   children: React.ReactNode;
-  /** Quantos parágrafos há dentro — vira a dica de tamanho no cabeçalho. */
+  /** Quantos parágrafos há dentro; vira a dica de tamanho no cabeçalho. */
   paragrafos?: number;
   /** Uma linha dizendo o que o leitor ganha ao abrir. */
   chamada?: string;

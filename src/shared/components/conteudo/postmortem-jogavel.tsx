@@ -12,7 +12,7 @@ import type { Postmortem } from "@/shared/types/postmortem";
 
 /**
  * Antes do spoiler: “o que você colocaria na pilha?”.
- * Revela os conceitos que o incidente prova — com o porque de cada um.
+ * Revela os conceitos que o incidente prova, com o porquê de cada um.
  */
 export function PostmortemJogavel({
   conceitos,
@@ -29,7 +29,7 @@ export function PostmortemJogavel({
 
   const opcoes = useMemo(() => {
     const ids = [...new Set([...conceitos.map((c) => c.slug), ...distratores])];
-    // ordem estável por título — evita “as três primeiras são a resposta”
+    // ordem estável por título; evita “as três primeiras são a resposta”
     return ids
       .map((slug) => ({ slug, titulo: getConceito(slug)?.titulo ?? slug }))
       .sort((a, b) => a.titulo.localeCompare(b.titulo, "pt-BR"));

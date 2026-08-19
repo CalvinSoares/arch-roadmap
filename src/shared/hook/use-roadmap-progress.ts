@@ -25,7 +25,7 @@ const PROXIMO: Record<ProgressoNo, ProgressoNo> = {
  * Progresso do usuário por nó do roadmap.
  *
  * Híbrido por design (o princípio "login é acréscimo, não portão"): o
- * localStorage é sempre a fonte da UI — instantâneo, funciona anônimo. Quando há
+ * localStorage é sempre a fonte da UI (instantâneo, funciona anônimo). Quando há
  * sessão, cada mudança é **espelhada** para a conta (write-through), onde o
  * servidor persiste e, na conclusão de um nó, concede o XP de forma idempotente.
  * O espelho é fire-and-forget: uma falha de rede não trava o clique local.
@@ -48,7 +48,7 @@ export function useRoadmapProgress(slug: string, totalNos: number) {
           }
         })
         .catch(() => {
-          /* offline/erro — o local já refletiu; tenta de novo na próxima ação */
+          /* offline/erro: o local já refletiu; tenta de novo na próxima ação */
         });
     },
     [logado, slug]

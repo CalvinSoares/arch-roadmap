@@ -1,5 +1,5 @@
 /**
- * Identidade pública do DevMappa — URL, textos e keywords usados em
+ * Identidade pública do DevMappa: URL, textos e keywords usados em
  * metadata, robots, sitemap, manifest e JSON-LD.
  */
 export const SITE = {
@@ -8,7 +8,7 @@ export const SITE = {
   title: "DevMappa — estude padrões e arquitetura visualmente",
   description:
     "Roadmaps enxutos e um catálogo visual de design patterns, princípios e arquitetura, com diagramas, camadas navegáveis e demos interativas.",
-  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://arch-roadmap.vercel.app").replace(
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://devmappa.vercel.app").replace(
     /\/$/,
     ""
   ),

@@ -1,13 +1,10 @@
 /**
- * Quem merece um lembrete de streak — a decisão em função **pura**.
+ * Decide quem recebe lembrete de streak (função pura). Só quem optou por
+ * receber, só quem tem streak em risco de verdade, e no máximo uma vez por
+ * dia.
  *
- * O lembrete é a alavanca de retorno, mas "reter com respeito": só quem **optou**
- * por receber (opt-out sempre disponível), só quem tem um streak em risco de
- * verdade, e uma vez por dia. Nada de culpa manipuladora ou spam — engajamento
- * saudável dura mais que o predatório.
- *
- * `hoje` entra por parâmetro (ISO YYYY-MM-DD), nunca `new Date()`, pra spec ser
- * estável no tempo.
+ * `hoje` entra por parâmetro (ISO YYYY-MM-DD), nunca `new Date()`, pra spec
+ * ser estável no tempo.
  */
 
 const MS_DIA = 86_400_000;
@@ -27,9 +24,8 @@ export interface EntradaLembrete {
 
 /**
  * Lembra quando: opt-in ligado, existe um streak (≥1) e a pessoa esteve ativa
- * **ontem** mas ainda não hoje (gap de exatamente 1). Antes disso não há o que
- * lembrar; depois disso o streak já quebrou (ou vai quebrar) e o lembrete vira
- * cobrança — não mandamos.
+ * ontem mas ainda não hoje (gap de exatamente 1). Antes disso não há o que
+ * lembrar; depois disso o streak já quebrou e o lembrete viraria cobrança.
  */
 export function deveLembrar(e: EntradaLembrete): boolean {
   if (!e.lembretesEmail) return false;

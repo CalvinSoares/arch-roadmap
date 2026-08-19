@@ -77,7 +77,7 @@ export default async function RoadmapPage({
         <summary className="cursor-pointer list-none px-5 py-4 text-sm font-semibold text-foreground marker:content-none">
           🗺️ Mapa de fases
           <span className="ml-2 font-normal text-muted">
-            — a trilha como fases com desbloqueio
+            a trilha em fases com desbloqueio
           </span>
         </summary>
         <div className="border-t border-card-border p-4">

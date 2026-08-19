@@ -28,7 +28,7 @@ import { QuizDoConceito } from "@/shared/components/conteudo/quiz-do-conceito";
 import { todasAsArmadilhas } from "@/shared/lib/quiz";
 import type { Conceito } from "@/shared/types/conceito";
 
-/** Duelos em que este conceito entra — derivado do registro de comparações. */
+/** Duelos em que este conceito entra, derivado do registro de comparações. */
 function ConfundidoCom({ slug }: { slug: string }) {
   const duelos = comparacoesDoConceito(slug);
   if (duelos.length === 0) return null;

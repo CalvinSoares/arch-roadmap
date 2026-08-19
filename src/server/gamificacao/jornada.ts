@@ -18,14 +18,14 @@ import {
 import { noExisteEmAlgumRoadmap } from "@/server/gamificacao/validacao";
 
 /**
- * Estado da jornada no servidor — só as estrelas (a conclusão do nó já é gravada
- * por `definirProgresso`). Sincroniza o brilho entre dispositivos; o localStorage
- * segue como camada anônima/instantânea.
+ * Estado da jornada no servidor: só as estrelas (a conclusão do nó já é gravada
+ * por `definirProgresso`). Sincroniza entre dispositivos; o localStorage segue
+ * cobrindo o uso anônimo.
  */
 
 /**
- * Grava as estrelas de um nó, mantendo o **melhor** resultado (um replay pior
- * não rebaixa). Idempotente por (usuário, nó).
+ * Grava as estrelas de um nó, mantendo o melhor resultado (replay pior não
+ * rebaixa). Idempotente por (usuário, nó).
  */
 export async function registrarEstrelasNo(
   noId: string,
@@ -66,7 +66,7 @@ export interface ResultadoBau {
 }
 
 /**
- * Abre o baú de uma unidade — **servidor-autoritativo e idempotente**.
+ * Abre o baú de uma unidade. O servidor valida e concede; idempotente.
  */
 export async function abrirBau(
   roadmapSlug: string,
@@ -132,7 +132,7 @@ export async function bausAbertos(refs: string[]): Promise<string[]> {
 }
 
 /**
- * Estrelas do usuário **da sessão** para um conjunto de nós.
+ * Estrelas do usuário da sessão para um conjunto de nós.
  * Ignora qualquer userId externo (fecha IDOR).
  */
 export async function estrelasDoUsuario(

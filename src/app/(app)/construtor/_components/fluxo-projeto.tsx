@@ -85,9 +85,9 @@ export function FluxoProjeto({ estado }: { estado: EstadoProjeto }) {
   }, [tipo, cacheQuente, falhas, sim.disponivel]);
 
   /**
-   * Conectores: apenas o caminho da requisição atual. (As linhas de ordem da
-   * pilha viviam aqui e cruzavam as trilhas, virando ruído desconexo — a ordem
-   * já é explícita na aba Montar.)
+   * Conectores: apenas o caminho da requisição atual. As linhas de ordem da
+   * pilha viviam aqui e cruzavam as trilhas; a ordem já é explícita na aba
+   * Montar.
    */
   const links = useMemo<ConnectorLink[]>(
     () =>
@@ -110,8 +110,8 @@ export function FluxoProjeto({ estado }: { estado: EstadoProjeto }) {
 
   /**
    * Runner: avança um passo por tique. O `setState` fica no callback do
-   * timer — um evento externo, que é onde a regra `set-state-in-effect`
-   * espera encontrá-lo — em vez de no corpo do efeito.
+   * timer (evento externo, onde a regra `set-state-in-effect` espera
+   * encontrá-lo), não no corpo do efeito.
    */
   useEffect(() => {
     if (!rodando) return;
@@ -200,8 +200,8 @@ export function FluxoProjeto({ estado }: { estado: EstadoProjeto }) {
         <Zap className="size-8 text-muted" />
         <p className="font-medium">Nada para simular ainda</p>
         <p className="max-w-xs text-sm text-muted">
-          Volte para a aba <b>Montar</b>, adicione camadas e tecnologias — e
-          então veja a requisição atravessar seu projeto.
+          Volte para a aba <b>Montar</b>, adicione camadas e tecnologias e
+          veja a requisição atravessar seu projeto.
         </p>
       </div>
     );
@@ -236,10 +236,10 @@ export function FluxoProjeto({ estado }: { estado: EstadoProjeto }) {
       className={cn(
         // @container: o layout reage à largura DESTE bloco, não da janela.
         // O diagrama mora numa coluna que pode ter 200px numa viewport de
-        // 1400px — usar breakpoint de viewport fazia as trilhas irem para o
+        // 1400px: usar breakpoint de viewport fazia as trilhas irem para o
         // modo horizontal sem caber, e a última vazava para fora da borda.
         "@container/fluxo relative rounded-xl border border-card-border bg-canvas/50",
-        // altura sempre acompanha o conteúdo — quem rola é o container externo
+        // altura sempre acompanha o conteúdo; quem rola é o container externo
         expandido ? "p-6" : "p-4"
       )}
     >
@@ -374,7 +374,7 @@ export function FluxoProjeto({ estado }: { estado: EstadoProjeto }) {
                 <p className="mb-2 border-b border-dashed border-card-border pb-1 text-center text-[11px] font-semibold uppercase tracking-widest text-muted [overflow-wrap:anywhere]">
                   {lane.titulo}
                 </p>
-                {/* Empilhado: fluxo vertical — cards de largura fixa,
+                {/* Empilhado: fluxo vertical, cards de largura fixa,
                     centralizados sob o título, quebrando linha quando há
                     vários. Lado a lado (@4xl): coluna, um card por linha. */}
                 <div
@@ -419,7 +419,7 @@ export function FluxoProjeto({ estado }: { estado: EstadoProjeto }) {
                                 ? "border-primary/60"
                                 : (v?.border ?? "border-card-border"),
                           // fora do caminho: borda tracejada (opacidade quebrava o
-                          // contraste do texto — axe reprovava em 2.27)
+                          // contraste do texto; axe reprovava em 2.27)
                           passoAtual >= 0 && !visitado && !ativo && "border-dashed"
                         )}
                       >
@@ -439,7 +439,7 @@ export function FluxoProjeto({ estado }: { estado: EstadoProjeto }) {
                           <p
                             className={cn(
                               // nunca truncar. `anywhere` (e não `break-word`)
-                              // porque só ele reduz a largura min-content — é o
+                              // porque só ele reduz a largura min-content, o
                               // que garante que o card nunca empurre a trilha.
                               "min-w-0 [overflow-wrap:anywhere] font-semibold leading-tight",
                               expandido ? "text-[15px]" : "text-[13px]"
@@ -472,7 +472,7 @@ export function FluxoProjeto({ estado }: { estado: EstadoProjeto }) {
                               return (
                                 <span
                                   key={tid}
-                                  title={caiu ? `${t.nome} — fora do ar` : t.nome}
+                                  title={caiu ? `${t.nome} (fora do ar)` : t.nome}
                                   className={cn(
                                     "flex min-w-0 items-center gap-1 rounded-md font-medium",
                                     expandido
@@ -704,8 +704,8 @@ function Comparador({ execucoes }: { execucoes: Execucao[] }) {
         })}
       </ul>
       <p className="mt-2 text-[11px] leading-relaxed text-muted">
-        Cada linha é uma execução; a variação compara com a execução anterior da
-        lista — troque as condições e rode de novo para medir o efeito.
+        Cada linha é uma execução; a variação compara com a execução anterior
+        da lista. Troque as condições e rode de novo para medir o efeito.
       </p>
     </div>
   );

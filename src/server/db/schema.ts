@@ -11,11 +11,11 @@ import {
 } from "drizzle-orm/pg-core";
 
 /**
- * Schema do banco (Neon Postgres) — apenas **dado de usuário**.
+ * Schema do banco (Neon Postgres): só dado de usuário.
  *
- * O conteúdo (conceitos, roadmaps, comparações) continua estático em Git; aqui
- * moram só usuários e o que eles fazem. A gamificação referencia o conteúdo por
- * slug/id estável (o teste de estabilidade de slug vira contrato).
+ * O conteúdo (conceitos, roadmaps, comparações) continua estático em Git. A
+ * gamificação referencia o conteúdo por slug/id estável (o teste de
+ * estabilidade de slug vira contrato).
  *
  * As quatro primeiras tabelas seguem o formato esperado pelo adapter Drizzle do
  * Auth.js (user/account/session/verificationToken). `hashed_password` e `role`
@@ -32,20 +32,20 @@ export const users = pgTable("user", {
   email: text("email").notNull(),
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
-  // ——— acréscimos do produto ———
-  /** Hash argon2id — só para login por email/senha; nulo em contas OAuth. */
+  // --- acréscimos do produto ---
+  /** Hash argon2id, só pra login por email/senha; nulo em contas OAuth. */
   hashedPassword: text("hashed_password"),
   role: papelUsuario("role").notNull().default("user"),
   /** @-handle público, único quando definido. */
   handle: text("handle"),
   perfilPublico: boolean("perfil_publico").notNull().default(false),
   timezone: text("timezone"),
-  // ——— moderação / operação (Fase 3) ———
+  // --- moderação / operação (Fase 3) ---
   /** Banido: não loga e some dos rankings/perfil público. */
   banido: boolean("banido").notNull().default(false),
   /** Shadow-ban: usa o app normalmente, mas some do ranking dos outros. */
   shadowBan: boolean("shadow_ban").notNull().default(false),
-  /** Opt-out de e-mails de lembrete (ética da retenção / LGPD). */
+  /** Opt-out de e-mails de lembrete (LGPD). */
   lembretesEmail: boolean("lembretes_email").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (t) => [uniqueIndex("user_handle_uq").on(t.handle)]);
@@ -88,10 +88,10 @@ export const verificationTokens = pgTable(
   (t) => [primaryKey({ columns: [t.identifier, t.token] })]
 );
 
-/* ——————————————————————— Produto ——————————————————————— */
+/* ----------------------- Produto ----------------------- */
 
 /**
- * Progresso por nó de roadmap / conceito — substitui o `localStorage`.
+ * Progresso por nó de roadmap/conceito, substitui o `localStorage`.
  * `no_id` aponta para um id de nó de roadmap ("be-http") ou slug de conceito.
  */
 export const progresso = pgTable(
@@ -108,11 +108,11 @@ export const progresso = pgTable(
 );
 
 /**
- * Ledger de XP — **append-only**. Nunca se dá UPDATE aqui.
+ * Ledger de XP, append-only. Nunca se dá UPDATE aqui.
  *
- * `origem_ref` é a **chave de idempotência por usuário**: "quiz:<attemptId>",
+ * `origem_ref` é a chave de idempotência por usuário: "quiz:<attemptId>",
  * "no:<roadmap>:<noId>", etc. O índice único composto `(user_id, origem_ref)`
- * mata race de duplo award **sem** bloquear o mesmo nó/baú para outro usuário.
+ * evita race de duplo award sem bloquear o mesmo nó/baú pra outro usuário.
  */
 export const xpEvents = pgTable(
   "xp_events",
@@ -133,7 +133,7 @@ export const xpEvents = pgTable(
 
 /**
  * Projeção (read model) derivada de `xp_events` + atividade diária.
- * Reconstruível a partir do ledger — se der bug, reprocessa. É o CQRS na prática.
+ * Reconstruível a partir do ledger: se der bug, reprocessa.
  */
 export const userStats = pgTable("user_stats", {
   userId: text("user_id")
@@ -150,10 +150,10 @@ export const userStats = pgTable("user_stats", {
 });
 
 /**
- * Tentativas do quiz — o histórico de acerto/erro por conceito, agora na conta
- * (supera o `localStorage`-only). O `id` é gerado no cliente por resposta e
- * vira a **chave de idempotência** do award de XP (`quiz:<id>`): retry de rede
- * não paga duas vezes, mas respostas distintas contam cada uma.
+ * Tentativas do quiz: histórico de acerto/erro por conceito, na conta.
+ * O `id` é gerado no cliente por resposta e vira a chave de idempotência do
+ * award de XP (`quiz:<id>`): retry de rede não paga duas vezes, mas respostas
+ * distintas contam cada uma.
  */
 export const quizTentativas = pgTable(
   "quiz_tentativas",
@@ -171,10 +171,10 @@ export const quizTentativas = pgTable(
 );
 
 /**
- * Progresso de missões por dia — as missões em si são estáticas (definidas em
- * `shared/lib/gamificacao/missoes.ts`, referenciadas por chave). A projeção de
- * quanto o usuário avançou em cada uma, no dia, mora aqui. PK composta garante
- * uma linha por (usuário, missão, dia).
+ * Progresso de missões por dia. As definições são estáticas
+ * (`shared/lib/gamificacao/missoes.ts`, referenciadas por chave); aqui fica só
+ * o avanço do usuário no dia. PK composta garante uma linha por
+ * (usuário, missão, dia).
  */
 export const missaoProgresso = pgTable(
   "missao_progresso",
@@ -192,7 +192,7 @@ export const missaoProgresso = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.missaoId, t.dia] })]
 );
 
-/* ————————————————————— Fase 2 — Social & competição ————————————————————— */
+/* --------------------- Fase 2: Social & competição --------------------- */
 
 export const statusAmizade = pgEnum("status_amizade", [
   "pending",
@@ -215,10 +215,10 @@ export const statusDenuncia = pgEnum("status_denuncia", [
 ]);
 
 /**
- * Amizades — **direcionadas**. `(userId → amigoId)` com um estado. Um convite de
- * A para B é `(A, B, pending)`; ao aceitar, viram duas linhas `accepted` (A→B e
- * B→A), o que torna "meus amigos" uma consulta simples por `userId`. `blocked`
- * mora do lado de quem bloqueou. Moderação (bloquear/denunciar) desde o dia 1.
+ * Amizades direcionadas: `(userId → amigoId)` com um estado. Convite de A pra B
+ * é `(A, B, pending)`; ao aceitar, viram duas linhas `accepted` (A→B e B→A), o
+ * que deixa "meus amigos" como uma consulta simples por `userId`. `blocked`
+ * mora do lado de quem bloqueou.
  */
 export const amizades = pgTable(
   "amizades",
@@ -239,9 +239,8 @@ export const amizades = pgTable(
 );
 
 /**
- * Temporadas — ligas semanais (estilo Duolingo). Só uma fica `ativa`; a virada
- * (por cron) fecha a atual, promove/rebaixa e abre a próxima. O ranking global
- * eterno desmotiva; a temporada reinicia a corrida toda semana.
+ * Temporadas: ligas semanais (estilo Duolingo). Só uma fica `ativa`; a virada
+ * (por cron) fecha a atual, promove/rebaixa e abre a próxima.
  */
 export const temporadas = pgTable("temporadas", {
   id: text("id")
@@ -253,9 +252,9 @@ export const temporadas = pgTable("temporadas", {
 });
 
 /**
- * Membros de uma temporada e o XP acumulado **na temporada** (zera a cada
- * virada — separado do `xp_total` vitalício de `user_stats`). O tier
- * (bronze→mestre) sobe/desce conforme o ranking no fim da semana.
+ * Membros de uma temporada e o XP acumulado nela (zera a cada virada; separado
+ * do `xp_total` vitalício de `user_stats`). O tier (bronze→mestre) sobe/desce
+ * conforme o ranking no fim da semana.
  */
 export const ligaMembros = pgTable(
   "liga_membros",
@@ -276,10 +275,10 @@ export const ligaMembros = pgTable(
 );
 
 /**
- * Conquistas ganhas. As **definições** dos badges são estáticas
+ * Conquistas ganhas. As definições dos badges são estáticas
  * (`shared/lib/gamificacao/conquistas.ts`, referenciadas por `chave`); aqui só
- * mora o "fulano ganhou tal badge quando". PK composta = idempotência natural
- * (não ganha o mesmo badge duas vezes).
+ * fica quem ganhou o quê e quando. A PK composta impede ganhar o mesmo badge
+ * duas vezes.
  */
 export const userConquistas = pgTable(
   "user_conquistas",
@@ -294,8 +293,7 @@ export const userConquistas = pgTable(
 );
 
 /**
- * Denúncias de moderação. Social sem moderação vira passivo — bloquear/denunciar
- * desde o início. O admin (Fase 3) resolve; aqui é só o registro.
+ * Denúncias de moderação. O admin (Fase 3) resolve; aqui é só o registro.
  */
 export const denuncias = pgTable("denuncias", {
   id: text("id")
@@ -312,13 +310,13 @@ export const denuncias = pgTable("denuncias", {
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
 });
 
-/* ————————————————————— Jornada (aba estilo Duolingo) ————————————————————— */
+/* --------------------- Jornada (aba estilo Duolingo) --------------------- */
 
 /**
- * Estado da jornada por nó — as **estrelas** conquistadas (precisão da lição).
- * A conclusão do nó já mora em `progresso`; aqui vai só o brilho, que precisa
- * sincronizar entre dispositivos (o localStorage cobre o anônimo/instantâneo).
- * Mantém-se o **melhor** resultado — um replay pior nunca rebaixa estrelas.
+ * Estado da jornada por nó: as estrelas conquistadas (precisão da lição).
+ * A conclusão do nó já mora em `progresso`; aqui vai só o que precisa
+ * sincronizar entre dispositivos (o localStorage cobre o anônimo). Guarda o
+ * melhor resultado: replay pior não rebaixa estrelas.
  */
 export const jornadaEstado = pgTable(
   "jornada_estado",

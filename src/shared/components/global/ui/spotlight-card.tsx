@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/shared/utils/cn";
 
 interface SpotlightCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Cor do holofote — CSS var ou cor literal. Default: `var(--primary)`. */
+  /** Cor do holofote: CSS var ou cor literal. Default: `var(--primary)`. */
   cor?: string;
   /** Levanta o card no hover. */
   elevar?: boolean;

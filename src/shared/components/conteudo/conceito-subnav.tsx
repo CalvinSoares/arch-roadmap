@@ -39,7 +39,7 @@ function useSecaoAtiva(secoes: SecaoNav[]) {
 }
 
 /**
- * Fita de chips presa ao topo — apresentação do índice até `xl`.
+ * Fita de chips presa ao topo; apresentação do índice até `xl`.
  * Some acima disso, onde a trilha vertical assume.
  */
 export function SubnavFita({ secoes }: { secoes: SecaoNav[] }) {

@@ -3,7 +3,7 @@ import { Fragment } from "react";
 /**
  * Ênfase e código inline dentro da prosa dos conceitos.
  *
- * O conteúdo é escrito em TypeScript, não em MDX — então nunca houve um passo
+ * O conteúdo é escrito em TypeScript, não em MDX, então nunca houve um passo
  * de markdown. Só que os textos foram escritos **como se houvesse**: havia 139
  * ocorrências de `**negrito**` no catálogo renderizando como asterisco
  * literal na tela.
@@ -14,7 +14,7 @@ import { Fragment } from "react";
  * suportá-los aqui só faria o conteúdo migrar para o lugar errado.
  */
 
-/** `**negrito**` e `código` — nesta ordem de precedência, sem aninhamento. */
+/** `**negrito**` e `código`, nesta ordem de precedência, sem aninhamento. */
 const PADRAO = /(\*\*[^*]+\*\*|`[^`]+`)/g;
 
 export function TextoRico({ children }: { children: string }) {

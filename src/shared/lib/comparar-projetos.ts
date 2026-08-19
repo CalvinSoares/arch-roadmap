@@ -4,11 +4,11 @@ import { tecnologiaDef } from "@/content/construtor/tecnologias";
 import type { EstadoProjeto, ScoreProjeto } from "@/shared/types/construtor";
 
 /**
- * Diff entre dois projetos montados — funções puras.
+ * Diff entre dois projetos montados (funções puras).
  *
- * Existe porque a pergunta que o Construtor não respondia era "e se eu tirasse
- * a fila?". Montar duas versões e comparar de cabeça não funciona: as cinco
- * métricas se movem juntas, e o ganho de uma esconde a piora de outra.
+ * Serve pra responder "e se eu tirasse a fila?" no Construtor: as cinco
+ * métricas se movem juntas, e comparar duas versões de cabeça esconde o
+ * trade-off.
  */
 
 export type Metrica = keyof Omit<ScoreProjeto, "fatores">;
@@ -32,7 +32,7 @@ export interface DiffMetrica {
 }
 
 export interface DiffPeca {
-  /** Rótulo legível — nome da camada, do padrão ou da tecnologia. */
+  /** Rótulo legível: nome da camada, do padrão ou da tecnologia. */
   label: string;
   /** Onde a peça vive, para dar contexto ao padrão/tecnologia. */
   onde?: string;
@@ -84,7 +84,7 @@ function insights(p: EstadoProjeto, nivel: "alerta" | "sinergia") {
  * Compara A (referência) com B (variante).
  *
  * O `veredito` de cada métrica já resolve a inversão: em complexidade e custo
- * operacional, **menor é melhor** — sem isso, um diff de `-8` em complexidade
+ * operacional, menor é melhor. Sem isso, um diff de `-8` em complexidade
  * apareceria como piora quando é justamente o ganho.
  */
 export function compararProjetos(
@@ -131,12 +131,8 @@ export function compararProjetos(
   };
 }
 
-/**
- * Uma frase que resume o diff.
- *
- * Serve para o caso em que a pessoa olha cinco números e não sabe concluir —
- * que é o caso normal.
- */
+/** Uma frase que resume o diff, pra quem não quer tirar conclusão de cinco
+ * números soltos. */
 export function resumoDoDiff(diff: DiffProjetos): string {
   const melhores = diff.metricas.filter((m) => m.veredito === "melhor");
   const piores = diff.metricas.filter((m) => m.veredito === "pior");

@@ -16,7 +16,7 @@ export interface CasoClinica {
 }
 
 /**
- * Casos jogáveis — derivados dos blocos `anti-exemplo`.
+ * Casos jogáveis, derivados dos blocos `anti-exemplo`.
  * Só entram os que têm código (sem código não há o que julgar).
  */
 export function listCasosClinica(): CasoClinica[] {
@@ -61,7 +61,7 @@ function embaralhar<T>(itens: T[], rnd: () => number): T[] {
   return out;
 }
 
-/** Ordem dos casos no dia — estável na mesma semente. */
+/** Ordem dos casos no dia, estável na mesma semente. */
 export function casosDoDia(semente: number): CasoClinica[] {
   return embaralhar(listCasosClinica(), prng(semente));
 }

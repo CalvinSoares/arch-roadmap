@@ -1,6 +1,6 @@
 /**
  * Trilha de passos numerados. O conector vive na primeira coluna do grid
- * (atrás das medalhas) em vez de pendurado em margem negativa — assim nada
+ * (atrás das medalhas) em vez de pendurado em margem negativa; assim nada
  * escapa da caixa nem passa por cima do conteúdo vizinho.
  */
 export function Passos({

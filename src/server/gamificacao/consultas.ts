@@ -13,8 +13,8 @@ import { acharConquista } from "@/shared/lib/gamificacao/conquistas";
 import { hojeDoUsuario } from "@/server/gamificacao/conceder-xp";
 
 /**
- * Leitura da projeção para a página de perfil (read model / CQRS). Só consulta —
- * nunca escreve. A verdade continua no ledger; aqui é a foto derivada.
+ * Leitura da projeção pra página de perfil (read model). Só consulta, nunca
+ * escreve; a fonte da verdade continua no ledger.
  */
 
 export interface EventoHistorico {
@@ -154,9 +154,9 @@ export interface PerfilPublico {
 }
 
 /**
- * Perfil público por handle — só devolve algo se o usuário **optou** por ser
- * público (LGPD: perfil é opt-in). Caso contrário, `null` (a página responde
- * 404, sem revelar que a conta existe).
+ * Perfil público por handle. Só devolve algo se o usuário optou por ser
+ * público (LGPD: perfil é opt-in); caso contrário `null` e a página responde
+ * 404 sem revelar que a conta existe.
  */
 export async function perfilPublicoPorHandle(
   handle: string

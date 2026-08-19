@@ -3,20 +3,27 @@
 import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { migrarProgressoLocal } from "@/server/progresso/migrar";
+import { listRoadmaps } from "@/shared/lib/content";
+import { estadoPorRoadmap } from "@/shared/lib/progresso";
+import { escreverArmazenamento } from "@/shared/hook/use-armazenamento-local";
+import type { ProgressoNo } from "@/shared/types/roadmap";
 
 /**
- * Ponte silenciosa da migração local→conta. Não renderiza nada: ao autenticar,
- * varre o `localStorage` de progresso do dispositivo e o envia à conta uma vez.
+ * Ponte silenciosa da sincronização local↔conta. Não renderiza nada.
  *
- * "Login é acréscimo, não portão": o anônimo segue com o `localStorage`; ao
- * logar, o que ele já fez entra na conta sem sobrescrever o que houver lá (o
- * merge é servidor-autoritativo). Uma flag por usuário evita reenviar a cada
- * navegação.
+ * "Login é acréscimo, não portão": o anônimo segue com o `localStorage`. Ao
+ * logar, num movimento só, (push) o que ele já fez sobe para a conta sem
+ * sobrescrever o que houver lá e (pull) o estado consolidado da conta **desce**
+ * para o `localStorage`. É isso que faz o progresso aparecer num dispositivo
+ * novo, onde o local começa vazio. Uma flag por usuário evita repetir a cada
+ * navegação; o write-through do hook mantém tudo em dia depois.
  */
 
 /** Chave dos mapas de progresso do roadmap: `DevMappa:progress:<slug>`. */
 const PREFIXO_PROGRESSO = "DevMappa:progress:";
-const flagMigrado = (userId: string) => `DevMappa:migrado:v1:${userId}`;
+// v2: a v1 só empurrava (push); a v2 também puxa (pull). Bumpar reidrata quem
+// já tinha logado antes desta mudança, uma vez por dispositivo.
+const flagSincronizado = (userId: string) => `DevMappa:migrado:v2:${userId}`;
 
 function coletarProgressoLocal(): { noId: string; status: string }[] {
   const entradas: { noId: string; status: string }[] = [];
@@ -32,10 +39,27 @@ function coletarProgressoLocal(): { noId: string; status: string }[] {
         entradas.push({ noId, status });
       }
     } catch {
-      // mapa corrompido: ignora essa chave, não derruba a migração
+      // mapa corrompido: ignora essa chave, não derruba a sincronização
     }
   }
   return entradas;
+}
+
+/**
+ * Semeia o `localStorage` com o estado da conta (pull). Reagrupa o mapa plano
+ * (`noId → status`) por trilha e grava cada chave notificando os assinantes
+ * desta aba; quem estiver na página de um roadmap re-renderiza na hora.
+ */
+function semear(estado: Record<string, ProgressoNo>): void {
+  const roadmaps = listRoadmaps().map((r) => ({
+    slug: r.slug,
+    noIds: r.sections.flatMap((s) => s.items.map((i) => i.id)),
+  }));
+  const porSlug = estadoPorRoadmap(estado, roadmaps);
+  for (const [slug, mapa] of Object.entries(porSlug)) {
+    if (Object.keys(mapa).length === 0) continue; // não cria chave vazia
+    escreverArmazenamento(`${PREFIXO_PROGRESSO}${slug}`, mapa);
+  }
 }
 
 export function MigrarProgresso() {
@@ -47,20 +71,19 @@ export function MigrarProgresso() {
     const userId = data?.user?.id;
     if (!userId) return;
 
-    const flag = flagMigrado(userId);
-    if (localStorage.getItem(flag)) return; // já migrado nesta conta
-
-    const entradas = coletarProgressoLocal();
-    if (entradas.length === 0) {
-      localStorage.setItem(flag, "1"); // nada a migrar; não tenta de novo
-      return;
-    }
+    const flag = flagSincronizado(userId);
+    if (localStorage.getItem(flag)) return; // já sincronizado neste dispositivo
 
     emVoo.current = true;
-    migrarProgressoLocal(entradas)
-      .then(() => localStorage.setItem(flag, "1"))
+    // Chamada mesmo com local vazio: aí ela só puxa o estado da conta.
+    migrarProgressoLocal(coletarProgressoLocal())
+      .then((r) => {
+        if (r.erro) return; // não marca a flag: reabre a tentativa depois
+        semear(r.estado);
+        localStorage.setItem(flag, "1");
+      })
       .catch(() => {
-        // rede/servidor falhou — deixa reabrir a tentativa numa próxima visita
+        // rede/servidor falhou; deixa reabrir a tentativa numa próxima visita
       })
       .finally(() => {
         emVoo.current = false;
