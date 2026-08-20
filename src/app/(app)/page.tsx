@@ -15,6 +15,7 @@ import {
 import { Button } from "@/shared/components/global/ui/button";
 import { Badge } from "@/shared/components/global/ui/badge";
 import { Aurora } from "@/shared/components/global/ui/aurora";
+import { CartaPato } from "@/shared/components/global/carta-pato";
 import { Reveal, RevealItem } from "@/shared/components/global/ui/reveal";
 import { SpotlightCard } from "@/shared/components/global/ui/spotlight-card";
 import { SeloNovo } from "@/shared/components/global/ui/selo-novo";
@@ -167,6 +168,7 @@ export default function HomePage() {
       {/* ================================================================ */}
       <section className="borda-gradiente relative overflow-hidden rounded-3xl bg-card/50 px-6 py-14 sm:px-10 sm:py-20">
         <Aurora />
+        <CartaPato />
 
         <div className="relative mx-auto max-w-3xl text-center">
           {temNovidade && ultima ? (
