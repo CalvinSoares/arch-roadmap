@@ -203,6 +203,32 @@ body {
 }
 .dark .aurora { opacity: 0.4; }
 
+/* Carta do easter egg da home. A travessia é CSS e não framer porque assim o
+   transform tem um dono só (dois animando o mesmo transform tremia) e o hover
+   consegue congelar a carta com animation-play-state. */
+@keyframes carta-atravessa {
+  from {
+    transform: translate3d(var(--carta-de), 0, 0) rotate(var(--carta-giro));
+  }
+  to {
+    transform: translate3d(var(--carta-para), 0, 0) rotate(var(--carta-giro));
+  }
+}
+.carta-voo {
+  animation: carta-atravessa var(--carta-duracao) linear forwards;
+}
+/* Chegar com o mouse ou focar pelo teclado para a carta, senão ela fugiria. */
+.carta-voo:hover,
+.carta-voo:focus-visible {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .carta-voo {
+    animation: none;
+    transform: translate3d(45vw, 0, 0);
+  }
+}
+
 /* Card com "holofote" seguindo o mouse (vars vêm do componente) */
 .card-holofote {
   position: relative;
