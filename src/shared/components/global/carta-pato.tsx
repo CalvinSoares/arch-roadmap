@@ -9,16 +9,20 @@ import { Button } from "@/shared/components/global/ui/button";
 /**
  * Easter egg da home. De vez em quando uma carta atravessa a tela enquanto o
  * visitante está no topo da página; clicar nela abre o patoDev.
+ *
+ * A travessia é uma animação CSS (`.carta-voo` em globals.css), não framer: o
+ * transform fica com um dono só e o hover consegue congelar a carta, senão ela
+ * fugiria do cursor.
  */
 
 /** Espera entre uma carta e a próxima. */
-const ESPERA_MIN_MS = 9_000;
-const ESPERA_MAX_MS = 18_000;
-/** Quanto tempo a carta leva para cruzar a tela. */
+const ESPERA_MIN_MS = 700;
+const ESPERA_MAX_MS = 1_000;
+/** Travessia da tela. O hover congela a carta, então dá para clicar. */
 const VOO_MIN_S = 13;
 const VOO_MAX_S = 18;
 /** Sem animação, a carta fica parada por este tempo e sai. */
-const PARADA_MS = 9_000;
+const PARADA_MS = 12_000;
 
 interface Carta {
   id: number;
@@ -34,10 +38,10 @@ const entre = (min: number, max: number) => min + Math.random() * (max - min);
 function novaCarta(id: number): Carta {
   return {
     id,
-    topo: entre(18, 70),
+    topo: entre(20, 68),
     daEsquerda: Math.random() > 0.5,
     duracao: entre(VOO_MIN_S, VOO_MAX_S),
-    giro: entre(-12, 12),
+    giro: entre(-6, 6),
   };
 }
 
@@ -79,8 +83,8 @@ export function CartaPato() {
     return () => window.clearTimeout(id);
   }, [noTopo, carta, aberto]);
 
-  // Com movimento reduzido não há voo para terminar, então um timer recolhe a
-  // carta no lugar do onAnimationComplete.
+  // Com movimento reduzido não há animação para terminar, então um timer
+  // recolhe a carta no lugar do onAnimationEnd.
   useEffect(() => {
     if (!carta || !reduzir || aberto) return;
     const id = window.setTimeout(() => setCarta(null), PARADA_MS);
@@ -101,11 +105,6 @@ export function CartaPato() {
     setAberto(true);
   };
 
-  const voo = carta && {
-    entrada: carta.daEsquerda ? "-12vw" : "112vw",
-    saida: carta.daEsquerda ? "112vw" : "-12vw",
-  };
-
   return (
     <>
       {/* Diz se o hero ainda está na tela. */}
@@ -116,52 +115,32 @@ export function CartaPato() {
       />
 
       <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden">
-        <AnimatePresence>
-          {carta && voo && !aberto && (
-            <motion.button
-              key={carta.id}
-              type="button"
-              onClick={abrir}
-              aria-label="Abrir a carta do patoDev"
-              title="Tem uma carta para você"
-              style={{ top: `${carta.topo}%` }}
-              className="pointer-events-auto absolute left-0 grid size-11 place-items-center rounded-xl bg-white text-neutral-800 shadow-[0_8px_28px_rgba(0,0,0,0.3)] ring-1 ring-black/10 transition-transform duration-200 hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring"
-              initial={
-                reduzir
-                  ? { opacity: 0, x: "50vw" }
-                  : { opacity: 0, x: voo.entrada, rotate: carta.giro }
-              }
-              animate={
-                reduzir
-                  ? { opacity: 1, x: "50vw" }
-                  : {
-                      opacity: [0, 1, 1, 1, 0],
-                      x: voo.saida,
-                      y: [0, -22, 14, -12, 0],
-                    }
-              }
-              exit={{ opacity: 0, scale: 0.6, transition: { duration: 0.25 } }}
-              transition={
-                reduzir
-                  ? { duration: 0.35 }
-                  : {
-                      duration: carta.duracao,
-                      ease: "linear",
-                      opacity: {
-                        duration: carta.duracao,
-                        times: [0, 0.06, 0.5, 0.94, 1],
-                      },
-                      y: { duration: carta.duracao, ease: "easeInOut" },
-                    }
-              }
-              onAnimationComplete={
-                reduzir ? undefined : () => setCarta(null)
-              }
-            >
+        {carta && !aberto && (
+          <button
+            key={carta.id}
+            type="button"
+            onClick={abrir}
+            onAnimationEnd={() => setCarta(null)}
+            aria-label="Abrir a carta do patoDev"
+            title="Tem uma carta para você"
+            // p-2 dá folga de alvo em volta do disco: o quadrado clicável fica
+            // perto de 60px, e passar o mouse congela a travessia.
+            className="carta-voo group pointer-events-auto absolute left-0 p-2 focus-visible:outline-none"
+            style={
+              {
+                top: `${carta.topo}%`,
+                "--carta-de": carta.daEsquerda ? "-12vw" : "112vw",
+                "--carta-para": carta.daEsquerda ? "112vw" : "-12vw",
+                "--carta-duracao": `${carta.duracao}s`,
+                "--carta-giro": `${carta.giro}deg`,
+              } as React.CSSProperties
+            }
+          >
+            <span className="grid size-11 place-items-center rounded-xl bg-white text-neutral-800 shadow-[0_8px_28px_rgba(0,0,0,0.3)] ring-1 ring-black/10 transition-transform duration-200 group-hover:scale-110 group-focus-visible:scale-110 group-focus-visible:ring-2 group-focus-visible:ring-ring">
               <Mail className="size-5" />
-            </motion.button>
-          )}
-        </AnimatePresence>
+            </span>
+          </button>
+        )}
       </div>
 
       <AnimatePresence>
